@@ -1,0 +1,204 @@
+.eui-seg {
+	position: relative;
+	display: inline-flex;
+	gap: 2px;
+	padding: 3px;
+	border-radius: 10px;
+	background: var(--emcp-track);
+}
+
+.eui-seg__opt {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	min-block-size: 32px;
+	padding-inline: 12px;
+	border: 0;
+	border-radius: 8px;
+	background: transparent;
+	color: var(--emcp-text-3);
+	font: 500 13px/1 var(--emcp-font);
+	white-space: nowrap;
+	cursor: pointer;
+	transition: color var(--emcp-dur-fast), background-color var(--emcp-dur-fast);
+}
+
+.eui-seg__opt:hover:not(:disabled) {
+	color: var(--emcp-ink);
+}
+
+.eui-seg__opt.is-active {
+	background: var(--emcp-surface);
+	color: var(--emcp-ink);
+	box-shadow: var(--emcp-shadow-seg);
+}
+
+/* One thumb slides under the selected option once it can be measured; the
+   options sit above it. Until then the active option draws its own fill. */
+.eui-seg__thumb {
+	position: absolute;
+	inset-block: 3px;
+	inset-inline-start: 0;
+	border-radius: 8px;
+	background: var(--emcp-surface);
+	box-shadow: var(--emcp-shadow-seg);
+	transition: transform var(--emcp-dur) var(--emcp-ease), width var(--emcp-dur) var(--emcp-ease);
+}
+
+.eui-seg.has-thumb .eui-seg__opt {
+	position: relative;
+}
+
+.eui-seg.has-thumb .eui-seg__opt.is-active {
+	background: transparent;
+	box-shadow: none;
+}
+
+.eui-seg__count {
+	color: var(--emcp-text-3);
+	font-weight: 600;
+}
+
+.eui-tabs {
+	position: relative;
+	display: flex;
+	gap: 4px;
+	border-block-end: 1px solid var(--emcp-divider);
+	overflow-x: auto;
+}
+
+.eui-tabs__tab {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-block-size: 44px;
+	padding-inline: 14px;
+	border: 0;
+	border-block-end: 2px solid transparent;
+	background: transparent;
+	color: var(--emcp-text-3);
+	font: 500 14px/1 var(--emcp-font);
+	white-space: nowrap;
+	cursor: pointer;
+	transition: color var(--emcp-dur-fast);
+}
+
+.eui-tabs__tab:hover {
+	color: var(--emcp-ink);
+}
+
+.eui-tabs__tab.is-active {
+	color: var(--emcp-primary-strong);
+	border-block-end-color: var(--emcp-primary);
+}
+
+.eui-tabs__ink {
+	position: absolute;
+	inset-block-end: 0;
+	inset-inline-start: 0;
+	block-size: 2px;
+	border-radius: 2px 2px 0 0;
+	background: var(--emcp-primary);
+	transition: transform var(--emcp-dur) var(--emcp-ease), width var(--emcp-dur) var(--emcp-ease);
+}
+
+.eui-tabs.has-ink .eui-tabs__tab.is-active {
+	border-block-end-color: transparent;
+}
+
+.eui-tabs__count {
+	padding: 2px 7px;
+	border-radius: var(--emcp-r-pill);
+	background: var(--emcp-divider-2);
+	color: var(--emcp-text-3);
+	font-size: 11px;
+}
+
+.eui-tabs__tab.is-active .eui-tabs__count {
+	background: var(--emcp-primary);
+	color: var(--emcp-surface);
+}
+
+.eui-chip {
+	display: inline-flex;
+	align-items: center;
+	border-radius: var(--emcp-r-pill);
+	background: var(--emcp-surface);
+	border: 1px solid var(--emcp-border-input);
+	transition: background-color var(--emcp-dur-fast), border-color var(--emcp-dur-fast);
+}
+
+.eui-chip.is-active {
+	background: var(--emcp-primary);
+	border-color: var(--emcp-primary);
+}
+
+.eui-chip__main {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	min-block-size: 32px;
+	padding-inline: 12px;
+	border: 0;
+	background: transparent;
+	color: var(--emcp-ink-2);
+	font: 500 13px/1 var(--emcp-font);
+	cursor: pointer;
+}
+
+/* A client logo or icon before the label. Logos keep their own colours; an
+   icon follows the text colour. */
+.eui-chip__media {
+	flex: none;
+	inline-size: 18px;
+	block-size: 18px;
+	border-radius: 4px;
+	object-fit: contain;
+}
+
+.eui-chip.is-active img.eui-chip__media {
+	background: var(--emcp-surface);
+}
+
+.eui-chip.is-active .eui-chip__main {
+	color: var(--emcp-surface);
+}
+
+.eui-chip__count {
+	padding: 2px 6px;
+	border-radius: var(--emcp-r-pill);
+	background: var(--emcp-divider-2);
+	color: var(--emcp-text-3);
+	font-size: 11px;
+	font-weight: 600;
+}
+
+.eui-chip.is-active .eui-chip__count {
+	background: var(--emcp-surface);
+	color: var(--emcp-primary-strong);
+}
+
+.eui-chip__remove {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	inline-size: 24px;
+	block-size: 24px;
+	margin-inline-end: 4px;
+	border: 0;
+	border-radius: 50%;
+	background: transparent;
+	color: inherit;
+	cursor: pointer;
+}
+
+.eui-chip__remove::before {
+	content: "";
+	position: absolute;
+	inset: -4px;
+}
+
+.eui-chip.is-active .eui-chip__remove {
+	color: var(--emcp-surface);
+}

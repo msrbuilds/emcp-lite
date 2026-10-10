@@ -1,0 +1,61 @@
+<?php
+/**
+ * Validates Elementor element structures before saving.
+ *
+ * @package EMCP_Tools
+ * @since   1.0.0
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Validates element structures for correctness.
+ *
+ * @since 1.0.0
+ */
+class EMCP_Tools_Element_Validator {
+
+	/**
+	 * Validates an element structure.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $element The element array to validate.
+	 * @return true|\WP_Error True if valid, WP_Error on failure.
+	 */
+	public function validate( array $element ) {
+		if ( empty( $element['id'] ) ) {
+			return new \WP_Error( 'missing_id', __( 'Element is missing an ID.', 'emcp-lite' ) );
+		}
+
+		if ( empty( $element['elType'] ) ) {
+			return new \WP_Error( 'missing_el_type', __( 'Element is missing elType.', 'emcp-lite' ) );
+		}
+
+		$valid_types = array(
+			'container', 'widget', 'section', 'column',
+			// Atomic container types (Elementor 4.0+).
+			'e-div-block', 'e-flexbox',
+			'e-tabs', 'e-tabs-menu', 'e-tab', 'e-tabs-content-area', 'e-tab-content',
+			'e-form', 'e-form-success-message', 'e-form-error-message',
+		);
+		if ( ! in_array( $element['elType'], $valid_types, true ) ) {
+			return new \WP_Error(
+				'invalid_el_type',
+				sprintf(
+					/* translators: %s: element type */
+					__( 'Invalid element type: %s.', 'emcp-lite' ),
+					$element['elType']
+				)
+			);
+		}
+
+		if ( 'widget' === $element['elType'] && empty( $element['widgetType'] ) ) {
+			return new \WP_Error( 'missing_widget_type', __( 'Widget element is missing widgetType.', 'emcp-lite' ) );
+		}
+
+		return true;
+	}
+}

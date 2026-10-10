@@ -1,0 +1,325 @@
+/**
+ * EMCP Themer — dynamic block front-end + editor styles.
+ *
+ * Intentionally light: layout + sensible defaults only, so the active theme and
+ * each block's own supports (color/typography/spacing/border) drive the look.
+ * No gradients.
+ */
+
+/* Breadcrumbs */
+.emcp-dyn-breadcrumbs {
+	font-size: 0.875em;
+}
+.emcp-dyn-breadcrumbs a {
+	text-decoration: none;
+}
+.emcp-dyn-breadcrumbs a:hover {
+	text-decoration: underline;
+}
+.emcp-dyn-breadcrumbs .emcp-dyn-sep {
+	opacity: 0.5;
+	margin: 0 0.25em;
+}
+
+/* Post meta */
+.emcp-dyn-post-meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25em 1em;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	font-size: 0.875em;
+}
+.emcp-dyn-post-meta > li {
+	margin: 0;
+	padding: 0;
+}
+.emcp-dyn-post-meta a {
+	text-decoration: none;
+}
+
+/* Site title / logo */
+.emcp-dyn-site-title a,
+.emcp-dyn-site-logo {
+	text-decoration: none;
+}
+.emcp-dyn-site-title {
+	font-weight: 700;
+}
+.emcp-dyn-site-tagline {
+	display: block;
+	font-size: 0.8125em;
+	opacity: 0.7;
+}
+.emcp-dyn-site-logo-img,
+.emcp-dyn-site-logo img {
+	display: block;
+	height: auto;
+}
+
+/* Nav menu */
+.emcp-dyn-nav-menu .emcp-dyn-menu {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1.25em;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	align-items: center;
+}
+.emcp-dyn-nav-menu .emcp-dyn-menu a {
+	text-decoration: none;
+	display: inline-block;
+}
+.emcp-dyn-nav-menu .sub-menu {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+/* Description */
+.emcp-dyn-description {
+	line-height: 1.6;
+}
+
+/* Archive loop.
+   Card look is driven by CSS variables so the Elementor/Gutenberg controls can
+   override them (background, border, radius, padding, gap). Defaults are clean:
+   grid = carded, list = borderless magazine rows. */
+.emcp-dyn-archive-loop {
+	--emcp-card-gap: 28px;
+	--emcp-card-bg: transparent;
+	--emcp-card-border-color: rgba(0, 0, 0, 0.1);
+	--emcp-card-border-width: 0px;
+	--emcp-card-radius: 12px;
+	--emcp-card-pad: 0px;
+	--emcp-card-media: clamp(180px, 32%, 320px);
+}
+.emcp-dyn-archive-loop--grid {
+	display: grid;
+	grid-template-columns: repeat(var(--emcp-cols, 3), minmax(0, 1fr));
+	gap: var(--emcp-card-gap);
+}
+.emcp-dyn-archive-loop--list {
+	display: flex;
+	flex-direction: column;
+	gap: var(--emcp-card-gap);
+}
+
+/* Card */
+.emcp-dyn-card {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	background: var(--emcp-card-bg);
+	border: var(--emcp-card-border-width) solid var(--emcp-card-border-color);
+	border-radius: var(--emcp-card-radius);
+	overflow: hidden;
+	transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+/* Grid cards read as cards by default (subtle border + hover lift). */
+.emcp-dyn-archive-loop--grid {
+	--emcp-card-border-width: 1px;
+	--emcp-card-pad: 18px;
+}
+.emcp-dyn-archive-loop--grid .emcp-dyn-card:hover {
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+	transform: translateY(-2px);
+	border-color: rgba(0, 0, 0, 0.16);
+}
+
+/* List rows: image left, content right; collapses to full-width text with no
+   image (flexbox, so the empty column that used to cramp the text is gone). */
+.emcp-dyn-archive-loop--list .emcp-dyn-card {
+	flex-direction: row;
+	gap: 24px;
+	align-items: stretch;
+}
+.emcp-dyn-archive-loop--list .emcp-dyn-card-media {
+	flex: 0 0 var(--emcp-card-media);
+	max-width: 340px;
+}
+.emcp-dyn-archive-loop--list .emcp-dyn-card-body {
+	flex: 1 1 auto;
+	justify-content: center;
+}
+
+/* Media */
+.emcp-dyn-card-media {
+	display: block;
+	overflow: hidden;
+	background: rgba(0, 0, 0, 0.04);
+}
+.emcp-dyn-card-media img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+.emcp-dyn-archive-loop--grid .emcp-dyn-card-media img {
+	aspect-ratio: 16 / 10;
+}
+.emcp-dyn-archive-loop--list .emcp-dyn-card-media img {
+	min-height: 100%;
+	border-radius: 8px;
+}
+.emcp-dyn-card:hover .emcp-dyn-card-media img {
+	transform: scale(1.03);
+}
+.emcp-dyn-card-media img {
+	transition: transform 0.3s ease;
+}
+
+/* Body */
+.emcp-dyn-card-body {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-width: 0;
+	padding: var(--emcp-card-pad);
+	flex: 1 1 auto;
+}
+.emcp-dyn-card-meta {
+	font-size: 0.8125em;
+	opacity: 0.7;
+}
+.emcp-dyn-card-title {
+	margin: 0;
+	font-size: 1.15em;
+	line-height: 1.3;
+}
+.emcp-dyn-card-title a {
+	text-decoration: none;
+	color: inherit;
+}
+.emcp-dyn-card-title a:hover {
+	text-decoration: underline;
+}
+.emcp-dyn-card-excerpt {
+	line-height: 1.6;
+	opacity: 0.9;
+}
+.emcp-dyn-card-more {
+	align-self: flex-start;
+	margin-top: 4px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+/* Pagination */
+.emcp-dyn-pagination {
+	margin-top: 32px;
+}
+.emcp-dyn-pagination .page-numbers {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.emcp-dyn-pagination .page-numbers li {
+	margin: 0;
+}
+.emcp-dyn-pagination .page-numbers a,
+.emcp-dyn-pagination .page-numbers span {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 38px;
+	height: 38px;
+	padding: 0 10px;
+	border: 1px solid rgba(0, 0, 0, 0.12);
+	border-radius: 6px;
+	text-decoration: none;
+	line-height: 1;
+}
+.emcp-dyn-pagination .page-numbers .current {
+	background: currentColor;
+	color: #fff;
+	border-color: transparent;
+}
+
+/* Editor: placeholder for elements with no data in the current context */
+.emcp-dyn-placeholder {
+	display: inline-block;
+	padding: 6px 12px;
+	border: 1px dashed rgba(0, 0, 0, 0.25);
+	border-radius: 6px;
+	font-size: 0.875em;
+	opacity: 0.7;
+}
+
+/* Small screens */
+@media (max-width: 782px) {
+	.emcp-dyn-archive-loop--grid {
+		grid-template-columns: 1fr;
+	}
+	/* Stack list rows on small screens: image on top, text below. */
+	.emcp-dyn-archive-loop--list .emcp-dyn-card {
+		flex-direction: column;
+	}
+	.emcp-dyn-archive-loop--list .emcp-dyn-card-media {
+		flex-basis: auto;
+		max-width: none;
+	}
+	.emcp-dyn-archive-loop--list .emcp-dyn-card-media img {
+		aspect-ratio: 16 / 9;
+	}
+}
+
+/* --------------------------------------------------------------------------
+ * Themer widget library (3.13.0)
+ *
+ * Layout and spacing only. Colour and typography stay with the theme and with
+ * Elementor's own controls, so a widget never fights the site design.
+ * -------------------------------------------------------------------------- */
+
+.emcp-dyn-author-box__inner { display: flex; gap: 1rem; align-items: flex-start; }
+.emcp-dyn-author-box__inner.is-stacked { flex-direction: column; align-items: center; text-align: center; }
+.emcp-dyn-author-box__avatar img { display: block; border-radius: 50%; max-width: 100%; height: auto; }
+.emcp-dyn-author-box__body { flex: 1 1 auto; min-width: 0; }
+.emcp-dyn-author-box__name { margin: 0 0 .25rem; }
+.emcp-dyn-author-box__links { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: .5rem; }
+
+.emcp-dyn-post-navigation { display: flex; gap: 1rem; justify-content: space-between; flex-wrap: wrap; }
+.emcp-dyn-post-navigation__prev,
+.emcp-dyn-post-navigation__next { display: flex; align-items: baseline; gap: .4rem; min-width: 0; }
+.emcp-dyn-post-navigation__next { margin-inline-start: auto; text-align: end; }
+.emcp-dyn-post-navigation__label { opacity: .7; font-size: .875em; }
+
+.emcp-dyn-search-form__form { display: flex; gap: .5rem; align-items: stretch; }
+.emcp-dyn-search-form__form.is-full { width: 100%; }
+.emcp-dyn-search-form__input { flex: 1 1 auto; min-width: 0; }
+.emcp-dyn-search-form__submit { flex: 0 0 auto; cursor: pointer; }
+
+.emcp-dyn-sitemap__list { list-style: none; margin: 0 0 1rem; padding: 0; }
+.emcp-dyn-sitemap__list li { margin: 0 0 .25rem; }
+
+.emcp-dyn-post-info__list { display: flex; gap: .5rem; flex-wrap: wrap; align-items: baseline; }
+.emcp-dyn-post-info__list.is-stacked { flex-direction: column; gap: .25rem; }
+.emcp-dyn-post-info__sep { opacity: .5; }
+
+.emcp-dyn-archive-posts__wrap.is-grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(1, minmax(0, 1fr)); }
+.emcp-dyn-archive-posts__wrap.is-list { display: flex; flex-direction: column; gap: 1.5rem; }
+.emcp-dyn-archive-posts__card { min-width: 0; }
+.emcp-dyn-archive-posts__image img { display: block; width: 100%; height: auto; }
+.emcp-dyn-archive-posts__title { margin: .5rem 0 .25rem; }
+.emcp-dyn-archive-posts__pagination { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: 1.5rem; }
+
+@media (min-width: 768px) {
+	.emcp-dyn-archive-posts__wrap.is-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	.emcp-dyn-archive-posts__wrap.is-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+	.emcp-dyn-archive-posts__wrap.is-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+	.emcp-dyn-archive-posts__wrap.is-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+	.emcp-dyn-archive-posts__wrap.is-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+
+.emcp-dyn-featured-image img { display: block; max-width: 100%; height: auto; }
+
+/* Loop Item editor canvas: the card previews at its configured width. */
+.emcp-themer-loop-canvas .emcp-themer-loop-preview {
+	margin: 40px auto;
+	width: 100%;
+}

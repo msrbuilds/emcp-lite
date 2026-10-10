@@ -1,0 +1,276 @@
+/**
+ * EMCP Themer — cascading condition builder styling.
+ * Flat, WordPress-admin-native. No gradients.
+ * @package EMCP_Tools
+ */
+
+/* ---- Metabox shell ------------------------------------------------------- */
+
+#emcp-themer-conditions .inside,
+.emcp-themer-conditions {
+	margin-top: 4px;
+}
+
+.emcp-themer-type-select {
+	min-width: 180px;
+	height: 34px;
+	border-radius: 4px;
+}
+
+/* ---- Rows ---------------------------------------------------------------- */
+
+.emcp-cond-rows {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin: 12px 0;
+}
+
+.emcp-cond-row {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+	padding: 12px 14px 12px 16px;
+	border: 1px solid #dcdcde;
+	border-left: 3px solid #2271b1;
+	border-radius: 6px;
+	background: #fff;
+	box-shadow: 0 1px 1px rgba( 0, 0, 0, 0.04 );
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.emcp-cond-row:hover {
+	box-shadow: 0 2px 6px rgba( 0, 0, 0, 0.07 );
+}
+
+.emcp-cond-cell {
+	display: inline-flex;
+	align-items: center;
+}
+
+/* Little "→" separators between the cascade steps. */
+.emcp-cond-cell + .emcp-cond-cell::before {
+	content: "";
+	width: 14px;
+	height: 1px;
+	margin: 0 2px;
+	background: #c3c4c7;
+	flex: 0 0 auto;
+}
+
+/* ---- Selects ------------------------------------------------------------- */
+
+.emcp-cond-row select {
+	height: 34px;
+	max-width: 240px;
+	padding: 0 26px 0 10px;
+	border: 1px solid #8c8f94;
+	border-radius: 4px;
+	background-color: #fff;
+	color: #1d2327;
+	line-height: 32px;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.emcp-cond-row select:hover {
+	border-color: #646970;
+}
+
+.emcp-cond-row select:focus {
+	border-color: #2271b1;
+	box-shadow: 0 0 0 1px #2271b1;
+	outline: 2px solid transparent;
+}
+
+/* Relation gets the emphasis (its own accented chip). */
+.emcp-cond-relation {
+	font-weight: 600;
+	min-width: 104px;
+	color: #0a4b78 !important;
+	background-color: #f0f6fc !important;
+	border-color: #2271b1 !important;
+}
+
+/* ---- Object (Pro) search ------------------------------------------------- */
+
+.emcp-cond-object {
+	display: inline-flex;
+	flex-direction: column;
+	gap: 4px;
+	position: relative;
+}
+
+.emcp-cond-object-search {
+	min-width: 210px;
+	height: 32px;
+	border-radius: 4px;
+}
+
+.emcp-cond-object-results {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	right: 0;
+	z-index: 30;
+	margin-top: 2px;
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	max-height: 220px;
+	overflow-y: auto;
+	box-shadow: 0 6px 16px rgba( 0, 0, 0, 0.12 );
+}
+
+.emcp-cond-object-results:empty {
+	display: none;
+}
+
+.emcp-cond-result {
+	display: block;
+	padding: 7px 12px;
+	text-decoration: none;
+	color: #1d2327;
+	border-bottom: 1px solid #f0f0f1;
+}
+
+.emcp-cond-result:last-child {
+	border-bottom: 0;
+}
+
+.emcp-cond-result:hover,
+.emcp-cond-result:focus {
+	background: #2271b1;
+	color: #fff;
+}
+
+.emcp-cond-searching {
+	display: block;
+	padding: 7px 12px;
+	color: #646970;
+}
+
+/* ---- Remove button ------------------------------------------------------- */
+
+.emcp-cond-remove {
+	margin-left: auto;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	border: 1px solid transparent;
+	border-radius: 50%;
+	background: transparent;
+	color: #b32d2e;
+	font-size: 18px;
+	line-height: 1;
+	text-decoration: none !important;
+	cursor: pointer;
+	transition: background 0.15s ease, color 0.15s ease;
+}
+
+.emcp-cond-remove:hover,
+.emcp-cond-remove:focus {
+	background: #b32d2e;
+	border-color: #b32d2e;
+	color: #fff;
+	box-shadow: none;
+	outline: none;
+}
+
+/* ---- Add condition ------------------------------------------------------- */
+
+.emcp-cond-add.button {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	height: 36px;
+	padding: 0 16px;
+	font-weight: 600;
+	color: #2271b1;
+	background: #fff;
+	border: 1px dashed #2271b1;
+	border-radius: 5px;
+	box-shadow: none;
+}
+
+.emcp-cond-add.button:hover,
+.emcp-cond-add.button:focus {
+	color: #fff;
+	background: #2271b1;
+	border-style: solid;
+	border-color: #2271b1;
+}
+
+/* ---- Priority ------------------------------------------------------------ */
+
+.emcp-cond-priority {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	background: #f6f7f7;
+	border: 1px solid #e0e0e0;
+	border-radius: 5px;
+}
+
+.emcp-cond-priority label {
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.emcp-cond-priority-input {
+	width: 72px;
+	height: 30px;
+	border-radius: 4px;
+}
+
+/* ---- Pro hint ------------------------------------------------------------ */
+
+.emcp-themer-pro-hint {
+	margin-top: 12px;
+	padding: 10px 14px;
+	background: #fcf9e8;
+	border: 1px solid #f0e6b8;
+	border-left: 3px solid #dba617;
+	border-radius: 4px;
+	color: #674e00;
+}
+
+/* ---- Empty / note state -------------------------------------------------- */
+
+.emcp-themer-conditions > .description {
+	margin: 14px 0;
+	padding: 12px 14px;
+	background: #f6f7f7;
+	border-radius: 5px;
+	color: #50575e;
+}
+
+/* ---- Small screens ------------------------------------------------------- */
+
+@media screen and ( max-width: 782px ) {
+	.emcp-cond-row select,
+	.emcp-cond-object-search {
+		max-width: 100%;
+		width: 100%;
+	}
+
+	.emcp-cond-cell {
+		width: 100%;
+	}
+
+	.emcp-cond-cell + .emcp-cond-cell::before {
+		display: none;
+	}
+
+	.emcp-cond-remove {
+		margin-left: 0;
+		position: absolute;
+		top: 8px;
+		right: 8px;
+	}
+}

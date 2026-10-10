@@ -1,0 +1,367 @@
+<?php
+/**
+ * Frame markup for the admin redesign (spec 5.1, 5.2).
+ *
+ * Every method returns a string built only from escaped parts, so views can
+ * print it and tests can assert on it.
+ *
+ * @package EMCP_Tools
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Server-rendered admin frame.
+ */
+final class EMCP_Tools_Admin_Frame {
+
+	/** User meta: '1' while the user keeps the sidebar collapsed to its icon rail. */
+	const SIDEBAR_META = 'emcp_tools_sidebar_collapsed';
+
+	/** Cookie the toggle writes, so the next page renders the new state at once. */
+	const SIDEBAR_COOKIE = 'emcp_tools_sidebar';
+
+	/**
+	 * Whether a user collapsed the sidebar. The toggle's cookie wins: the REST
+	 * save can land after the next page is already rendering. User meta
+	 * carries the choice to other browsers.
+	 *
+	 * @param int         $user_id User.
+	 * @param string|null $cookie  The SIDEBAR_COOKIE value, if sent.
+	 */
+	public static function sidebar_collapsed( int $user_id, ?string $cookie = null ): bool {
+		if ( '1' === $cookie || '0' === $cookie ) {
+			return '1' === $cookie;
+		}
+		return $user_id > 0 && '1' === (string) get_user_meta( $user_id, self::SIDEBAR_META, true );
+	}
+
+
+	/**
+	 * Announcements for the promo bar, in display order.
+	 *
+	 * @param bool $show_upgrade Whether the site has no Pro licence.
+	 * @return array[]
+	 */
+	public static function announcements( bool $show_upgrade ): array {
+		$list = array(
+			array(
+				'key'   => 'cloud',
+				'badge' => __( 'New', 'emcp-lite' ),
+				'icon'  => 'cloud',
+				'title' => __( 'EMCP Cloud is live.', 'emcp-lite' ),
+				'text'  => __( 'Optionally connect your site for configuration management and access to enabled tools through Gateway.', 'emcp-lite' ),
+				'cta'   => __( 'Explore Cloud', 'emcp-lite' ),
+				'url'   => 'https://emcptools.com/cloud',
+			),
+		);
+		if ( $show_upgrade ) {
+			$upgrade = function_exists( 'emcp_tools_upgrade_url' ) ? emcp_tools_upgrade_url() : 'https://emcptools.com/pricing';
+			$list[]  = array(
+				'key'   => 'pro',
+				'badge' => __( 'Pro', 'emcp-lite' ),
+				'icon'  => 'crown',
+				'title' => __( 'Upgrade to EMCP Pro.', 'emcp-lite' ),
+				'text'  => __( 'Unlock AI Chat, the Widget and Block Builder, Templates, Skills and scheduled backups.', 'emcp-lite' ),
+				'cta'   => __( 'Upgrade to Pro', 'emcp-lite' ),
+				'url'   => $upgrade,
+			);
+			$list[]  = array(
+				'key'   => 'ltd',
+				'badge' => __( 'Limited', 'emcp-lite' ),
+				'icon'  => 'sparkles',
+				'title' => __( 'Lifetime deal ends soon.', 'emcp-lite' ),
+				'text'  => __( 'Pay once and own EMCP Pro forever. This lifetime deal is going away for good.', 'emcp-lite' ),
+				'cta'   => __( 'Get the LTD', 'emcp-lite' ),
+				'url'   => $upgrade,
+			);
+		}
+		$list[] = array(
+			'key'   => 'whatsnew',
+			'badge' => EMCP_TOOLS_VERSION,
+			'icon'  => 'gift',
+			/* translators: %s: plugin version. */
+			'title' => sprintf( __( 'What\'s new in %s.', 'emcp-lite' ), EMCP_TOOLS_VERSION ),
+			'text'  => __( 'Ten new Pro integrations, from Polylang and Tutor LMS to Amelia and MailPoet, each with undo.', 'emcp-lite' ),
+			'cta'   => __( 'See what\'s new', 'emcp-lite' ),
+			'url'   => admin_url( 'admin.php?page=' . EMCP_Tools_Admin::PAGE_SLUG . '-changelog' ),
+		);
+		$list[] = array(
+			'key'   => 'community',
+			'badge' => __( 'Community', 'emcp-lite' ),
+			'icon'  => 'users',
+			'title' => __( 'Join the EMCP community.', 'emcp-lite' ),
+			'text'  => __( 'Share builds, get help and hear about releases first in our Facebook group.', 'emcp-lite' ),
+			'cta'   => __( 'Join the group', 'emcp-lite' ),
+			'url'   => 'https://www.facebook.com/groups/emcptools',
+		);
+		return $list;
+	}
+
+	/**
+	 * The announcement bar: every announcement as a slide, rotated by the shell
+	 * (promo.js), with previous/next arrows and dots beside the CTA. It cannot
+	 * be dismissed. Slides after the first are hidden until the shell shows them.
+	 * Each slide names its colour (data-emcp-promo-tone, the announcement key);
+	 * the bar's data-tone follows the slide on show.
+	 *
+	 * @param array[] $announcements From announcements().
+	 */
+	public static function promo( array $announcements ): string {
+		$announcements = array_values( $announcements );
+		$count         = count( $announcements );
+		if ( 0 === $count ) {
+			return '';
+		}
+		$slides = '';
+		$dots   = '';
+		foreach ( $announcements as $i => $a ) {
+			$external = 0 === strpos( (string) $a['url'], 'http' ) && 0 !== strpos( (string) $a['url'], admin_url() );
+			$slides  .= '<div class="eui-frame-promo__slide' . ( 0 === $i ? ' is-active"' : '" hidden' )
+				. ' data-emcp-promo-tone="' . esc_attr( $a['key'] ) . '"'
+				. ' role="group" aria-roledescription="slide" aria-label="' . esc_attr(
+					/* translators: 1: slide number, 2: slide count. */
+					sprintf( __( '%1$d of %2$d', 'emcp-lite' ), $i + 1, $count )
+				) . '">'
+				. '<span class="eui-frame-promo__badge">' . esc_html( $a['badge'] ) . '</span>'
+				. EMCP_Tools_Admin_Icons::svg( $a['icon'] ?? 'cloud', 16 )
+				. '<p class="eui-frame-promo__text"><strong>' . esc_html( $a['title'] ) . '</strong> ' . esc_html( $a['text'] ) . '</p>'
+				. '<a class="eui-frame-promo__cta" href="' . esc_url( $a['url'] ) . '"' . ( $external ? ' target="_blank" rel="noopener noreferrer"' : '' ) . '>' . esc_html( $a['cta'] ) . EMCP_Tools_Admin_Icons::svg( 'arrow-right', 14 ) . '</a>'
+				. '</div>';
+			$dots .= '<button type="button" class="eui-frame-promo__dot" data-emcp-promo-dot="' . (int) $i . '"' . ( 0 === $i ? ' aria-current="true"' : '' )
+				. ' aria-label="' . esc_attr(
+					/* translators: %d: announcement number. */
+					sprintf( __( 'Show announcement %d', 'emcp-lite' ), $i + 1 )
+				) . '"></button>';
+		}
+		$nav = '';
+		if ( $count > 1 ) {
+			$nav = '<div class="eui-frame-promo__nav">'
+				. '<button type="button" class="eui-frame-promo__arrow" data-emcp-promo-prev aria-label="' . esc_attr__( 'Previous announcement', 'emcp-lite' ) . '">' . EMCP_Tools_Admin_Icons::svg( 'chevron-left', 16 ) . '</button>'
+				. '<span class="eui-frame-promo__dots">' . $dots . '</span>'
+				. '<button type="button" class="eui-frame-promo__arrow" data-emcp-promo-next aria-label="' . esc_attr__( 'Next announcement', 'emcp-lite' ) . '">' . EMCP_Tools_Admin_Icons::svg( 'chevron-right', 16 ) . '</button>'
+				. '</div>';
+		}
+		return '<div class="eui-frame-promo" data-emcp-promo data-tone="' . esc_attr( $announcements[0]['key'] ) . '" role="region" aria-roledescription="carousel" aria-label="' . esc_attr__( 'Announcements', 'emcp-lite' ) . '">'
+			. '<div class="eui-frame-promo__slides">' . $slides . '</div>'
+			. $nav
+			. '</div>';
+	}
+
+	/**
+	 * The sidebar.
+	 *
+	 * @param EMCP_Tools_Admin_Nav $nav        Registry.
+	 * @param string               $active_tab Current tab id.
+	 * @param string               $version    Plugin version.
+	 * @param bool                 $premium    Whether Pro is licensed.
+	 */
+	public static function sidebar( EMCP_Tools_Admin_Nav $nav, string $active_tab, string $version, bool $premium ): string {
+		// A div, not <aside>: the frame sits inside core's role="main" (#wpbody-content),
+		// where a nested complementary landmark is an accessibility error.
+		$html  = '<div class="eui-frame__sidebar" id="emcp-frame-sidebar">';
+		$html .= '<div class="eui-frame-brand"><img class="eui-frame-brand__logo" src="' . esc_url( EMCP_TOOLS_URL . 'assets/img/icon-sm.png' ) . '" alt="" width="32" height="32">'
+			. '<span class="eui-frame-brand__text"><span class="eui-frame-brand__name">' . esc_html__( 'EMCP Tools', 'emcp-lite' ) . '</span>'
+			. '<span class="eui-frame-brand__version eui-mono">v' . esc_html( $version ) . ' · ' . esc_html( $premium ? __( 'Pro', 'emcp-lite' ) : __( 'Free', 'emcp-lite' ) ) . '</span></span></div>';
+		$html .= '<button type="button" class="eui-frame-search" data-emcp-palette-open>' . EMCP_Tools_Admin_Icons::svg( 'search', 16 )
+			. '<span class="eui-frame-search__label">' . esc_html__( 'Search...', 'emcp-lite' ) . '</span>'
+			. '<kbd class="eui-frame-search__kbd">' . esc_html__( 'Ctrl K', 'emcp-lite' ) . '</kbd></button>';
+		$html .= '<nav class="eui-frame-nav" aria-label="' . esc_attr__( 'Main', 'emcp-lite' ) . '">';
+		foreach ( $nav->groups() as $group ) {
+			$gid   = 'eui-frame-group-' . $group['id'];
+			$html .= '<p class="eui-frame-nav__group" id="' . esc_attr( $gid ) . '">' . esc_html( $group['label'] ) . '</p><ul class="eui-frame-nav__list" aria-labelledby="' . esc_attr( $gid ) . '">';
+			foreach ( $group['items'] as $item ) {
+				$html .= '<li>' . self::nav_link( $item, $item['id'] === $active_tab ) . '</li>';
+			}
+			$html .= '</ul>';
+		}
+		$html  .= '</nav>';
+		$footer = $nav->sidebar_footer();
+		if ( $footer ) {
+			$html .= '<ul class="eui-frame-nav__list eui-frame-nav__footer">';
+			foreach ( $footer as $item ) {
+				$html .= '<li>' . self::nav_link( $item, $item['id'] === $active_tab ) . '</li>';
+			}
+			$html .= '</ul>';
+		}
+		return $html . '</div>';
+	}
+
+	/**
+	 * One sidebar link.
+	 *
+	 * @param array $item   Entry or footer item.
+	 * @param bool  $active Whether it is the current page.
+	 */
+	private static function nav_link( array $item, bool $active ): string {
+		$external = ! empty( $item['external'] );
+		// The title names the link on hover when the sidebar is an icon rail.
+		$attrs    = ' href="' . esc_url( $item['url'] ) . '" class="eui-frame-nav__item' . ( $active ? ' is-active' : '' ) . '" data-emcp-nav title="' . esc_attr( $item['label'] ) . '"';
+		$attrs   .= $active ? ' aria-current="page"' : '';
+		$attrs   .= $external ? ' target="_blank" rel="noopener noreferrer"' : '';
+		$tail     = '';
+		if ( isset( $item['count'] ) && null !== $item['count'] ) {
+			$tail = '<span class="eui-frame-nav__count eui-mono">' . (int) $item['count'] . '</span>';
+		} elseif ( ! empty( $item['badge'] ) ) {
+			$tail = '<span class="eui-frame-nav__badge">' . esc_html( $item['badge'] ) . '</span>';
+		}
+		return '<a' . $attrs . '>' . EMCP_Tools_Admin_Icons::svg( $item['icon'], 16 ) . '<span class="eui-frame-nav__label">' . esc_html( $item['label'] ) . '</span>' . $tail . '</a>';
+	}
+
+	/**
+	 * The Cloud pill's state: null while the Cloud module is off, else whether
+	 * the site is connected and the connection is healthy.
+	 *
+	 * @param bool  $enabled Cloud module on.
+	 * @param array $status  EMCP_Tools_Cloud::status().
+	 */
+	public static function cloud_status( bool $enabled, array $status ): ?array {
+		if ( ! $enabled ) {
+			return null;
+		}
+		return array(
+			'connected' => ! empty( $status['connected'] ),
+			'healthy'   => ! array_key_exists( 'healthy', $status ) || ! empty( $status['healthy'] ),
+		);
+	}
+
+	/**
+	 * The top bar.
+	 *
+	 * @param string[]   $crumbs    Breadcrumb labels, current last.
+	 * @param array      $status    EMCP_Tools_Admin_Bar::status().
+	 * @param int        $unread    Unread notification count.
+	 * @param array      $user      user_summary().
+	 * @param array      $links     Top-bar links (help, affiliate, changelog, account).
+	 * @param bool       $collapsed Sidebar collapsed.
+	 * @param array|null $cloud     cloud_status(); null leaves the Cloud pill out.
+	 */
+	public static function topbar( array $crumbs, array $status, int $unread, array $user, array $links = array(), bool $collapsed = false, ?array $cloud = null ): string {
+		// A div, not <header>: a banner landmark cannot sit inside core's role="main".
+		$toggle = $collapsed ? __( 'Expand sidebar', 'emcp-lite' ) : __( 'Collapse sidebar', 'emcp-lite' );
+		$html   = '<div class="eui-frame__topbar"><button type="button" class="eui-frame-iconlink eui-frame-collapse" data-emcp-sidebar-toggle aria-controls="emcp-frame-sidebar" aria-expanded="' . ( $collapsed ? 'false' : 'true' ) . '" aria-label="' . esc_attr( $toggle ) . '" title="' . esc_attr( $toggle ) . '">'
+			. '<span class="eui-frame-collapse__close">' . EMCP_Tools_Admin_Icons::svg( 'panel-left-close', 18 ) . '</span>'
+			. '<span class="eui-frame-collapse__open">' . EMCP_Tools_Admin_Icons::svg( 'panel-left-open', 18 ) . '</span></button>';
+		$html  .= '<nav aria-label="' . esc_attr__( 'Breadcrumb', 'emcp-lite' ) . '"><ol class="eui-frame-crumbs">';
+		$last = count( $crumbs ) - 1;
+		foreach ( array_values( $crumbs ) as $i => $label ) {
+			$html .= $i === $last ? '<li aria-current="page">' . esc_html( $label ) . '</li>' : '<li>' . esc_html( $label ) . '</li>';
+		}
+		$html .= '</ol></nav><div class="eui-frame__topbar-actions">';
+
+		$color  = $status['color'] ?? 'grey';
+		$labels = array(
+			'green' => __( 'Server online', 'emcp-lite' ),
+			'grey'  => __( 'Server off', 'emcp-lite' ),
+			'red'   => __( 'Abilities API missing', 'emcp-lite' ),
+		);
+		if ( ! isset( $labels[ $color ] ) ) {
+			$color = 'grey';
+		}
+		$html .= '<a class="eui-frame-status is-' . esc_attr( $color ) . '" href="' . esc_url( EMCP_Tools_Admin_Nav::url( 'connection' ) ) . '"><span class="eui-frame-status__dot" aria-hidden="true"></span>' . esc_html( $labels[ $color ] ) . '</a>';
+		if ( null !== $cloud ) {
+			if ( ! $cloud['connected'] ) {
+				$tone  = 'grey';
+				$label = __( 'Cloud not connected', 'emcp-lite' );
+			} elseif ( ! $cloud['healthy'] ) {
+				$tone  = 'amber';
+				$label = __( 'Cloud needs attention', 'emcp-lite' );
+			} else {
+				$tone  = 'green';
+				$label = __( 'Cloud connected', 'emcp-lite' );
+			}
+			$html .= '<a class="eui-frame-status is-' . $tone . '" href="' . esc_url( EMCP_Tools_Admin_Nav::url( 'connection' ) . '&section=cloud' ) . '"><span class="eui-frame-status__dot" aria-hidden="true"></span>' . esc_html( $label ) . '</a>';
+		}
+		if ( isset( $links['help'] ) ) {
+			$help  = __( 'Get help (opens in a new tab)', 'emcp-lite' );
+			$html .= '<a class="eui-frame-iconlink" href="' . esc_url( $links['help']['url'] ) . '" target="_blank" rel="noopener noreferrer" aria-label="' . esc_attr( $help ) . '" title="' . esc_attr__( 'Get help', 'emcp-lite' ) . '">' . EMCP_Tools_Admin_Icons::svg( 'life-buoy', 18 ) . '</a>';
+		}
+		if ( isset( $links['affiliate'] ) ) {
+			$html .= '<a class="eui-frame-iconlink" href="' . esc_url( $links['affiliate']['url'] ) . '" aria-label="' . esc_attr__( 'Affiliate', 'emcp-lite' ) . '" title="' . esc_attr__( 'Affiliate', 'emcp-lite' ) . '">' . EMCP_Tools_Admin_Icons::svg( 'dollar-sign', 18 ) . '</a>';
+		}
+		// The sidebar's static New badge moved here as a dot.
+		$changelog = __( 'Changelog: new release', 'emcp-lite' );
+		$html     .= '<a class="eui-frame-iconlink" href="' . esc_url( EMCP_Tools_Admin_Nav::url( 'changelog' ) ) . '" aria-label="' . esc_attr( $changelog ) . '" title="' . esc_attr__( 'Changelog', 'emcp-lite' ) . '">' . EMCP_Tools_Admin_Icons::svg( 'newspaper', 18 ) . '<span class="eui-frame-iconlink__dot" aria-hidden="true"></span></a>';
+		$bell_label = $unread > 0
+			/* translators: %d: number of unread notifications. */
+			? sprintf( _n( 'Notifications (%d unread)', 'Notifications (%d unread)', $unread, 'emcp-lite' ), $unread )
+			: __( 'Notifications', 'emcp-lite' );
+		$html      .= '<button type="button" class="eui-frame-iconlink eui-frame-bell" data-emcp-notifications-open aria-label="' . esc_attr( $bell_label ) . '" title="' . esc_attr( $bell_label ) . '">' . EMCP_Tools_Admin_Icons::svg( 'bell', 18 )
+			. '<span class="eui-frame-bell__dot" data-emcp-unread' . ( $unread > 0 ? '' : ' hidden' ) . '></span></button>';
+		return $html . '</div></div>';
+	}
+
+	/** The card for a tab with no screen: switched off, or an unknown slug. */
+	public static function unavailable(): string {
+		return '<div class="eui-card emcp-unavailable"><div class="eui-card__body">'
+			. '<h1>' . esc_html__( 'This page isn’t available', 'emcp-lite' ) . '</h1>'
+			. '<p>' . esc_html__( 'This screen is switched off or needs a module that isn’t active.', 'emcp-lite' ) . '</p>'
+			. '<p><a class="eui-btn eui-btn--primary eui-btn--md" href="' . esc_url( admin_url( 'admin.php?page=' . EMCP_Tools_Admin::PAGE_SLUG ) ) . '">' . esc_html__( 'Go to the Dashboard', 'emcp-lite' ) . '</a></p>'
+			. '</div></div>';
+	}
+
+	/**
+	 * The React mount point with its server-rendered fallback (spec 5.2 layer 1).
+	 *
+	 * @param string $screen_id Screen id.
+	 */
+	public static function screen_container( string $screen_id ): string {
+		return '<div id="emcp-screen" class="eui-frame-screen" data-screen="' . esc_attr( $screen_id ) . '">'
+			. '<div data-emcp-fallback class="eui-frame-fallback">'
+			. '<div class="eui-skeleton" aria-hidden="true"><span class="eui-skeleton__line"></span><span class="eui-skeleton__line"></span><span class="eui-skeleton__line"></span></div>'
+			. '<div class="eui-card eui-card__body eui-frame-recovery" data-emcp-recovery hidden role="alert">'
+			. '<h2 class="eui-card__title">' . esc_html__( "This screen didn't load", 'emcp-lite' ) . '</h2>'
+			. '<p>' . esc_html__( 'Reload the page. If it keeps happening, copy the details below and send them to support.', 'emcp-lite' ) . '</p>'
+			. '<pre class="eui-frame-recovery__details eui-mono" data-emcp-recovery-details></pre>'
+			. '<div class="eui-frame-recovery__actions">'
+			. '<button type="button" class="eui-btn eui-btn--primary eui-btn--md" data-emcp-reload>' . esc_html__( 'Reload', 'emcp-lite' ) . '</button>'
+			. '<button type="button" class="eui-btn eui-btn--secondary eui-btn--md" data-emcp-copy>' . esc_html__( 'Copy details', 'emcp-lite' ) . '</button>'
+			. '</div></div>'
+			. '<noscript><div class="eui-notice eui-notice--warning">' . esc_html__( 'This screen needs JavaScript. Turn it on in your browser and reload.', 'emcp-lite' ) . '</div></noscript>'
+			. '</div><div data-emcp-root></div></div>';
+	}
+
+	/**
+	 * Contents of the built fallback script (printed inline after the container).
+	 */
+	public static function fallback_script(): string {
+		$file = EMCP_TOOLS_DIR . 'assets/admin/build/fallback.js';
+		return is_readable( $file ) ? (string) file_get_contents( $file ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+	}
+
+	/**
+	 * Body classes for EMCP screens: fold the WordPress menu unless the user expanded it.
+	 *
+	 * @param string $classes Existing admin body classes.
+	 * @param string $mfold   get_user_setting( 'mfold' ): 'o' = expanded, 'f' = folded.
+	 */
+	public static function body_class( string $classes, string $mfold ): string {
+		$classes .= ' emcp-admin-frame';
+		if ( 'o' !== $mfold && false === strpos( ' ' . $classes . ' ', ' folded ' ) ) {
+			$classes .= ' folded';
+		}
+		return $classes;
+	}
+
+	/**
+	 * Name, initials and avatar of a user.
+	 *
+	 * @param object $user WP_User-like (ID, display_name).
+	 * @return array{name:string,initials:string,avatar:string}
+	 */
+	public static function user_summary( $user ): array {
+		$name  = (string) ( $user->display_name ?? '' );
+		$parts = preg_split( '/\s+/', trim( $name ) );
+		$init  = '';
+		foreach ( array_slice( array_filter( (array) $parts ), 0, 2 ) as $part ) {
+			$init .= function_exists( 'mb_substr' ) ? mb_strtoupper( mb_substr( $part, 0, 1 ) ) : strtoupper( substr( $part, 0, 1 ) );
+		}
+		return array(
+			'name'     => $name,
+			'initials' => $init,
+			'avatar'   => function_exists( 'get_avatar_url' ) ? (string) get_avatar_url( (int) ( $user->ID ?? 0 ), array( 'size' => 64 ) ) : '',
+		);
+	}
+}

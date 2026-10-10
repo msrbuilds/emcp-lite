@@ -1,0 +1,160 @@
+.eui-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 7px;
+	block-size: 38px;
+	padding-inline: 16px;
+	border: 1px solid transparent;
+	border-radius: var(--emcp-r-btn);
+	font: 600 14px/1 var(--emcp-font);
+	white-space: nowrap;
+	text-decoration: none;
+	cursor: pointer;
+	transition: background-color var(--emcp-dur-fast), border-color var(--emcp-dur-fast), color var(--emcp-dur-fast), box-shadow var(--emcp-dur-fast), transform var(--emcp-dur-fast);
+}
+
+.eui-btn:active:not(:disabled) {
+	transform: translateY(1px);
+}
+
+.eui-btn--sm {
+	block-size: 34px;
+	padding-inline: 12px;
+	font-size: 13px;
+}
+
+.eui-btn--lg {
+	block-size: 40px;
+	padding-inline: 18px;
+}
+
+.eui-btn--primary {
+	background: var(--emcp-primary);
+	color: var(--emcp-surface);
+}
+
+.eui-btn--primary:hover:not(:disabled) {
+	background: var(--emcp-primary-strong);
+	color: var(--emcp-surface);
+}
+
+.eui-btn--secondary {
+	background: var(--emcp-surface);
+	color: var(--emcp-ink-2);
+	border-color: var(--emcp-border-input);
+}
+
+.eui-btn--secondary:hover:not(:disabled) {
+	border-color: var(--emcp-hover-border);
+	color: var(--emcp-ink-2);
+}
+
+.eui-btn--outline {
+	background: var(--emcp-surface);
+	color: var(--emcp-primary-strong);
+	border-color: var(--emcp-primary);
+}
+
+.eui-btn--danger {
+	background: var(--emcp-surface);
+	color: var(--emcp-danger-fg);
+	border-color: var(--emcp-danger-border);
+}
+
+.eui-btn--ghost {
+	background: transparent;
+	color: var(--emcp-primary-strong);
+	padding-inline: 8px;
+}
+
+.eui-btn--ghost-inverse {
+	background: transparent;
+	color: var(--emcp-surface);
+}
+
+.eui-btn:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+/* A Button with an href is an <a>, and core wp-admin recolours links on
+   hover, focus and active (`a:focus`, 0,1,1) and adds a blue focus
+   box-shadow. The doubled class keeps each variant's text colour in every
+   state; the hover backgrounds above still apply. */
+.eui-btn.eui-btn--primary:is(:hover, :focus, :active, :visited) {
+	color: var(--emcp-surface);
+}
+
+.eui-btn.eui-btn--secondary:is(:hover, :focus, :active, :visited) {
+	color: var(--emcp-ink-2);
+}
+
+.eui-btn.eui-btn--outline:is(:hover, :focus, :active, :visited) {
+	color: var(--emcp-primary-strong);
+}
+
+.eui-btn.eui-btn--danger:is(:hover, :focus, :active, :visited) {
+	color: var(--emcp-danger-fg);
+}
+
+.eui-btn.eui-btn--ghost:is(:hover, :focus, :active, :visited) {
+	color: var(--emcp-primary-strong);
+}
+
+.eui-btn.eui-btn--ghost-inverse:is(:hover, :focus, :active, :visited) {
+	color: var(--emcp-surface);
+}
+
+.eui-btn.eui-btn:focus {
+	box-shadow: none;
+	outline: none;
+}
+
+.eui-btn.eui-btn:focus-visible {
+	outline: 2px solid var(--emcp-primary);
+	outline-offset: 2px;
+}
+
+.eui-iconbtn {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	inline-size: 30px;
+	block-size: 30px;
+	padding: 0;
+	border: 1px solid var(--emcp-border-input);
+	border-radius: var(--emcp-r-sm);
+	background: var(--emcp-surface);
+	color: var(--emcp-text-3);
+	cursor: pointer;
+}
+
+/* Hit area: the 28px padding box plus 2px each side is 32px (spec 6.4). */
+.eui-iconbtn::before {
+	content: "";
+	position: absolute;
+	inset: -2px;
+}
+
+.eui-iconbtn:hover:not(:disabled) {
+	border-color: var(--emcp-hover-border);
+	color: var(--emcp-ink);
+}
+
+.eui-iconbtn--sm {
+	inline-size: 24px;
+	block-size: 24px;
+	border-color: transparent;
+	background: transparent;
+}
+
+.eui-iconbtn--sm::before {
+	inset: -5px;
+}
+
+.eui-iconbtn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}

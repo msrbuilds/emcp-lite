@@ -1,0 +1,389 @@
+.eui-conn {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+}
+
+.eui-conn__grid {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 340px;
+	gap: 20px;
+	align-items: start;
+}
+
+.eui-conn__main {
+	padding: 22px 24px;
+	border: 1px solid var(--emcp-border);
+	border-radius: var(--emcp-r-card);
+	background: var(--emcp-surface);
+}
+
+.eui-conn__chips,
+.eui-conn__actions,
+.eui-conn__creds,
+.eui-conn__app-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
+}
+
+.eui-conn__actions {
+	margin-block-start: 16px;
+}
+
+.eui-conn__creds {
+	align-items: flex-end;
+	margin-block-end: 14px;
+}
+
+.eui-conn__steps {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.eui-conn__substep {
+	display: flex;
+	gap: 12px;
+}
+
+.eui-conn__substep-body {
+	flex: 1;
+	min-inline-size: 0;
+}
+
+.eui-conn__letter {
+	display: inline-flex;
+	flex: none;
+	align-items: center;
+	justify-content: center;
+	inline-size: 22px;
+	block-size: 22px;
+	border-radius: var(--emcp-r-sm);
+	background: var(--emcp-primary-tint);
+	color: var(--emcp-primary-strong);
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.eui-conn__substep-title {
+	margin: 0 0 4px;
+	color: var(--emcp-ink);
+	font-weight: 600;
+}
+
+.eui-conn__substep-desc,
+.eui-conn__muted {
+	margin: 0 0 8px;
+	color: var(--emcp-muted);
+	font-size: 13px;
+}
+
+.eui-conn__warning,
+.eui-conn__warn {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin: 0 0 8px;
+	color: var(--emcp-warning-fg);
+	font-size: 13px;
+}
+
+.eui-conn__paths {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.eui-conn__existing {
+	margin-block-end: 14px;
+}
+
+/* The select fills its field, so the chevron sits inside it. */
+.eui-conn__existing .eui-select {
+	display: flex;
+}
+
+.eui-conn__existing .eui-select select {
+	flex: 1;
+	min-inline-size: 0;
+	max-inline-size: none; /* core wp-admin caps select at 25rem */
+}
+
+/* The "Copy it now" notice above the lettered config steps. */
+.eui-conn__creds ~ .eui-notice {
+	margin-block-end: 16px;
+}
+
+/* A client's setup guide (server-rendered markup in client.guide, e.g. the
+   ChatGPT "Custom MCP" form). Its table lost its styles with the old admin
+   stylesheet; labels stay on one line and every row starts at the same edge. */
+.eui-conn__substep-body .description {
+	margin: 0 0 8px;
+	color: var(--emcp-muted);
+	font-size: 13px;
+}
+
+.eui-conn__substep-body .emcp-conn-guide {
+	inline-size: 100%;
+	margin-block: 4px 12px;
+	border-collapse: collapse;
+}
+
+.eui-conn__substep-body .emcp-conn-guide th,
+.eui-conn__substep-body .emcp-conn-guide td {
+	padding-block: 8px;
+	padding-inline: 0 16px;
+	border-block-end: 1px solid var(--emcp-border);
+	text-align: start;
+	vertical-align: top;
+	font-size: 13px;
+}
+
+.eui-conn__substep-body .emcp-conn-guide th {
+	inline-size: 1%;
+	white-space: nowrap;
+	color: var(--emcp-ink);
+	font-weight: 600;
+}
+
+.eui-conn__substep-body .emcp-conn-guide td {
+	color: var(--emcp-ink-2);
+	overflow-wrap: anywhere;
+}
+
+.eui-conn__existing summary {
+	min-block-size: 32px;
+	color: var(--emcp-primary-strong);
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.eui-conn__waiting {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 10px;
+	color: var(--emcp-ink);
+}
+
+.eui-conn__trouble {
+	margin: 6px 0 0;
+	padding-inline-start: 18px;
+}
+
+.eui-conn__rail {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.eui-conn__rail-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.eui-conn__rail-title {
+	margin: 0 0 10px;
+	color: var(--emcp-ink);
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.eui-conn__rail-toggle {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	inline-size: 100%;
+	min-block-size: 32px;
+	padding: 0;
+	border: 0;
+	background: none;
+	cursor: pointer;
+}
+
+.eui-conn__status {
+	margin: 0 0 12px;
+	padding: 0;
+	list-style: none;
+}
+
+.eui-conn__status li {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-block-size: 28px;
+	color: var(--emcp-text-2);
+}
+
+.eui-conn__status strong {
+	margin-inline-start: auto;
+}
+
+.eui-conn__dot {
+	inline-size: 8px;
+	block-size: 8px;
+	border-radius: 50%;
+	background: var(--emcp-border);
+}
+
+.eui-conn__dot.is-ok {
+	background: var(--emcp-success-dot);
+}
+
+.eui-conn__apps {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.eui-conn__apps li {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	padding-block: 8px;
+	border-block-end: 1px solid var(--emcp-divider);
+}
+
+.eui-conn__apps li > div:first-child {
+	display: flex;
+	flex-direction: column;
+	min-inline-size: 0;
+}
+
+.eui-conn__adv {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.eui-conn__adv-foot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	margin-block-start: 8px;
+}
+
+.eui-conn__services,
+.eui-conn__cloud {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+	gap: 16px;
+}
+
+.eui-conn__service {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 10px;
+	margin-block-end: 12px;
+}
+
+.eui-conn__service .eui-field {
+	flex: 1 1 240px;
+}
+
+.eui-conn__inline-form {
+	display: inline-flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
+}
+
+.eui-conn__link {
+	min-block-size: 32px;
+	color: var(--emcp-primary-strong);
+	line-height: 32px;
+}
+
+@media (max-width: 1100px) {
+
+	.eui-conn__grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+/* Cloud account card */
+.eui-conn__account-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding-block-end: 16px;
+	border-block-end: 1px solid var(--emcp-divider);
+}
+
+.eui-conn__account {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	min-inline-size: 0;
+}
+
+.eui-conn__account-icon {
+	display: inline-flex;
+	flex: none;
+	align-items: center;
+	justify-content: center;
+	inline-size: 40px;
+	block-size: 40px;
+	border-radius: 50%;
+	background: var(--emcp-primary-tint);
+	color: var(--emcp-primary-strong);
+}
+
+.eui-conn__account-text {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-inline-size: 0;
+}
+
+.eui-conn__account-name {
+	overflow: hidden;
+	color: var(--emcp-ink);
+	font-size: 15px;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.eui-conn__setting {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+	padding-block-start: 16px;
+}
+
+.eui-conn__setting-text {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.eui-conn__setting-title {
+	color: var(--emcp-ink);
+	font-weight: 600;
+}
+
+.eui-conn__setting-link {
+	display: inline-flex;
+	align-items: center;
+	align-self: flex-start;
+	min-block-size: 32px;
+	padding: 0;
+	border: 0;
+	background: none;
+	cursor: pointer;
+	text-decoration: underline;
+	color: var(--emcp-primary-strong);
+	font-size: 13px;
+	font-weight: 500;
+}

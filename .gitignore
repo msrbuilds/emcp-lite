@@ -1,0 +1,27 @@
+/docs/
+/node_modules/
+/build/
+/vendor/
+/AGENTS.md
+/.phpunit.public.cache/
+/.phpunit.cache/
+/.phpunit.result.cache
+/coverage/
+/playwright-report/
+/test-results/
+.env
+.env.*
+*.log
+*.pem
+*.key
+
+# Development-only files kept locally, not published.
+/.agents/
+/.claude/
+/skills-lock.json
+/tests/
+*.test.js
+*.test.mjs
+/jest.config.js
+/eslint.config.cjs
+/build.ps1

@@ -1,0 +1,209 @@
+import { useRef } from '@wordpress/element';
+import { rovingKeyDown } from '../utils/roving';
+import { cx } from '../utils/cx';
+import { Icon } from './Icon';
+import { useIndicator } from './Motion';
+import './Choice.css';
+
+function useGroup( options, value, onChange ) {
+	const refs = useRef( [] );
+	const selected = options.findIndex( ( o ) => o.value === value );
+	const tabStop = selected >= 0 ? selected : 0;
+	const move = ( i ) => {
+		onChange( options[ i ].value );
+		refs.current[ i ]?.focus();
+	};
+	return { refs, tabStop, move, selected };
+}
+
+const labelsOf = ( options ) =>
+	options.map( ( o ) => `${ o.label }|${ o.count ?? '' }` ).join( ',' );
+
+export function Segmented( { label, options, value, onChange, className } ) {
+	const { refs, tabStop, move, selected } = useGroup(
+		options,
+		value,
+		onChange
+	);
+	const thumb = useIndicator( refs, selected, [ labelsOf( options ) ] );
+	return (
+		<div
+			role="radiogroup"
+			aria-label={ label }
+			className={ cx( 'eui-seg', thumb && 'has-thumb', className ) }
+		>
+			{ thumb && (
+				<span
+					className="eui-seg__thumb"
+					aria-hidden="true"
+					style={ {
+						transform: `translateX(${ thumb.x }px)`,
+						width: `${ thumb.w }px`,
+					} }
+				/>
+			) }
+			{ options.map( ( o, i ) => (
+				<button
+					key={ o.value }
+					ref={ ( el ) => ( refs.current[ i ] = el ) }
+					type="button"
+					role="radio"
+					aria-checked={ o.value === value ? 'true' : 'false' }
+					tabIndex={ i === tabStop ? 0 : -1 }
+					disabled={ o.disabled }
+					className={ cx(
+						'eui-seg__opt',
+						o.value === value && 'is-active'
+					) }
+					onClick={ () => onChange( o.value ) }
+					onKeyDown={ ( e ) =>
+						rovingKeyDown( e, {
+							index: i,
+							count: options.length,
+							onMove: move,
+							isDisabled: ( j ) => !! options[ j ].disabled,
+						} )
+					}
+				>
+					<span>{ o.label }</span>
+					{ undefined !== o.count && (
+						<span className="eui-seg__count">{ o.count }</span>
+					) }
+				</button>
+			) ) }
+		</div>
+	);
+}
+
+export function Tabs( {
+	label,
+	options,
+	value,
+	onChange,
+	idPrefix,
+	className,
+} ) {
+	const { refs, tabStop, move, selected } = useGroup(
+		options,
+		value,
+		onChange
+	);
+	const ink = useIndicator( refs, selected, [ labelsOf( options ) ] );
+	return (
+		<div
+			role="tablist"
+			aria-label={ label }
+			className={ cx( 'eui-tabs', ink && 'has-ink', className ) }
+		>
+			{ ink && (
+				<span
+					className="eui-tabs__ink"
+					aria-hidden="true"
+					style={ {
+						transform: `translateX(${ ink.x }px)`,
+						width: `${ ink.w }px`,
+					} }
+				/>
+			) }
+			{ options.map( ( o, i ) => (
+				<button
+					key={ o.value }
+					id={ `${ idPrefix }-tab-${ o.value }` }
+					ref={ ( el ) => ( refs.current[ i ] = el ) }
+					type="button"
+					role="tab"
+					aria-selected={ o.value === value ? 'true' : 'false' }
+					aria-controls={ `${ idPrefix }-panel-${ o.value }` }
+					tabIndex={ i === tabStop ? 0 : -1 }
+					className={ cx(
+						'eui-tabs__tab',
+						o.value === value && 'is-active'
+					) }
+					onClick={ () => onChange( o.value ) }
+					onKeyDown={ ( e ) =>
+						rovingKeyDown( e, {
+							index: i,
+							count: options.length,
+							onMove: move,
+							isDisabled: ( j ) => !! options[ j ].disabled,
+						} )
+					}
+				>
+					<span>{ o.label }</span>
+					{ undefined !== o.count && (
+						<span className="eui-tabs__count eui-mono">
+							{ o.count }
+						</span>
+					) }
+				</button>
+			) ) }
+		</div>
+	);
+}
+
+/**
+ * A toggleable filter pill. `image` (a logo URL) or `icon` (an icon name) is
+ * shown before the label; both are decorative, the label names the chip.
+ *
+ * @param {Object}     props
+ * @param {string}     props.label         Chip text and accessible name.
+ * @param {string}     [props.image]       Logo URL.
+ * @param {string}     [props.icon]        Icon name, used when there is no image.
+ * @param {boolean}    [props.active]      Pressed state.
+ * @param {number}     [props.count]       Count after the label.
+ * @param {() => void} [props.onClick]     Toggle.
+ * @param {() => void} [props.onRemove]    Shows a remove button when set.
+ * @param {string}     [props.removeLabel] The remove button's name.
+ */
+export function FilterChip( {
+	label,
+	image,
+	icon,
+	active = false,
+	count,
+	onClick,
+	onRemove,
+	removeLabel,
+} ) {
+	return (
+		<span className={ cx( 'eui-chip', active && 'is-active' ) }>
+			<button
+				type="button"
+				className="eui-chip__main"
+				aria-pressed={ active ? 'true' : 'false' }
+				onClick={ onClick }
+			>
+				{ image && (
+					<img
+						className="eui-chip__media"
+						src={ image }
+						alt=""
+						width="18"
+						height="18"
+					/>
+				) }
+				{ ! image && icon && (
+					<Icon
+						name={ icon }
+						size={ 16 }
+						className="eui-chip__media"
+					/>
+				) }
+				<span>{ label }</span>
+				{ undefined !== count && (
+					<span className="eui-chip__count">{ count }</span>
+				) }
+			</button>
+			{ onRemove && (
+				<button
+					type="button"
+					className="eui-chip__remove"
+					aria-label={ removeLabel }
+					onClick={ onRemove }
+				>
+					<Icon name="x" size={ 12 } />
+				</button>
+			) }
+		</span>
+	);
+}

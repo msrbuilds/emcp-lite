@@ -1,0 +1,137 @@
+import { __, sprintf } from '@wordpress/i18n';
+import { Badge, CopyButton } from '@emcp/ui';
+import { formatWhen } from './time';
+
+const SLOW_MS = 200;
+
+/**
+ * One request row plus, when expanded, its details row.
+ *
+ * @param {Object}     props
+ * @param {Object}     props.row      Row from EMCP_Tools_Admin_Log_Data::row().
+ * @param {number}     props.max      Slowest duration on the page (bar scale).
+ * @param {string}     props.tz       site | utc | browser.
+ * @param {string}     props.siteZone Site time zone.
+ * @param {boolean}    props.open     Details shown.
+ * @param {() => void} props.onToggle Toggle the details.
+ */
+export function LogRow( { row, max, tz, siteZone, open, onToggle } ) {
+	const pct = max ? Math.max( 2, Math.round( ( row.ms / max ) * 100 ) ) : 0;
+	const detailsId = `emcp-log-details-${ row.key }`;
+	const name = row.reqId || row.tool || row.method;
+	const details = [
+		[ __( 'Client', 'emcp-lite' ), row.client ],
+		[ __( 'Session', 'emcp-lite' ), row.session ],
+		[ __( 'Credential', 'emcp-lite' ), row.credential ],
+		[ __( 'Stage', 'emcp-lite' ), row.stage ],
+		[ __( 'Failure reason', 'emcp-lite' ), row.reason ],
+		[ __( 'Error', 'emcp-lite' ), row.error ],
+		[ __( 'History entry', 'emcp-lite' ), row.ledger ],
+	].filter( ( d ) => '' !== d[ 1 ] );
+	return (
+		<>
+			<tr className={ open ? 'is-open' : undefined }>
+				<td className="emcp-log__when">
+					{ formatWhen( row.ts, tz, siteZone ) }
+				</td>
+				<td className="emcp-log__request">
+					{ row.tool && (
+						<span className="emcp-log__tool">{ row.tool }</span>
+					) }
+					<code className="emcp-log__mono">{ row.method }</code>
+				</td>
+				<td>
+					<Badge
+						kind="status"
+						value={ 'error' === row.status ? 'danger' : 'success' }
+					>
+						{ 'error' === row.status
+							? __( 'Error', 'emcp-lite' )
+							: __( 'Success', 'emcp-lite' ) }
+					</Badge>
+				</td>
+				<td>
+					<span className="emcp-log__duration">
+						<span className="emcp-log__track" aria-hidden="true">
+							<span
+								className={
+									row.ms > SLOW_MS
+										? 'emcp-log__bar is-slow'
+										: 'emcp-log__bar'
+								}
+								style={ { inlineSize: `${ pct }%` } }
+							/>
+						</span>
+						<span>
+							{ sprintf(
+								/* translators: %d: duration in milliseconds. */
+								__( '%d ms', 'emcp-lite' ),
+								row.ms
+							) }
+						</span>
+					</span>
+				</td>
+				<td>
+					{ row.reqId && (
+						<span className="emcp-log__req">
+							<code className="emcp-log__mono">
+								{ row.reqId }
+							</code>
+							<CopyButton
+								text={ row.reqId }
+								label={ __( 'Copy request ID', 'emcp-lite' ) }
+							/>
+						</span>
+					) }
+				</td>
+				<td className="emcp-log__more">
+					<button
+						type="button"
+						className="emcp-log__toggle"
+						aria-expanded={ open ? 'true' : 'false' }
+						aria-controls={ detailsId }
+						aria-label={
+							open
+								? sprintf(
+										/* translators: %s: request id or tool. */
+										__( 'Show less: %s', 'emcp-lite' ),
+										name
+									)
+								: sprintf(
+										/* translators: %s: request id or tool. */
+										__( 'Show more: %s', 'emcp-lite' ),
+										name
+									)
+						}
+						onClick={ onToggle }
+					>
+						{ open
+							? __( 'Show less', 'emcp-lite' )
+							: __( 'Show more', 'emcp-lite' ) }
+					</button>
+				</td>
+			</tr>
+			<tr
+				id={ detailsId }
+				className="emcp-log__details"
+				hidden={ ! open }
+			>
+				<td colSpan={ 6 }>
+					{ open &&
+						( details.length ? (
+							<dl>
+								{ details.map( ( [ label, value ] ) => (
+									<div key={ label }>
+										<dt>{ label }</dt>
+										<dd>{ value }</dd>
+									</div>
+								) ) }
+							</dl>
+						) : (
+							<p>{ __( 'No further details.', 'emcp-lite' ) }</p>
+						) ) }
+				</td>
+			</tr>
+		</>
+	);
+}

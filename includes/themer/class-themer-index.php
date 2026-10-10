@@ -1,0 +1,129 @@
+<?php
+/**
+ * Themer condition index — the front-end fast path.
+ *
+ * A single autoloaded option maps template type => normalized rows
+ * [{ id, include, exclude, priority }] so the resolver runs zero DB queries per
+ * request. build() is pure (records -> grouped index); rebuild() is the WP glue
+ * that queries the CPT and writes the option (hooked on save/delete).
+ *
+ * @package EMCP_Tools
+ * @since   3.1.0
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * @since 3.1.0
+ */
+class EMCP_Tools_Themer_Index {
+
+	const OPTION = 'emcp_tools_themer_index';
+
+	/** Post type storing templates. */
+	const POST_TYPE = 'emcp_theme_template';
+
+	/** Meta keys. */
+	const META_TYPE       = '_emcp_themer_type';
+	const META_CONDITIONS = '_emcp_themer_conditions';
+
+	/**
+	 * Build the grouped index from flat records.
+	 *
+	 * @param array<int,array{id?:int,type?:string,conditions?:array}> $records Records.
+	 * @return array<string,array<int,array{id:int,include:array,exclude:array,priority:int}>>
+	 */
+	public static function build( array $records ): array {
+		$index = array();
+		foreach ( $records as $rec ) {
+			if ( empty( $rec['id'] ) || empty( $rec['type'] ) ) {
+				continue;
+			}
+			// Parts (Loop Items) never fill a slot, so they stay out of the index.
+			if ( class_exists( 'EMCP_Tools_Themer_CPT' ) && EMCP_Tools_Themer_CPT::is_part( (string) $rec['type'] ) ) {
+				continue;
+			}
+			$cond                             = is_array( $rec['conditions'] ?? null ) ? $rec['conditions'] : array();
+			$index[ (string) $rec['type'] ][] = array(
+				'id'       => (int) $rec['id'],
+				'include'  => is_array( $cond['include'] ?? null ) ? array_values( $cond['include'] ) : array(),
+				'exclude'  => is_array( $cond['exclude'] ?? null ) ? array_values( $cond['exclude'] ) : array(),
+				'priority' => (int) ( $cond['priority'] ?? 0 ),
+			);
+		}
+		return $index;
+	}
+
+	/**
+	 * Read the stored index (empty array when unset).
+	 *
+	 * @return array
+	 */
+	public static function get(): array {
+		$stored = get_option( self::OPTION, array() );
+		return is_array( $stored ) ? $stored : array();
+	}
+
+	/**
+	 * Rebuild the index option from the CPT. Hooked on save/delete.
+	 *
+	 * @return array The freshly built index.
+	 */
+	public static function rebuild(): array {
+		$query = new WP_Query(
+			array(
+				'post_type'      => self::POST_TYPE,
+				// Only published templates apply on the front end — a draft is
+				// work-in-progress and must not render for visitors (it's still
+				// previewable from the edit screen).
+				'post_status'    => 'publish',
+				'posts_per_page' => 500,
+				'no_found_rows'  => true,
+				'fields'         => 'ids',
+			)
+		);
+
+		$records = array();
+		foreach ( $query->posts as $id ) {
+			$id   = (int) $id;
+			$type = (string) get_post_meta( $id, self::META_TYPE, true );
+			if ( '' === $type ) {
+				continue;
+			}
+			$raw       = get_post_meta( $id, self::META_CONDITIONS, true );
+			$cond      = is_array( $raw ) ? $raw : ( is_string( $raw ) && '' !== $raw ? json_decode( $raw, true ) : array() );
+			$records[] = array( 'id' => $id, 'type' => $type, 'conditions' => is_array( $cond ) ? $cond : array() );
+		}
+
+		$index = self::build( $records );
+		update_option( self::OPTION, $index, true );
+		return $index;
+	}
+
+	/**
+	 * Rebuild the index whenever a template is saved, trashed, or deleted.
+	 */
+	public static function register_hooks(): void {
+		// Priority 99: the metabox and the MCP abilities write the type/conditions
+		// meta on save_post_{type} at priority 10, so the rebuild must run AFTER
+		// them or it reads stale/absent meta and produces an empty index (which
+		// makes the front end fall back to the theme's own templates).
+		add_action( 'save_post_' . self::POST_TYPE, array( __CLASS__, 'rebuild' ), 99 );
+		add_action( 'deleted_post', array( __CLASS__, 'on_deleted_post' ) );
+		add_action( 'trashed_post', array( __CLASS__, 'on_deleted_post' ) );
+		add_action( 'untrashed_post', array( __CLASS__, 'on_deleted_post' ) );
+	}
+
+	/**
+	 * Rebuild only when the affected post is one of ours.
+	 *
+	 * @param int $post_id Post id.
+	 */
+	public static function on_deleted_post( $post_id ): void {
+		if ( self::POST_TYPE === get_post_type( (int) $post_id ) ) {
+			self::rebuild();
+		}
+	}
+}

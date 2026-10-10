@@ -1,0 +1,488 @@
+/**
+ * Client config snippets for the Connection screen, ported from the builders
+ * of the old admin.js (removed in 3.18.0), so configs users already copied
+ * keep their exact shape. Pure: no DOM.
+ */
+import { __, sprintf } from '@wordpress/i18n';
+
+const PROXY = '@msrbuilds/emcp-proxy@latest';
+
+export function serverName( siteUrl, endpoint ) {
+	let host = '';
+	try {
+		host = new URL( siteUrl || endpoint ).hostname;
+	} catch {
+		host = '';
+	}
+	host = ( host || '' )
+		.replace( /^www\./, '' )
+		.replace( /[^a-zA-Z0-9]+/g, '-' )
+		.replace( /^-+|-+$/g, '' )
+		.toLowerCase();
+	return host ? 'emcp-' + host : 'emcp-tools';
+}
+
+export function basic( username, password ) {
+	return btoa( username + ':' + String( password ).replace( /\s+/g, '' ) );
+}
+
+export function fill( tpl, { name = '', endpoint = '', b64 = '' } ) {
+	return String( tpl )
+		.replace( /%NAME%/g, name )
+		.replace( /%ENDPOINT%/g, endpoint )
+		.replace( /%B64%/g, b64 );
+}
+
+export function deeplink( kind, name, endpoint ) {
+	if ( 'cursor' === kind ) {
+		return (
+			'cursor://anysphere.cursor-deeplink/mcp/install?name=' +
+			encodeURIComponent( name ) +
+			'&config=' +
+			btoa( JSON.stringify( { url: endpoint } ) )
+		);
+	}
+	if ( 'claude-ai' === kind ) {
+		return (
+			'https://claude.ai/customize/connectors?modal=add-custom-connector&connectorName=' +
+			encodeURIComponent( name ) +
+			'&connectorUrl=' +
+			encodeURIComponent( endpoint )
+		);
+	}
+	return '';
+}
+
+const signin = () =>
+	__(
+		'The next time your AI client connects, your browser opens so you can authorize it. Approve to finish connecting.',
+		'emcp-lite'
+	);
+
+export function oauthSteps( client, name, endpoint ) {
+	const o = client.oauth;
+	const vars = { name, endpoint };
+	if ( ! o || 'object' !== typeof o ) {
+		return [
+			{
+				kind: 'copy',
+				title: __(
+					'Add this site as an HTTP MCP server',
+					'emcp-lite'
+				),
+				text: endpoint,
+			},
+			{
+				kind: 'text',
+				title: __( 'Sign in', 'emcp-lite' ),
+				text: signin(),
+			},
+		];
+	}
+	if ( 'cmd' === o.type ) {
+		return [
+			{
+				kind: 'code',
+				title: __( 'Run this in your terminal', 'emcp-lite' ),
+				text: fill( o.cmd, vars ),
+			},
+			{
+				kind: 'text',
+				title: __( 'Sign in', 'emcp-lite' ),
+				text: signin(),
+			},
+		];
+	}
+	if ( 'connector' === o.type ) {
+		const app = o.app || __( 'your client', 'emcp-lite' );
+		const out = [];
+		if ( o.deeplink ) {
+			out.push( {
+				kind: 'link',
+				title: sprintf(
+					/* translators: %s: app name. */
+					__( 'Add the connector to %s', 'emcp-lite' ),
+					app
+				),
+				href: deeplink( o.deeplink, name, endpoint ),
+			} );
+		}
+		if ( o.note ) {
+			out.push( { kind: 'text', title: '', text: o.note } );
+		}
+		out.push( {
+			kind: 'text',
+			title: __( 'Open Connectors', 'emcp-lite' ),
+			text: sprintf(
+				/* translators: %s: app name. */
+				__(
+					'In %s, open Settings, then Connectors, then Add custom connector.',
+					'emcp-lite'
+				),
+				app
+			),
+		} );
+		out.push( {
+			kind: 'copy',
+			title: __( 'Name the connector', 'emcp-lite' ),
+			text: name,
+		} );
+		out.push( {
+			kind: 'copy',
+			title: __( 'Enter the server URL', 'emcp-lite' ),
+			text: endpoint,
+		} );
+		out.push( {
+			kind: 'text',
+			title: '',
+			text: __(
+				'Leave the OAuth Client ID and Secret empty. Sign in when the browser opens.',
+				'emcp-lite'
+			),
+		} );
+		return out;
+	}
+	if ( 'steps' === o.type ) {
+		return ( o.steps || [] ).map( ( s ) =>
+			s.copy
+				? {
+						kind: 'copy',
+						title: s.title || '',
+						text: fill( s.copy, vars ),
+					}
+				: {
+						kind: 'text',
+						title: s.title || '',
+						text: s.desc ? fill( s.desc, vars ) : '',
+					}
+		);
+	}
+	if ( 'config' === o.type ) {
+		const out = [];
+		if ( o.deeplink ) {
+			out.push( {
+				kind: 'link',
+				title: __( 'One-click install', 'emcp-lite' ),
+				href: deeplink( o.deeplink, name, endpoint ),
+			} );
+		}
+		out.push( {
+			kind: 'paths',
+			title: __( 'Open your config', 'emcp-lite' ),
+			paths: o.paths || [],
+		} );
+		out.push( {
+			kind: 'text',
+			title: __( 'Add this server', 'emcp-lite' ),
+			text:
+				o.merge_msg ||
+				__(
+					'If your config file already has content, merge this into it instead of replacing it.',
+					'emcp-lite'
+				),
+		} );
+		out.push( { kind: 'code', title: '', text: fill( o.template, vars ) } );
+		out.push( {
+			kind: 'text',
+			title: __( 'Restart and sign in', 'emcp-lite' ),
+			text: o.note ? fill( o.note, vars ) + ' ' + signin() : signin(),
+		} );
+		return out;
+	}
+	return [
+		{
+			kind: 'copy',
+			title: __( 'Connector URL', 'emcp-lite' ),
+			text: endpoint,
+		},
+		{ kind: 'text', title: __( 'Sign in', 'emcp-lite' ), text: signin() },
+	];
+}
+
+function proxyEnv( c ) {
+	return {
+		WP_URL: c.siteUrl,
+		WP_USERNAME: c.username,
+		WP_APP_PASSWORD: c.password,
+		MCP_PROTOCOL_VERSION: '2024-11-05',
+	};
+}
+
+function jsonConfig( variant, c, name, b64 ) {
+	const servers = {};
+	if ( 'npx' === variant ) {
+		servers[ name ] = {
+			type: 'stdio',
+			command: 'npx',
+			args: [ '-y', PROXY ],
+			env: proxyEnv( c ),
+		};
+	} else if ( 'http' === variant ) {
+		servers[ name ] = {
+			type: 'http',
+			url: c.endpoint,
+			headers: { Authorization: 'Basic ' + b64 },
+		};
+	} else {
+		servers[ name ] = {
+			command: 'npx',
+			args: [
+				'-y',
+				'mcp-remote',
+				c.endpoint,
+				'--header',
+				'Authorization: Basic ' + b64,
+			],
+		};
+	}
+	return JSON.stringify( { mcpServers: servers }, null, 4 );
+}
+
+function openclaw( variant, c, name, b64 ) {
+	const server =
+		'npx' === variant
+			? { command: 'npx', args: [ '-y', PROXY ], env: proxyEnv( c ) }
+			: {
+					url: c.endpoint,
+					transport: 'streamable-http',
+					headers: { Authorization: 'Basic ' + b64 },
+				};
+	return (
+		'"mcp": ' + JSON.stringify( { servers: { [ name ]: server } }, null, 4 )
+	);
+}
+
+function hermes( variant, c, name, b64 ) {
+	if ( 'npx' === variant ) {
+		return (
+			'mcp_servers:\n  ' +
+			name +
+			':\n    command: "npx"\n    args: ["-y", "' +
+			PROXY +
+			'"]\n    env:\n' +
+			'      WP_URL: "' +
+			c.siteUrl +
+			'"\n      WP_USERNAME: "' +
+			c.username +
+			'"\n      WP_APP_PASSWORD: "' +
+			c.password +
+			'"\n      MCP_PROTOCOL_VERSION: "2024-11-05"'
+		);
+	}
+	return (
+		'mcp_servers:\n  ' +
+		name +
+		':\n    url: "' +
+		c.endpoint +
+		'"\n    headers:\n      Authorization: "Basic ' +
+		b64 +
+		'"'
+	);
+}
+
+function toml( c, name, b64 ) {
+	return (
+		'[mcp_servers.' +
+		name +
+		']\nurl = "' +
+		c.endpoint +
+		'"\nhttp_headers = { "Authorization" = "Basic ' +
+		b64 +
+		'" }'
+	);
+}
+
+function tomlStdio( c, name ) {
+	return (
+		'[mcp_servers.' +
+		name +
+		']\ncommand = "npx"\nargs = ["-y", "' +
+		PROXY +
+		'"]\n\n[mcp_servers.' +
+		name +
+		'.env]\n' +
+		'WP_URL = "' +
+		c.siteUrl +
+		'"\nWP_USERNAME = "' +
+		c.username +
+		'"\nWP_APP_PASSWORD = "' +
+		c.password +
+		'"\nMCP_PROTOCOL_VERSION = "2024-11-05"'
+	);
+}
+
+const LABELS = () => ( {
+	npx: __( 'Manual config: Node proxy (npx)', 'emcp-lite' ),
+	http: __( 'Manual config: direct HTTP', 'emcp-lite' ),
+	remote: __( 'Manual config: npx mcp-remote', 'emcp-lite' ),
+	toml: __( 'Manual config: direct HTTP (config.toml)', 'emcp-lite' ),
+	'toml-stdio': __(
+		'Manual config: Node proxy, npx (config.toml)',
+		'emcp-lite'
+	),
+	'openclaw-http': __(
+		'Manual config: direct HTTP (openclaw.json)',
+		'emcp-lite'
+	),
+	'openclaw-npx': __(
+		'Manual config: Node proxy, npx (openclaw.json)',
+		'emcp-lite'
+	),
+	'hermes-http': __(
+		'Manual config: direct HTTP (config.yaml)',
+		'emcp-lite'
+	),
+	'hermes-npx': __(
+		'Manual config: Node proxy, npx (config.yaml)',
+		'emcp-lite'
+	),
+} );
+
+export function appSteps( client, c ) {
+	const name = serverName( c.siteUrl, c.endpoint );
+	const b64 = basic( c.username, c.password );
+	const m = client.methods || {};
+	const labels = LABELS();
+	const out = [];
+	if ( client.guide ) {
+		out.push( {
+			kind: 'guide',
+			title: client.guideTitle || __( 'Setup guide', 'emcp-lite' ),
+			text: client.guide,
+		} );
+	}
+	if ( m.bundle ) {
+		out.push( {
+			kind: 'bundle',
+			title: __( 'One-click bundle (.mcpb)', 'emcp-lite' ),
+		} );
+	}
+	if ( m.cli ) {
+		out.push( {
+			kind: 'code',
+			title: __( 'Terminal command', 'emcp-lite' ),
+			text: fill( m.cli, { name, endpoint: c.endpoint, b64 } ),
+		} );
+	}
+	if ( m.ai_prompt ) {
+		out.push( {
+			kind: 'code',
+			title: __(
+				'Ask your AI to set it up (paste into chat)',
+				'emcp-lite'
+			),
+			text:
+				'Add an MCP server named "' +
+				name +
+				'" at ' +
+				c.endpoint +
+				' using the HTTP transport with header  Authorization: Basic ' +
+				b64,
+		} );
+	}
+	( m.json || [] ).forEach( ( variant ) => {
+		let text;
+		if ( 'toml' === variant ) {
+			text = toml( c, name, b64 );
+		} else if ( 'toml-stdio' === variant ) {
+			text = tomlStdio( c, name );
+		} else if ( variant.startsWith( 'openclaw-' ) ) {
+			text = openclaw( variant.slice( 9 ), c, name, b64 );
+		} else if ( variant.startsWith( 'hermes-' ) ) {
+			text = hermes( variant.slice( 7 ), c, name, b64 );
+		} else {
+			text = jsonConfig( variant, c, name, b64 );
+		}
+		out.push( {
+			kind: 'code',
+			title: labels[ variant ] || labels.remote,
+			text,
+		} );
+	} );
+	return out;
+}
+
+/**
+ * Split a command line, keeping "double quoted" parts whole.
+ *
+ * @param {string} line Command line.
+ * @return {string[]} Parts without their quotes.
+ */
+function splitCommand( line ) {
+	return ( String( line ).match( /"[^"]*"|\S+/g ) || [] ).map( ( p ) =>
+		p.replace( /^"(.*)"$/, '$1' )
+	);
+}
+
+/**
+ * Double-quote a shell argument that contains spaces or quotes.
+ *
+ * @param {string} arg Argument.
+ * @return {string} Safe argument.
+ */
+function shellArg( arg ) {
+	return /[\s"]/.test( arg ) ? '"' + arg.replace( /"/g, '\\"' ) + '"' : arg;
+}
+
+export function cliSteps( client, cli ) {
+	const args = [
+		'mcp-adapter',
+		'serve',
+		'--server=emcp-tools-server',
+		'--user=' + cli.user,
+		'--path=' + cli.path,
+	];
+	const note = {
+		kind: 'text',
+		title: __( 'About the setup token', 'emcp-lite' ),
+		text: __(
+			'EMCP_SETUP lets this screen recognise the first call. It stops working once the setup finishes; leaving it in the config is harmless.',
+			'emcp-lite'
+		),
+	};
+	if ( 'claude-code' === client.id ) {
+		return [
+			{
+				kind: 'code',
+				title: __( 'Run this in your terminal', 'emcp-lite' ),
+				text:
+					'claude mcp add ' +
+					cli.name +
+					' --env EMCP_SETUP=' +
+					cli.token +
+					' -- ' +
+					[ ...splitCommand( cli.command ), ...args ]
+						.map( shellArg )
+						.join( ' ' ),
+			},
+			note,
+		];
+	}
+	const parts = splitCommand( cli.command );
+	const config = {
+		mcpServers: {
+			[ cli.name ]: {
+				type: 'stdio',
+				command: parts[ 0 ],
+				args: [ ...parts.slice( 1 ), ...args ],
+				env: { EMCP_SETUP: cli.token },
+			},
+		},
+	};
+	return [
+		{
+			kind: 'text',
+			title: __( 'Add this server to your config', 'emcp-lite' ),
+			text: __(
+				"Merge it into the client's MCP config file, then restart the client.",
+				'emcp-lite'
+			),
+		},
+		{
+			kind: 'code',
+			title: __( 'WP-CLI (stdio)', 'emcp-lite' ),
+			text: JSON.stringify( config, null, 4 ),
+		},
+		note,
+	];
+}
