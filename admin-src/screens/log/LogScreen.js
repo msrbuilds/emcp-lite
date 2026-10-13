@@ -143,18 +143,13 @@ export function LogScreen( { data } ) {
 		try {
 			const qs = filterQuery( latest.current );
 			const res = await request(
-				qs ? `${ state.exportPath }?${ qs }` : state.exportPath,
-				{ parse: false }
+				qs ? `${ state.exportPath }?${ qs }` : state.exportPath
 			);
-			const blob = await res.blob();
-			const disposition =
-				( res.headers && res.headers.get( 'Content-Disposition' ) ) ||
-				'';
-			const named = /filename="([^"]+)"/.exec( disposition );
+			const blob = new Blob( [ res.csv ], { type: 'text/csv;charset=utf-8' } );
 			const url = window.URL.createObjectURL( blob );
 			const a = document.createElement( 'a' );
 			a.href = url;
-			a.download = named ? named[ 1 ] : 'emcp-mcp-log.csv';
+			a.download = res.filename || 'emcp-mcp-log.csv';
 			document.body.appendChild( a );
 			a.click();
 			a.remove();

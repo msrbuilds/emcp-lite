@@ -201,7 +201,7 @@ final class EMCP_Tools_MCP_Log_Recorder {
 	 * address per window, so a scanner cannot evict the real rows.
 	 */
 	private static function claim_anonymous_slot(): bool {
-		$ip  = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( (string) $_SERVER['REMOTE_ADDR'] ) ) : '';
+		$ip  = isset( $_SERVER['REMOTE_ADDR'] ) && is_string( $_SERVER['REMOTE_ADDR'] ) ? ( filter_var( wp_unslash( $_SERVER['REMOTE_ADDR'] ), FILTER_VALIDATE_IP ) ?: '' ) : '';
 		$key = 'emcp_tools_mcp_anon_' . substr( md5( $ip ), 0, 12 );
 		if ( false !== get_transient( $key ) ) {
 			return false;

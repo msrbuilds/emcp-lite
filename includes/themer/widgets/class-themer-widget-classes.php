@@ -352,7 +352,7 @@ abstract class EMCP_Tools_Themer_Widget_Base extends \Elementor\Widget_Base {
 	protected function render(): void {
 		$settings = $this->get_settings_for_display();
 		$args     = EMCP_Tools_Themer_Dynamic::args_from( $this->emcp_key(), is_array( $settings ) ? $settings : array() );
-		echo EMCP_Tools_Themer_Dynamic::render( $this->emcp_key(), $args ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo wp_kses( EMCP_Tools_Themer_Dynamic::render( $this->emcp_key(), $args ), EMCP_Lite_Edition::allowed_html() );
 	}
 }
 

@@ -194,7 +194,7 @@ class EMCP_Tools_Themer_Render_Controller {
 			add_action(
 				$map[ $adapter ]['header'],
 				static function () use ( $slots ) {
-					echo EMCP_Tools_Themer_Content_Renderer::render( (int) $slots['header'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					echo wp_kses( EMCP_Tools_Themer_Content_Renderer::render( (int) $slots['header'] ), EMCP_Lite_Edition::allowed_html() );
 				},
 				10
 			);
@@ -204,7 +204,7 @@ class EMCP_Tools_Themer_Render_Controller {
 			add_action(
 				$map[ $adapter ]['footer'],
 				static function () use ( $slots ) {
-					echo EMCP_Tools_Themer_Content_Renderer::render( (int) $slots['footer'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					echo wp_kses( EMCP_Tools_Themer_Content_Renderer::render( (int) $slots['footer'] ), EMCP_Lite_Edition::allowed_html() );
 				},
 				10
 			);
@@ -266,7 +266,7 @@ class EMCP_Tools_Themer_Render_Controller {
 		}
 
 		if ( empty( self::$hello_rendered[ $location ] ) ) {
-			echo EMCP_Tools_Themer_Content_Renderer::render( (int) $template_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo wp_kses( EMCP_Tools_Themer_Content_Renderer::render( (int) $template_id ), EMCP_Lite_Edition::allowed_html() );
 			self::$hello_rendered[ $location ] = true;
 		}
 
@@ -317,7 +317,7 @@ if ( ! function_exists( 'emcp_themer_location' ) ) {
 	function emcp_themer_location( string $slot ): void {
 		$slots = EMCP_Tools_Themer_Render_Controller::slots();
 		if ( ! empty( $slots[ $slot ] ) ) {
-			echo EMCP_Tools_Themer_Content_Renderer::render( (int) $slots[ $slot ] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo wp_kses( EMCP_Tools_Themer_Content_Renderer::render( (int) $slots[ $slot ] ), EMCP_Lite_Edition::allowed_html() );
 		}
 	}
 }

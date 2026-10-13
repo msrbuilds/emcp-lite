@@ -126,7 +126,7 @@ final class EMCP_Tools_Admin_REST_Connection extends EMCP_Tools_Admin_REST_Contr
 	}
 
 	public function app_passwords( $request ) {
-		$user_id = (int) $request->get_param( 'user_id' );
+		$user_id = self::int_param( $request, 'user_id' );
 		$user_id = $user_id ? $user_id : get_current_user_id();
 		if ( ! current_user_can( 'edit_user', $user_id ) ) {
 			return new WP_Error( 'rest_forbidden', __( 'You cannot manage application passwords for this user.', 'emcp-lite' ), array( 'status' => 403 ) );
@@ -135,12 +135,12 @@ final class EMCP_Tools_Admin_REST_Connection extends EMCP_Tools_Admin_REST_Contr
 	}
 
 	public function create_app_password( $request ) {
-		$result = $this->admin()->create_app_password_for( (int) $request->get_param( 'user_id' ) );
+		$result = $this->admin()->create_app_password_for( self::int_param( $request, 'user_id' ) );
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		}
 		$record = EMCP_Tools_Connection_Setup::get( get_current_user_id() );
-		$setup  = (string) $request->get_param( 'setup' );
+		$setup  = self::string_param( $request, 'setup' );
 		if ( '' !== $setup && null !== $record && hash_equals( (string) $record['setup_id'], $setup ) && 'app' === $record['method'] && '' !== $result['uuid'] ) {
 			EMCP_Tools_Connection_Setup::set_expect( get_current_user_id(), 'app:' . $result['uuid'] );
 		}
@@ -148,7 +148,7 @@ final class EMCP_Tools_Admin_REST_Connection extends EMCP_Tools_Admin_REST_Contr
 	}
 
 	public function test( $request ) {
-		$result = $this->admin()->run_mcp_handshake( sanitize_text_field( (string) $request->get_param( 'username' ) ), trim( (string) $request->get_param( 'password' ) ) );
+		$result = $this->admin()->run_mcp_handshake( sanitize_text_field( self::string_param( $request, 'username' ) ), trim( self::string_param( $request, 'password' ) ) );
 		if ( is_wp_error( $result ) ) {
 			return new WP_REST_Response( array( 'ok' => false, 'message' => $result->get_error_message(), 'stage' => $result->get_error_code() ) );
 		}
@@ -162,10 +162,10 @@ final class EMCP_Tools_Admin_REST_Connection extends EMCP_Tools_Admin_REST_Contr
 
 	public function open_setup( $request ) {
 		$user_id = get_current_user_id();
-		$client  = sanitize_key( (string) $request->get_param( 'client' ) );
-		$method  = sanitize_key( (string) $request->get_param( 'method' ) );
-		$expect  = sanitize_text_field( (string) $request->get_param( 'expect' ) );
-		$valid   = $this->data()->validate_setup( $user_id, $client, $method, $expect, (int) $request->get_param( 'user_id' ) );
+		$client  = sanitize_key( self::string_param( $request, 'client' ) );
+		$method  = sanitize_key( self::string_param( $request, 'method' ) );
+		$expect  = sanitize_text_field( self::string_param( $request, 'expect' ) );
+		$valid   = $this->data()->validate_setup( $user_id, $client, $method, $expect, self::int_param( $request, 'user_id' ) );
 		if ( is_wp_error( $valid ) ) {
 			return $valid;
 		}
@@ -183,7 +183,7 @@ final class EMCP_Tools_Admin_REST_Connection extends EMCP_Tools_Admin_REST_Contr
 	public function first_call( $request ) {
 		$user_id = get_current_user_id();
 		$record  = EMCP_Tools_Connection_Setup::renew( $user_id );
-		if ( null === $record || ! hash_equals( (string) $record['setup_id'], (string) $request->get_param( 'setup' ) ) ) {
+		if ( null === $record || ! hash_equals( (string) $record['setup_id'], self::string_param( $request, 'setup' ) ) ) {
 			return new WP_Error( 'emcp_setup_gone', __( 'This setup has expired. Start again from step 1.', 'emcp-lite' ), array( 'status' => 410 ) );
 		}
 		$result = EMCP_Tools_Connection_First_Call::check( $record, EMCP_Tools_MCP_Request_Log::all() );
@@ -194,7 +194,7 @@ final class EMCP_Tools_Admin_REST_Connection extends EMCP_Tools_Admin_REST_Contr
 	}
 
 	public function revoke_app( $request ) {
-		$id = (string) $request->get_param( 'id' );
+		$id = self::string_param( $request, 'id' );
 		$is_gateway = class_exists( 'EMCP_Tools_Gateway_Credential' ) && EMCP_Tools_Gateway_Credential::is_gateway_client( $id );
 		$ok         = $is_gateway
 			? EMCP_Tools_Gateway_Credential::revoke_registered_client( $id, false )
@@ -206,7 +206,7 @@ final class EMCP_Tools_Admin_REST_Connection extends EMCP_Tools_Admin_REST_Contr
 	}
 
 	public function delete_app( $request ) {
-		$id = (string) $request->get_param( 'id' );
+		$id = self::string_param( $request, 'id' );
 		$is_gateway = class_exists( 'EMCP_Tools_Gateway_Credential' ) && EMCP_Tools_Gateway_Credential::is_gateway_client( $id );
 		$ok         = $is_gateway
 			? EMCP_Tools_Gateway_Credential::revoke_registered_client( $id, true )

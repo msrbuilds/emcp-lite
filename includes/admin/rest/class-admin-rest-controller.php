@@ -99,7 +99,39 @@ abstract class EMCP_Tools_Admin_REST_Controller {
 	 */
 	protected static function route_param( $request, string $key ): string {
 		$url = method_exists( $request, 'get_url_params' ) ? (array) $request->get_url_params() : array();
-		return (string) ( $url[ $key ] ?? $request->get_param( $key ) ?? '' );
+		$value = $url[ $key ] ?? $request->get_param( $key );
+		return is_scalar( $value ) ? sanitize_text_field( (string) $value ) : '';
+	}
+
+	/** REST values are already unslashed. Never coerce arrays into IDs or strings. */
+	protected static function string_param( $request, string $key ): string {
+		$value = $request->get_param( $key );
+		return is_string( $value ) ? $value : '';
+	}
+
+	protected static function int_param( $request, string $key ): int {
+		$value = $request->get_param( $key );
+		return is_scalar( $value ) && false !== filter_var( $value, FILTER_VALIDATE_INT ) ? (int) $value : 0;
+	}
+
+	/** Shared input types for the dashboard's REST contract. Domain checks remain in each controller. */
+	private static function parameter_schemas(): array {
+		$args = array();
+		foreach ( array( 'search', 'category', 'slug', 'id', 'setup', 'username', 'password', 'client', 'method', 'expect', 'profile', 'instructions', 'public_base_url', 'status', 'kind', 'range', 'session', 'builder', 'source', 'target' ) as $key ) {
+			$args[ $key ] = array( 'type' => 'string' );
+		}
+		foreach ( array( 'page', 'batch', 'user_id', 'before', 'limit', 'from', 'to', 'days', 'targetPostId', 'code' ) as $key ) {
+			$args[ $key ] = array( 'type' => 'integer' );
+		}
+		foreach ( array( 'confirm', 'force', 'backup', 'full_clobber', 'collapsed', 'enabled', 'dispatcher_mode', 'server_enabled', 'oauth_enabled', 'strict_schemas', 'ignoreQuery' ) as $key ) {
+			$args[ $key ] = array( 'type' => 'boolean' );
+		}
+		foreach ( array( 'enable', 'disable', 'activate', 'deactivate', 'packs_enable', 'packs_disable', 'ids' ) as $key ) {
+			$args[ $key ] = array( 'type' => 'array', 'items' => array( 'type' => 'string' ) );
+		}
+		$args['values'] = array( 'type' => 'object' );
+		$args['sections'] = array( 'type' => 'object', 'additionalProperties' => array( 'type' => 'boolean' ) );
+		return $args;
 	}
 
 	protected function route( string $path, array $args ): void {
@@ -109,10 +141,12 @@ abstract class EMCP_Tools_Admin_REST_Controller {
 		if ( isset( $args[0] ) && is_array( $args[0] ) ) {
 			foreach ( $args as $i => $endpoint ) {
 				if ( is_int( $i ) && is_array( $endpoint ) ) {
+					$endpoint['args'] = array_merge( self::parameter_schemas(), $endpoint['args'] ?? array() );
 					$args[ $i ] = array_merge( $check, $endpoint );
 				}
 			}
 		} else {
+			$args['args'] = array_merge( self::parameter_schemas(), $args['args'] ?? array() );
 			$args = array_merge( $check, $args );
 		}
 		register_rest_route( self::REST_NAMESPACE, '/admin/' . ltrim( $path, '/' ), $args );

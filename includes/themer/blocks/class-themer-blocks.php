@@ -358,20 +358,7 @@ class EMCP_Tools_Themer_Blocks {
 	 */
 	/** Escape rendered blocks while preserving their form controls and SVG icons. */
 	public static function escape_markup( string $html ): string {
-		$allowed = wp_kses_allowed_html( 'post' );
-		$common = array( 'id' => true, 'class' => true, 'role' => true, 'aria-*' => true, 'data-*' => true );
-		$allowed['form'] = $common + array( 'action' => true, 'method' => true );
-		$allowed['input'] = $common + array( 'type' => true, 'name' => true, 'value' => true, 'placeholder' => true, 'required' => true, 'checked' => true, 'disabled' => true, 'autocomplete' => true );
-		$allowed['textarea'] = $common + array( 'name' => true, 'rows' => true, 'cols' => true, 'required' => true, 'placeholder' => true );
-		$allowed['select'] = $common + array( 'name' => true, 'required' => true, 'multiple' => true, 'disabled' => true );
-		$allowed['option'] = array( 'value' => true, 'selected' => true, 'disabled' => true );
-		$allowed['button'] = $common + array( 'type' => true, 'name' => true, 'value' => true, 'disabled' => true );
-		$allowed['svg'] = $common + array( 'xmlns' => true, 'viewbox' => true, 'width' => true, 'height' => true, 'fill' => true, 'stroke' => true, 'stroke-width' => true, 'stroke-linecap' => true, 'stroke-linejoin' => true, 'focusable' => true );
-		$allowed['path'] = array( 'd' => true, 'fill' => true, 'fill-rule' => true, 'clip-rule' => true, 'stroke' => true );
-		foreach ( array( 'circle' => array( 'cx', 'cy', 'r' ), 'rect' => array( 'x', 'y', 'width', 'height', 'rx', 'ry' ), 'line' => array( 'x1', 'x2', 'y1', 'y2' ), 'polyline' => array( 'points' ), 'polygon' => array( 'points' ), 'g' => array( 'transform' ) ) as $tag => $attributes ) {
-			$allowed[ $tag ] = array_fill_keys( array_merge( $attributes, array( 'fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin' ) ), true );
-		}
-		return wp_kses( $html, $allowed );
+		return wp_kses( $html, EMCP_Lite_Edition::allowed_html() );
 	}
 
 	private static function editor_payload(): array {

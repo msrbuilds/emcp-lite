@@ -163,7 +163,7 @@ class EMCP_Tools_Block_Repair {
 	 * @return int
 	 */
 	private static function current_editor_post_id(): int {
-		if ( isset( $_GET['post'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['post'] ) && is_string( $_GET['post'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return absint( $_GET['post'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		}
 		$post = get_post();

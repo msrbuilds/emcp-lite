@@ -110,10 +110,14 @@ class EMCP_Tools_Site_Context {
 	public static function rest_endpoint( string $path ): string {
 		$override = get_option( self::OPTION_BASE_URL, '' );
 		$override = is_string( $override ) ? trim( $override ) : '';
+		$url = (string) rest_url( $path );
 		if ( '' !== $override ) {
-			return rtrim( $override, '/' ) . '/wp-json/' . ltrim( $path, '/' );
+			$base = self::detected_base_url();
+			if ( 0 === strpos( $url, $base . '/' ) || 0 === strpos( $url, $base . '?' ) ) {
+				return rtrim( $override, '/' ) . substr( $url, strlen( $base ) );
+			}
 		}
-		return function_exists( 'rest_url' ) ? (string) rest_url( $path ) : ( rtrim( (string) home_url(), '/' ) . '/wp-json/' . ltrim( $path, '/' ) );
+		return $url;
 	}
 
 	/**
@@ -130,7 +134,7 @@ class EMCP_Tools_Site_Context {
 			return rtrim( (string) home_url(), '/' );
 		}
 		// Pretty permalinks: https://host/subdir/wp-json/ → strip the REST prefix.
-		$stripped = preg_replace( '#/wp-json/?$#', '', $rest );
+		$stripped = preg_replace( '#/' . preg_quote( rest_get_url_prefix(), '#' ) . '/?$#', '', $rest );
 		if ( is_string( $stripped ) && $stripped !== $rest ) {
 			return rtrim( $stripped, '/' );
 		}

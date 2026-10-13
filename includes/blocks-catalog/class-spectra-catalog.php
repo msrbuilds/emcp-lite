@@ -4,8 +4,7 @@
  *
  * Both halves are sourced from Spectra itself, so nothing is guessed:
  *  - the block LIST comes from `UAGB_Block_Module::get_blocks_info()`;
- *  - a block's ATTRIBUTES come from Spectra's own
- *    `includes/blocks/<slug>/attributes.php` (real names + defaults).
+ *  - attribute names and defaults come from its verified local attributes files.
  * A small STRUCTURE map records which blocks need an innerBlocks template
  * (e.g. buttons -> buttons-child) and which are dynamic (server-rendered), which
  * cannot be read from attributes; that is structural, not attribute-guessing.
@@ -154,8 +153,7 @@ class EMCP_Tools_Spectra_Catalog {
 	}
 
 	/**
-	 * A block's REAL attributes (name => default) from Spectra's own
-	 * attributes.php. Tests seed $GLOBALS['_uagb_block_attributes'][$name].
+	 * A block's defaults from the active plugin's confined local attributes file. Tests seed $GLOBALS['_uagb_block_attributes'][$name].
 	 *
 	 * @param string $name Full block name.
 	 * @return array<string,mixed>
@@ -164,12 +162,20 @@ class EMCP_Tools_Spectra_Catalog {
 		if ( isset( $GLOBALS['_uagb_block_attributes'][ $name ] ) ) {
 			return (array) $GLOBALS['_uagb_block_attributes'][ $name ];
 		}
-		$slug = ( 0 === strpos( $name, 'uagb/' ) ) ? substr( $name, 5 ) : $name;
-		$dir  = defined( 'UAGB_DIR' ) ? UAGB_DIR : ( ( defined( 'WP_PLUGIN_DIR' ) ? WP_PLUGIN_DIR : '' ) . '/' . self::PLUGIN_SLUG . '/' );
-		$file = $dir . 'includes/blocks/' . $slug . '/attributes.php';
-		if ( self::is_active() && is_readable( $file ) ) {
-			$attrs = require $file; // returns the attributes array.
-			return is_array( $attrs ) ? $attrs : array();
+		if ( ! self::is_active() || ! defined( 'UAGB_FILE' ) || ! preg_match( '#\Auagb/[a-z0-9-]+\z#', $name ) ) {
+			return array();
+		}
+		// Spectra registers most blocks in JavaScript, so the PHP block registry
+		// cannot supply these defaults. Resolve only its already installed code.
+		$root = realpath( plugin_dir_path( UAGB_FILE ) . 'includes/blocks' );
+		if ( false === $root ) {
+			return array();
+		}
+		$file = realpath( $root . DIRECTORY_SEPARATOR . substr( $name, 5 ) . DIRECTORY_SEPARATOR . 'attributes.php' );
+		if ( false !== $file && 0 === strpos( $file, $root . DIRECTORY_SEPARATOR ) && is_file( $file ) && is_readable( $file ) ) {
+			// A canonical local path under the active plugin, never a URL or stream wrapper.
+			$defaults = require $file;
+			return is_array( $defaults ) ? $defaults : array();
 		}
 		return array();
 	}

@@ -369,7 +369,7 @@ trait EMCP_Tools_Admin_Connection_Trait {
 	 */
 	public function handle_download_mcpb(): void {
 		if (
-			! isset( $_POST['_emcp_nonce'] )
+			! isset( $_POST['_emcp_nonce'] ) || ! is_string( $_POST['_emcp_nonce'] )
 			|| ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_emcp_nonce'] ) ), self::NONCE_DOWNLOAD_MCPB )
 		) {
 			wp_die( esc_html__( 'Invalid request.', 'emcp-lite' ), '', array( 'response' => 403 ) );
@@ -378,7 +378,7 @@ trait EMCP_Tools_Admin_Connection_Trait {
 			wp_die( esc_html__( 'You do not have permission to download this.', 'emcp-lite' ), '', array( 'response' => 403 ) );
 		}
 
-		$user_id = isset( $_POST['user_id'] ) ? absint( wp_unslash( $_POST['user_id'] ) ) : 0;
+		$user_id = isset( $_POST['user_id'] ) && is_string( $_POST['user_id'] ) ? absint( wp_unslash( $_POST['user_id'] ) ) : 0;
 		$user    = $user_id ? get_userdata( $user_id ) : false;
 		if ( ! $user || ! current_user_can( 'edit_user', $user_id ) || ! user_can( $user_id, 'manage_options' ) ) {
 			wp_die( esc_html__( 'Pick a valid administrator account.', 'emcp-lite' ), '', array( 'response' => 400 ) );
@@ -386,7 +386,7 @@ trait EMCP_Tools_Admin_Connection_Trait {
 
 		// The app password was generated on the page (Step 1) and POSTed back —
 		// same-origin, nonce-gated, the admin's own credential.
-		$app_password = isset( $_POST['app_password'] ) ? sanitize_text_field( wp_unslash( $_POST['app_password'] ) ) : '';
+		$app_password = isset( $_POST['app_password'] ) && is_string( $_POST['app_password'] ) ? sanitize_text_field( wp_unslash( $_POST['app_password'] ) ) : '';
 		if ( '' === $app_password ) {
 			wp_die( esc_html__( 'Generate an Application Password first, then download the bundle.', 'emcp-lite' ), '', array( 'response' => 400 ) );
 		}

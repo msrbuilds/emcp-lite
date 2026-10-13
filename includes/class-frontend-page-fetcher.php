@@ -346,7 +346,7 @@ class EMCP_Tools_Frontend_Page_Fetcher {
 			$segments[] = $segment;
 		}
 		$path = '/' . implode( '/', $segments );
-		if ( preg_match( '#/(?:wp-admin)(?:/|$)#', $path ) || preg_match( '#/wp-login\.php(?:/|$)#', $path ) || preg_match( '#/wp-json/mcp(?:/|$)#', $path ) ) {
+		if ( preg_match( '#/(?:wp-admin)(?:/|$)#', $path ) || preg_match( '#/wp-login\.php(?:/|$)#', $path ) || preg_match( '#/' . preg_quote( rest_get_url_prefix(), '#' ) . '/mcp(?:/|$)#', $path ) ) {
 			return true;
 		}
 		$query = array();

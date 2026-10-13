@@ -44,9 +44,9 @@ final class EMCP_Tools_Admin_REST_Brand_Kits extends EMCP_Tools_Admin_REST_Contr
 
 	private static function query( $request ): array {
 		return array(
-			'search'   => sanitize_text_field( (string) $request->get_param( 'search' ) ),
-			'category' => sanitize_key( (string) $request->get_param( 'category' ) ),
-			'page'     => max( 1, (int) $request->get_param( 'page' ) ),
+			'search'   => sanitize_text_field( self::string_param( $request, 'search' ) ),
+			'category' => sanitize_key( self::string_param( $request, 'category' ) ),
+			'page'     => max( 1, self::int_param( $request, 'page' ) ),
 		);
 	}
 

@@ -332,7 +332,6 @@ class EMCP_Tools_OAuth_Metadata {
 			header( 'Access-Control-Allow-Origin: *' );
 			header( 'Cache-Control: public, max-age=3600' );
 		}
-		echo wp_json_encode( $doc );
-		exit;
+		wp_send_json( $doc, 200, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT );
 	}
 }

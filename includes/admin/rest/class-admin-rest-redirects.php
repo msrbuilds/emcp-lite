@@ -63,7 +63,12 @@ final class EMCP_Tools_Admin_REST_Redirects extends EMCP_Tools_Admin_REST_Contro
 				'tabs'   => array( 'redirects' ),
 				'boot'   => static function (): array {
 					// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only view state, sanitized by payload().
-					$get = wp_unslash( $_GET );
+					$get = array();
+					foreach ( array( 'search', 'paged' ) as $key ) {
+						if ( isset( $_GET[ $key ] ) && is_string( $_GET[ $key ] ) ) {
+							$get[ $key ] = sanitize_text_field( wp_unslash( $_GET[ $key ] ) );
+						}
+					}
 					$get = is_array( $get ) ? $get : array();
 					return ( new EMCP_Tools_Admin_Redirects_Data() )->payload(
 						array(
@@ -85,8 +90,8 @@ final class EMCP_Tools_Admin_REST_Redirects extends EMCP_Tools_Admin_REST_Contro
 	private static function list_for( $request ): array {
 		return ( new EMCP_Tools_Admin_Redirects_Data() )->payload(
 			array(
-				'search' => (string) $request->get_param( 'search' ),
-				'page'   => (int) $request->get_param( 'page' ),
+				'search' => ( is_string( $request->get_param( 'search' ) ) ? sanitize_text_field( $request->get_param( 'search' ) ) : '' ),
+				'page'   => ( is_scalar( $request->get_param( 'page' ) ) ? absint( $request->get_param( 'page' ) ) : 1 ),
 			)
 		);
 	}
@@ -283,7 +288,7 @@ final class EMCP_Tools_Admin_REST_Redirects extends EMCP_Tools_Admin_REST_Contro
 	 * @return WP_REST_Response
 	 */
 	public function targets( $request ) {
-		$search = sanitize_text_field( (string) $request->get_param( 'search' ) );
+		$search = sanitize_text_field( ( is_string( $request->get_param( 'search' ) ) ? sanitize_text_field( $request->get_param( 'search' ) ) : '' ) );
 		$posts  = get_posts(
 			array(
 				'post_type'        => array_values( get_post_types( array( 'public' => true ) ) ),

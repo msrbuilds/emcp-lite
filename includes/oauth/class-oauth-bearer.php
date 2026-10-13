@@ -46,6 +46,9 @@ class EMCP_Tools_OAuth_Bearer {
 	 * @return bool
 	 */
 	public static function permission_callback( $request ): bool {
+		if ( ! $request instanceof WP_REST_Request || '/mcp/emcp-tools-server' !== rtrim( $request->get_route(), '/' ) ) {
+			return false;
+		}
 		$token = self::bearer_token( $request );
 
 		if ( '' !== $token ) {
@@ -55,10 +58,10 @@ class EMCP_Tools_OAuth_Bearer {
 			// tidy on active sites within minutes, not waiting on a daily WP-Cron.
 			EMCP_Tools_OAuth_Store::gc_throttled();
 			$row = EMCP_Tools_OAuth_Store::find_token( $token, 'access' );
-			if ( null !== $row && EMCP_Tools_OAuth_Metadata::resource_matches( (string) ( $row['resource'] ?? EMCP_Tools_OAuth_Metadata::resource() ) ) ) {
+			if ( null !== $row && in_array( $row['scopes'] ?? '', array( 'mcp', 'gateway' ), true ) && EMCP_Tools_OAuth_Metadata::resource_matches( (string) ( $row['resource'] ?? EMCP_Tools_OAuth_Metadata::resource() ) ) ) {
 				wp_set_current_user( (int) $row['user_id'] );
 				self::$authenticated_client_id = (string) ( $row['client_id'] ?? '' );
-				return true;
+				return current_user_can( 'read' );
 			}
 			return false; // Bearer present but invalid/expired → 401.
 		}
@@ -84,12 +87,14 @@ class EMCP_Tools_OAuth_Bearer {
 			$header = (string) $request->get_header( 'authorization' );
 		}
 		if ( '' === $header && isset( $_SERVER['HTTP_AUTHORIZATION'] ) && is_string( $_SERVER['HTTP_AUTHORIZATION'] ) ) {
-			return self::parse_bearer( wp_unslash( $_SERVER['HTTP_AUTHORIZATION'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Strict credential grammar below rejects malformed bytes without altering credentials.
+			$validated = filter_var( wp_unslash( $_SERVER['HTTP_AUTHORIZATION'] ), FILTER_VALIDATE_REGEXP, array( 'options' => array( 'regexp' => '/\A[ \t]*Bearer[ \t]+[A-Za-z0-9\-._~+\/]+=*[ \t]*\z/i' ) ) );
+			return false === $validated ? '' : self::parse_bearer( sanitize_text_field( $validated ) );
 		}
 		if ( '' === $header && isset( $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ) && is_string( $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ) ) {
-			return self::parse_bearer( wp_unslash( $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Strict credential grammar below rejects malformed bytes without altering credentials.
+			$validated = filter_var( wp_unslash( $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ), FILTER_VALIDATE_REGEXP, array( 'options' => array( 'regexp' => '/\A[ \t]*Bearer[ \t]+[A-Za-z0-9\-._~+\/]+=*[ \t]*\z/i' ) ) );
+			return false === $validated ? '' : self::parse_bearer( sanitize_text_field( $validated ) );
 		}
-		return self::parse_bearer( $header );
+		return sanitize_text_field( self::parse_bearer( $header ) );
 	}
 
 	/**

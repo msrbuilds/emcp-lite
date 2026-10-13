@@ -47,7 +47,7 @@ class EMCP_Tools_Themer_Loop_Assets {
 		}
 		wp_register_style( $handle, false, array(), EMCP_TOOLS_VERSION );
 		wp_enqueue_style( $handle );
-		wp_add_inline_style( $handle, $css );
+		wp_add_inline_style( $handle, EMCP_Lite_Edition::sanitize_stylesheet( $css ) );
 		if ( empty( self::$dynamic_handles ) ) {
 			add_action( 'wp_footer', array( __CLASS__, 'print_dynamic_styles' ), 20 );
 		}

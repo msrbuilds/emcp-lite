@@ -80,26 +80,58 @@ class EMCP_Tools_OAuth_Authorize {
 			self::error_page( __( 'OAuth sign-in is not enabled on this site.', 'emcp-lite' ) );
 		}
 
-		if ( 'POST' === strtoupper( sanitize_key( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? 'GET' ) ) ) ) {
+		if ( 'POST' === strtoupper( sanitize_key( wp_unslash( isset( $_SERVER['REQUEST_METHOD'] ) && is_string( $_SERVER['REQUEST_METHOD'] ) ? $_SERVER['REQUEST_METHOD'] : 'GET' ) ) ) ) {
 			self::handle_post();
 		} else {
 			self::handle_get();
 		}
 	}
 
+	/** Authorization request fields read from the query string or consent form. */
+	const PARAM_KEYS = array( 'response_type', 'client_id', 'redirect_uri', 'code_challenge', 'code_challenge_method', 'state', 'scope', 'resource', 'action', '_emcp_oauth_nonce' );
+
 	/**
-	 * Read request params from a superglobal (unslashed, string values only).
-	 * Values are validated / escaped downstream.
-	 *
-	 * @param array $src $_GET or $_POST.
-	 * @return array<string,string>
+	 * OAuth state and registered redirect URIs are opaque: they are compared
+	 * byte-for-byte or echoed back, so invalid values are rejected rather than
+	 * normalized into a different binding. Any valid UTF-8 without control bytes.
 	 */
-	private static function request_params( array $src ): array {
+	const OPAQUE_PATTERN = '/\A[^\x00-\x1f\x7f]{0,4096}\z/u';
+
+	/** Every other field is one or more space-separated URI-safe tokens. */
+	const TOKEN_PATTERN = '/\A(?=[ -~]{0,4096}\z)(?:[A-Za-z0-9._~:\/@!$&\'()*+,;=-]+(?: [A-Za-z0-9._~:\/@!$&\'()*+,;=-]+)*)?\z/';
+
+	/**
+	 * Read the named authorization fields, validating each one as it is read.
+	 * A present but malformed field becomes null so validate_params() rejects
+	 * it instead of silently applying a default. Unknown fields are ignored.
+	 *
+	 * @param string $method 'GET' or 'POST'.
+	 * @return array<string,string|null>
+	 */
+	private static function request_params( string $method ): array {
 		$out = array();
-		foreach ( $src as $k => $v ) {
-			if ( is_string( $v ) ) {
-				$out[ (string) $k ] = (string) wp_unslash( $v );
+		foreach ( self::PARAM_KEYS as $key ) {
+			$opaque = in_array( $key, array( 'state', 'redirect_uri', 'resource' ), true );
+			$rule   = array( 'options' => array( 'regexp' => $opaque ? self::OPAQUE_PATTERN : self::TOKEN_PATTERN ) );
+			// phpcs:disable WordPress.Security.NonceVerification -- Read-only; handle_post() verifies the nonce before any write.
+			if ( 'POST' === $method ) {
+				if ( ! isset( $_POST[ $key ] ) ) {
+					continue;
+				}
+				$value = is_string( $_POST[ $key ] ) ? filter_var( wp_unslash( $_POST[ $key ] ), FILTER_VALIDATE_REGEXP, $rule ) : false;
+			} else {
+				if ( ! isset( $_GET[ $key ] ) ) {
+					continue;
+				}
+				$value = is_string( $_GET[ $key ] ) ? filter_var( wp_unslash( $_GET[ $key ] ), FILTER_VALIDATE_REGEXP, $rule ) : false;
 			}
+			// phpcs:enable WordPress.Security.NonceVerification
+			if ( ! is_string( $value ) ) {
+				$out[ $key ] = null;
+				continue;
+			}
+			// Token fields contain nothing sanitize_text_field() would alter.
+			$out[ $key ] = $opaque ? $value : sanitize_text_field( $value );
 		}
 		return $out;
 	}
@@ -118,7 +150,7 @@ class EMCP_Tools_OAuth_Authorize {
 	// ---------------------------------------------------------------------
 
 	private static function handle_get(): void {
-		$params       = self::request_params( $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- public authorization endpoint; params validated below, no state mutation on GET.
+		$params       = self::request_params( 'GET' );
 		$client_id    = (string) ( $params['client_id'] ?? '' );
 		$redirect_uri = (string) ( $params['redirect_uri'] ?? '' );
 		$client       = self::lookup_client( $client_id );
@@ -154,7 +186,9 @@ class EMCP_Tools_OAuth_Authorize {
 			self::error_page( __( 'Only administrators can authorize an MCP connection on this site.', 'emcp-lite' ) );
 		}
 
-		echo self::render_consent( array_merge( $valid, array( 'client_name' => $client['client_name'] ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- render_consent escapes.
+		// KSES removes declarations, so the fixed doctype is printed on its own (standards mode).
+		echo "<!doctype html>\n";
+		echo wp_kses( self::render_consent( array_merge( $valid, array( 'client_name' => $client['client_name'] ) ) ), EMCP_Lite_Edition::allowed_html( 'document' ) );
 		exit;
 	}
 
@@ -167,8 +201,8 @@ class EMCP_Tools_OAuth_Authorize {
 			self::error_page( __( 'You are not allowed to authorize this connection.', 'emcp-lite' ) );
 		}
 
-		$p     = self::request_params( $_POST ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified immediately below.
-		$nonce = sanitize_text_field( $p['_emcp_oauth_nonce'] ?? '' );
+		$p     = self::request_params( 'POST' );
+		$nonce = (string) ( $p['_emcp_oauth_nonce'] ?? '' );
 		if ( ! wp_verify_nonce( $nonce, self::NONCE_ACTION ) ) {
 			self::error_page( __( 'Security check failed. Please start the connection again.', 'emcp-lite' ) );
 		}
@@ -194,16 +228,13 @@ class EMCP_Tools_OAuth_Authorize {
 			self::redirect_error( $redirect_uri, 'access_denied', $state );
 		}
 
-		$challenge = (string) ( $p['code_challenge'] ?? '' );
-		if ( '' === $challenge ) {
-			self::redirect_error( $redirect_uri, 'invalid_request', $state );
-		}
-		$resource = (string) ( $p['resource'] ?? '' );
-		if ( '' === $resource ) {
-			$resource = EMCP_Tools_OAuth_Metadata::resource();
-		}
-		if ( ! EMCP_Tools_OAuth_Metadata::resource_matches( $resource ) ) {
-			self::redirect_error( $redirect_uri, 'invalid_target', $state );
+		// The consent POST is untrusted even after a valid nonce. Revalidate
+		// the same PKCE, scope and resource contract used by the GET request.
+		$p['response_type'] = 'code';
+		$p['code_challenge_method'] = 'S256';
+		$valid = self::validate_params( $p, $client );
+		if ( is_wp_error( $valid ) ) {
+			self::redirect_error( $redirect_uri, $valid->get_error_code(), $state );
 		}
 
 		// An app approved while this user's Connection setup is open belongs to
@@ -217,8 +248,8 @@ class EMCP_Tools_OAuth_Authorize {
 				'client_id'      => $client['client_id'],
 				'user_id'        => get_current_user_id(),
 				'redirect_uri'   => $redirect_uri,
-				'code_challenge' => $challenge,
-				'scopes'         => (string) ( $p['scope'] ?? EMCP_Tools_OAuth_Server::SCOPE ),
+				'code_challenge' => $valid['code_challenge'],
+				'scopes'         => $valid['scope'],
 				'resource'       => EMCP_Tools_OAuth_Metadata::resource(),
 			)
 		);
@@ -240,16 +271,28 @@ class EMCP_Tools_OAuth_Authorize {
 	 *                        OAuth error slug (safe to return to redirect_uri).
 	 */
 	public static function validate_params( array $params, ?array $client ) {
+		foreach ( $params as $value ) {
+			if ( ! is_string( $value ) || strlen( $value ) > 4096 || preg_match( '/[\x00-\x1f\x7f]/', $value ) ) {
+				return new WP_Error( 'invalid_request', 'Malformed authorization parameter.' );
+			}
+		}
 		if ( 'code' !== ( $params['response_type'] ?? '' ) ) {
 			return new WP_Error( 'unsupported_response_type', 'Only response_type=code is supported.' );
 		}
 		if ( null === $client ) {
 			return new WP_Error( 'invalid_request', 'Unknown client.' );
 		}
-		if ( 'S256' !== ( $params['code_challenge_method'] ?? '' ) || '' === (string) ( $params['code_challenge'] ?? '' ) ) {
+		if ( 'S256' !== ( $params['code_challenge_method'] ?? '' ) || ! preg_match( '/\A[A-Za-z0-9_-]{43}\z/', $params['code_challenge'] ?? '' ) ) {
 			return new WP_Error( 'invalid_request', 'PKCE with S256 is required.' );
 		}
-		$resource = trim( (string) ( $params['resource'] ?? '' ) );
+		$scope = $params['scope'] ?? EMCP_Tools_OAuth_Server::SCOPE;
+		if ( '' === $scope ) {
+			$scope = EMCP_Tools_OAuth_Server::SCOPE;
+		}
+		if ( EMCP_Tools_OAuth_Server::SCOPE !== $scope ) {
+			return new WP_Error( 'invalid_scope', 'Only the mcp scope can be authorized.' );
+		}
+		$resource = (string) ( $params['resource'] ?? '' );
 		if ( '' === $resource ) {
 			// Compatibility for older clients on this single-resource server. New
 			// MCP clients send resource explicitly; mismatches are always rejected.
@@ -263,7 +306,7 @@ class EMCP_Tools_OAuth_Authorize {
 			'redirect_uri'   => (string) ( $params['redirect_uri'] ?? '' ),
 			'code_challenge' => (string) $params['code_challenge'],
 			'state'          => (string) ( $params['state'] ?? '' ),
-			'scope'          => (string) ( $params['scope'] ?? EMCP_Tools_OAuth_Server::SCOPE ),
+			'scope'          => $scope,
 			'resource'       => EMCP_Tools_OAuth_Metadata::resource(),
 		);
 	}
@@ -330,7 +373,7 @@ class EMCP_Tools_OAuth_Authorize {
 		wp_print_styles( array( 'emcp-oauth-consent' ) );
 		$styles = (string) ob_get_clean();
 
-		return '<!doctype html><html><head><meta charset="utf-8" />'
+		return '<html><head><meta charset="utf-8" />'
 			. '<meta name="viewport" content="width=device-width, initial-scale=1" />'
 			. '<meta name="robots" content="noindex" />'
 			. '<title>' . esc_html__( 'Authorize connection', 'emcp-lite' ) . '</title>'
@@ -439,7 +482,7 @@ class EMCP_Tools_OAuth_Authorize {
 	 */
 	private static function current_url(): string {
 		// The destination uses the configured origin, never a request Host header.
-		$params = self::request_params( $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Login return only; no state change.
+		$params = array_filter( self::request_params( 'GET' ), 'is_string' );
 		$params = array_intersect_key( $params, array_flip( array( 'response_type', 'client_id', 'redirect_uri', 'code_challenge', 'code_challenge_method', 'state', 'scope', 'resource' ) ) );
 		return esc_url_raw( add_query_arg( $params, self::endpoint_url() ) );
 	}

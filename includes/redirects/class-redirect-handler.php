@@ -39,11 +39,11 @@ class EMCP_Tools_Redirect_Handler {
 		if ( function_exists( 'wp_doing_cron' ) && wp_doing_cron() ) {
 			return true;
 		}
-		if ( function_exists( 'wp_is_json_request' ) && wp_is_json_request() ) {
+		if ( ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || ( function_exists( 'wp_is_json_request' ) && wp_is_json_request() ) ) {
 			return true;
 		}
 		$uri = isset( $_SERVER['REQUEST_URI'] ) && is_string( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
-		return (bool) preg_match( '#^(wp-admin|wp-json|wp-login\.php)#', ltrim( $uri, '/' ) );
+		return (bool) preg_match( '#(?:^|/)(wp-admin|' . preg_quote( rest_get_url_prefix(), '#' ) . '|wp-login\.php)(?:/|[?]|$)#', ltrim( $uri, '/' ) );
 	}
 
 	/**

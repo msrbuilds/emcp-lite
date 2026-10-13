@@ -49,7 +49,8 @@ class EMCP_Tools_Dispatcher_Abilities {
 		// in compact mode (where the top-level surface is just the 3 meta-tools).
 		if ( function_exists( 'wp_get_ability' ) ) {
 			foreach ( array( 'core/get-site-info', 'core/get-user-info', 'core/get-environment-info' ) as $core ) {
-				if ( wp_get_ability( $core ) && ! in_array( $core, $names, true ) ) {
+				// wp_has_ability() first: wp_get_ability() raises a notice for absent abilities.
+				if ( ( ! function_exists( 'wp_has_ability' ) || wp_has_ability( $core ) ) && wp_get_ability( $core ) && ! in_array( $core, $names, true ) ) {
 					$names[] = $core;
 				}
 			}
@@ -64,7 +65,10 @@ class EMCP_Tools_Dispatcher_Abilities {
 	 * @return object|null
 	 */
 	protected function resolve_ability( string $name ) {
-		return function_exists( 'wp_get_ability' ) ? wp_get_ability( $name ) : null;
+		if ( ! function_exists( 'wp_get_ability' ) || ( function_exists( 'wp_has_ability' ) && ! wp_has_ability( $name ) ) ) {
+			return null; // Unknown client-supplied names must not raise a debug notice.
+		}
+		return wp_get_ability( $name );
 	}
 
 	/**

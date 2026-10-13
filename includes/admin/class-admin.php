@@ -247,7 +247,7 @@ class EMCP_Tools_Admin {
 	 */
 	private function get_active_tab(): string {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+		$page = isset( $_GET['page'] ) && is_string( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
 
 		switch ( $page ) {
 			case self::PAGE_SLUG . '-page-builders':
@@ -718,7 +718,7 @@ class EMCP_Tools_Admin {
 				wp_enqueue_style( $handle, EMCP_TOOLS_URL . 'assets/admin/build/' . $file . '.css', 'shell' === $file ? array( 'emcp-admin-ui' ) : array(), $version );
 			}
 		}
-		wp_add_inline_script( 'emcp-admin-shell', 'window.emcpShell = ' . wp_json_encode( $this->shell_data(), JSON_HEX_TAG | JSON_HEX_AMP ) . ';', 'before' );
+		wp_add_inline_script( 'emcp-admin-shell', 'window.emcpShell = ' . wp_json_encode( $this->shell_data(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ) . ';', 'before' );
 		wp_enqueue_script( 'emcp-admin-shell' );
 	}
 
@@ -936,8 +936,21 @@ class EMCP_Tools_Admin {
 				self::migrate_tool_slugs(),
 				array( 'emcp-tools/list-redirects', 'emcp-tools/find-broken-links', 'emcp-tools/resize-media' )
 			);
+			$emcp_elementor = EMCP_Tools_Bootstrap::elementor_active();
+			if ( ! $emcp_elementor ) {
+				// Elementor-only tool listed in the mixed stock-images group.
+				$emcp_conditional[] = 'emcp-tools/add-stock-image';
+			}
 			foreach ( $catalog as $emcp_group ) {
-				foreach ( array_keys( $emcp_group['tools'] ?? array() ) as $emcp_slug ) {
+				// Elementor tools register only while Elementor is loaded.
+				if ( ! $emcp_elementor && 'elementor' === ( $emcp_group['platform'] ?? 'elementor' ) ) {
+					continue;
+				}
+				foreach ( ( $emcp_group['tools'] ?? array() ) as $emcp_slug => $emcp_tool ) {
+					// Integration tools for a plugin that is not installed are expected to be absent.
+					if ( isset( $emcp_tool['available'] ) && ! $emcp_tool['available'] ) {
+						continue;
+					}
 					// is_registered() is a silent isset() check — unlike wp_get_ability()
 					// / get_registered(), it does not _doing_it_wrong() "Ability not
 					// found" for env-gated tools, which was flooding debug.log (#71).

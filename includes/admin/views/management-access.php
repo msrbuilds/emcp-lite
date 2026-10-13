@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 		<?php endif; ?>
 	<?php endif; ?>
 	<?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only success notice; the policy write verifies its nonce.
-	if ( '1' === sanitize_text_field( wp_unslash( $_GET['saved'] ?? '' ) ) ) : ?>
+	if ( '1' === sanitize_text_field( wp_unslash( isset( $_GET['saved'] ) && is_string( $_GET['saved'] ) ? $_GET['saved'] : '' ) ) ) : ?>
 		<div class="notice notice-success inline" role="status"><p><?php esc_html_e( 'Management access saved.', 'emcp-lite' ); ?></p></div>
 	<?php endif; ?>
 	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">

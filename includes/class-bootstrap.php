@@ -89,7 +89,7 @@ class EMCP_Tools_Bootstrap {
 	/**
 	 * Best-effort early detection of a REST request. `REST_REQUEST` is not defined
 	 * until `parse_request` (after plugins_loaded), so at boot time we fall back to
-	 * the request URI: the REST base (`/wp-json/`) or the plain-permalink
+	 * the request URI: the configured REST base (rest_get_url_prefix()) or the plain-permalink
 	 * `?rest_route=` form. Deliberately broad, any REST request loads the full
 	 * surface, so a custom MCP route is never missed.
 	 *
@@ -108,8 +108,8 @@ class EMCP_Tools_Bootstrap {
 		if ( '' === $uri ) {
 			return false;
 		}
-		$prefix = function_exists( 'rest_get_url_prefix' ) ? rest_get_url_prefix() : 'wp-json';
-		return false !== strpos( $uri, '/' . $prefix . '/' ) || false !== strpos( $uri, '/wp-json/' );
+		// The configured prefix is authoritative; WordPress routes no other REST base.
+		return false !== strpos( $uri, '/' . rest_get_url_prefix() . '/' );
 	}
 
 	/**

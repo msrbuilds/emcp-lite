@@ -55,7 +55,7 @@ final class EMCP_Tools_Admin_REST_Changelog extends EMCP_Tools_Admin_REST_Contro
 	 * @param WP_REST_Request $request Request.
 	 */
 	public function search( $request ) {
-		$q = substr( sanitize_text_field( (string) $request->get_param( 'search' ) ), 0, 100 );
+		$q = substr( sanitize_text_field( self::string_param( $request, 'search' ) ), 0, 100 );
 		return rest_ensure_response( array( 'results' => ( new EMCP_Tools_Admin_Changelog_Data() )->search( $q ) ) );
 	}
 }

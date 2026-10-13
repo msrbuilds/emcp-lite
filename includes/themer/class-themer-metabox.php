@@ -177,7 +177,7 @@ JS;
 			// type ('header') — that silently mistyped templates (e.g. a template
 			// named "Single Page" saved as a header, which then renders in the
 			// header slot instead of the body).
-			$req  = isset( $_GET['emcp_themer_type'] ) ? sanitize_key( wp_unslash( $_GET['emcp_themer_type'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$req  = isset( $_GET['emcp_themer_type'] ) && is_string( $_GET['emcp_themer_type'] ) ? sanitize_key( wp_unslash( $_GET['emcp_themer_type'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$type = in_array( $req, EMCP_Tools_Themer_CPT::TYPES, true ) ? $req : '';
 		}
 		$cond = get_post_meta( $post->ID, '_emcp_themer_conditions', true );
@@ -323,7 +323,7 @@ JS;
 	 * @param WP_Post $post    Post.
 	 */
 	public function save( $post_id, $post ): void {
-		if ( ! isset( $_POST[ self::NONCE ] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST[ self::NONCE ] ) ), self::NONCE ) ) {
+		if ( ! isset( $_POST[ self::NONCE ] ) || ! is_string( $_POST[ self::NONCE ] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST[ self::NONCE ] ) ), self::NONCE ) ) {
 			return;
 		}
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
@@ -333,7 +333,7 @@ JS;
 			return;
 		}
 
-		if ( isset( $_POST['emcp_themer_type'] ) ) {
+		if ( isset( $_POST['emcp_themer_type'] ) && is_string( $_POST['emcp_themer_type'] ) ) {
 			$type = sanitize_text_field( wp_unslash( $_POST['emcp_themer_type'] ) );
 			if ( in_array( $type, EMCP_Tools_Themer_CPT::TYPES, true ) ) {
 				update_post_meta( $post_id, '_emcp_themer_type', $type );
@@ -341,7 +341,7 @@ JS;
 		}
 
 		// PHP-template attachment (feature-gated; type-enforced server-side).
-		if ( class_exists( 'EMCP_Tools_Themer_PHP' ) && EMCP_Tools_Themer_PHP::enabled() && isset( $_POST['emcp_themer_php_template'] ) && EMCP_Tools_Themer_PHP_Store::can_edit() ) {
+		if ( class_exists( 'EMCP_Tools_Themer_PHP' ) && EMCP_Tools_Themer_PHP::enabled() && isset( $_POST['emcp_themer_php_template'] ) && is_string( $_POST['emcp_themer_php_template'] ) && EMCP_Tools_Themer_PHP_Store::can_edit() ) {
 			$prev   = (int) get_post_meta( $post_id, '_emcp_themer_php_template', true );
 			$chosen = absint( wp_unslash( $_POST['emcp_themer_php_template'] ) );
 			$ptype  = (string) get_post_meta( $post_id, '_emcp_themer_type', true );
@@ -361,14 +361,20 @@ JS;
 		$saved_type = (string) get_post_meta( $post_id, '_emcp_themer_type', true );
 		if ( EMCP_Tools_Themer_CPT::is_part( $saved_type ) ) {
 			if ( isset( $_POST['emcp_themer_loop_preview'] ) && is_array( $_POST['emcp_themer_loop_preview'] ) ) {
-				update_post_meta( $post_id, EMCP_Tools_Themer_CPT::META_LOOP_PREVIEW, EMCP_Tools_Themer_CPT::sanitize_loop_preview( wp_unslash( $_POST['emcp_themer_loop_preview'] ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized by sanitize_loop_preview().
+				$preview = array();
+				foreach ( array( 'post_type', 'post_id', 'width' ) as $key ) {
+					if ( isset( $_POST['emcp_themer_loop_preview'][ $key ] ) && is_string( $_POST['emcp_themer_loop_preview'][ $key ] ) ) {
+						$preview[ $key ] = sanitize_text_field( wp_unslash( $_POST['emcp_themer_loop_preview'][ $key ] ) );
+					}
+				}
+				update_post_meta( $post_id, EMCP_Tools_Themer_CPT::META_LOOP_PREVIEW, EMCP_Tools_Themer_CPT::sanitize_loop_preview( $preview ) );
 			}
 			// A part takes no conditions; stale rules from a former slot type go.
 			delete_post_meta( $post_id, '_emcp_themer_conditions' );
 			return;
 		}
 
-		if ( ! isset( $_POST['emcp_themer_conditions_json'] ) ) {
+		if ( ! isset( $_POST['emcp_themer_conditions_json'] ) || ! is_string( $_POST['emcp_themer_conditions_json'] ) ) {
 			return;
 		}
 		$raw     = sanitize_textarea_field( wp_unslash( $_POST['emcp_themer_conditions_json'] ) );

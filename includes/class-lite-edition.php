@@ -2,6 +2,43 @@
 /** WordPress.org edition catalog, matching physically removed implementations. */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 final class EMCP_Lite_Edition {
+	/** Allowed presentation markup at final output boundaries. */
+	public static function allowed_html( string $context = 'content' ): array {
+		$allowed = wp_kses_allowed_html( 'post' );
+		$common = array( 'id' => true, 'class' => true, 'role' => true, 'aria-*' => true, 'data-*' => true );
+		$allowed['form'] = $common + array( 'action' => true, 'method' => true );
+		$allowed['input'] = $common + array( 'type' => true, 'name' => true, 'value' => true, 'placeholder' => true, 'required' => true, 'checked' => true, 'disabled' => true, 'autocomplete' => true );
+		$allowed['textarea'] = $common + array( 'name' => true, 'rows' => true, 'cols' => true, 'required' => true, 'placeholder' => true );
+		$allowed['select'] = $common + array( 'name' => true, 'required' => true, 'multiple' => true, 'disabled' => true );
+		$allowed['option'] = array( 'value' => true, 'selected' => true, 'disabled' => true );
+		$allowed['button'] = $common + array( 'type' => true, 'name' => true, 'value' => true, 'disabled' => true );
+		$allowed['svg'] = $common + array( 'xmlns' => true, 'viewbox' => true, 'width' => true, 'height' => true, 'fill' => true, 'stroke' => true, 'stroke-width' => true, 'stroke-linecap' => true, 'stroke-linejoin' => true, 'focusable' => true );
+		$allowed['path'] = array( 'd' => true, 'fill' => true, 'fill-rule' => true, 'clip-rule' => true, 'stroke' => true );
+		foreach ( array( 'circle' => array( 'cx', 'cy', 'r' ), 'rect' => array( 'x', 'y', 'width', 'height', 'rx', 'ry' ), 'line' => array( 'x1', 'x2', 'y1', 'y2' ), 'polyline' => array( 'points' ), 'polygon' => array( 'points' ), 'g' => array( 'transform' ) ) as $tag => $attributes ) {
+			$allowed[ $tag ] = array_fill_keys( array_merge( $attributes, array( 'fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin' ) ), true );
+		}
+		$allowed['label'] = $common + array( 'for' => true );
+		$allowed['input'] += array( 'min' => true, 'max' => true, 'step' => true, 'minlength' => true, 'maxlength' => true );
+		$allowed['iframe'] = $common + array( 'src' => true, 'title' => true, 'width' => true, 'height' => true, 'loading' => true, 'allow' => true, 'allowfullscreen' => true, 'frameborder' => true );
+		if ( 'document' === $context ) {
+			$allowed['html'] = array( 'lang' => true );
+			$allowed['head'] = array();
+			$allowed['body'] = $common;
+			$allowed['title'] = array();
+			$allowed['meta'] = array( 'charset' => true, 'name' => true, 'content' => true );
+			$allowed['link'] = array( 'rel' => true, 'href' => true, 'id' => true, 'media' => true, 'type' => true );
+		}
+		return $allowed;
+	}
+
+	/** Generated CSS must never escape its style element. */
+	public static function sanitize_stylesheet( string $css ): string {
+		if ( preg_match( '/[<\x00]|expression\s*\(|@import|(?:javascript|vbscript)\s*:/i', $css ) ) {
+			return '';
+		}
+		return wp_strip_all_tags( $css );
+	}
+
 	const CODE_POST_TYPES = array( 'custom_css', 'elementor_snippet', 'emcp_php_snippet', 'emcp_code_snippet', 'wpcode', 'wpcode_snippet' );
 	/** Presentation preferences exposed for remote writes and their undo. */
 	const WRITABLE_OPTIONS = array(
@@ -12,6 +49,7 @@ final class EMCP_Lite_Edition {
 		'large_size_w', 'large_size_h', 'uploads_use_yearmonth_folders',
 	);
 	const REMOVED_TOOLS = array(
+		'emcp-tools/query',
 		'emcp-tools/add-custom-css',
 		'emcp-tools/install-plugin',
 		'emcp-tools/activate-plugin',

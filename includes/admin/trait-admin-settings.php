@@ -549,11 +549,14 @@ trait EMCP_Tools_Admin_Settings_Trait {
 					'type'              => 'string',
 					'default'           => '',
 					'sanitize_callback' => static function ( $value ) use ( $emcp_stock_option ) {
-						// phpcs:ignore WordPress.Security.NonceVerification.Missing -- options.php verifies the settings-group nonce before this runs.
-						if ( ! empty( $_POST[ $emcp_stock_option . '__clear' ] ) ) {
+						$clear = isset( $_POST[ $emcp_stock_option . '__clear' ] ) && is_string( $_POST[ $emcp_stock_option . '__clear' ] )
+							? sanitize_text_field( wp_unslash( $_POST[ $emcp_stock_option . '__clear' ] ) ) : '';
+						$nonce = isset( $_POST['_wpnonce'] ) && is_string( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
+						$group = isset( $_POST['option_page'] ) && is_string( $_POST['option_page'] ) ? sanitize_text_field( wp_unslash( $_POST['option_page'] ) ) : '';
+						if ( '1' === $clear && self::SETTINGS_GROUP_SERVICES === $group && current_user_can( 'manage_options' ) && current_user_can( EMCP_Tools_Management_Access::CAPABILITY ) && wp_verify_nonce( $nonce, self::SETTINGS_GROUP_SERVICES . '-options' ) ) {
 							return '';
 						}
-						$value = sanitize_text_field( (string) $value );
+						$value = is_string( $value ) ? sanitize_text_field( $value ) : '';
 						if ( '' === $value ) {
 							// Unchanged (masked) submit — keep the stored value.
 							return (string) get_option( $emcp_stock_option, '' );

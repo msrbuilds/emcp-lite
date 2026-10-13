@@ -127,7 +127,7 @@ final class EMCP_Tools_Admin_Screens {
 	/** The ?view= of the current admin request, sanitised. */
 	public static function current_view(): string {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only routing.
-		return isset( $_GET['view'] ) ? sanitize_key( wp_unslash( $_GET['view'] ) ) : '';
+		return isset( $_GET['view'] ) && is_string( $_GET['view'] ) ? sanitize_key( wp_unslash( $_GET['view'] ) ) : '';
 	}
 
 	/**
@@ -212,7 +212,7 @@ final class EMCP_Tools_Admin_Screens {
 	 * @param array $payload Boot payload.
 	 */
 	public static function boot_script( array $payload ): string {
-		$json = wp_json_encode( $payload, JSON_HEX_TAG | JSON_HEX_AMP );
+		$json = wp_json_encode( $payload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT );
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG && is_string( $json ) && strlen( $json ) > self::MAX_PAYLOAD_BYTES ) {
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			error_log( sprintf( 'EMCP Tools: boot payload for "%s" is %d bytes; fetch large data after mount.', $payload['screen'] ?? '?', strlen( $json ) ) );

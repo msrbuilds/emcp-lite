@@ -98,7 +98,7 @@ if ( ! class_exists( 'EMCP_Tools_Themer_Widget_Rich_Base' ) && class_exists( '\E
 		protected function render(): void {
 			$html = EMCP_Tools_Themer_Dynamic::render( $this->emcp_key(), (array) $this->get_settings_for_display() );
 			// The element renderers escape their own output.
-			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo wp_kses( $html, EMCP_Lite_Edition::allowed_html() );
 		}
 
 		/**

@@ -63,26 +63,6 @@ class EMCP_Tools_MCP_Host_Guard {
 	}
 
 	/**
-	 * Guarantee a clean JSON body on our MCP + OAuth routes by forcing PHP's
-	 * display_errors OFF for the request. A stray notice/warning printed into the
-	 * response — e.g. WordPress's own `_doing_it_wrong` HTML for a not-yet-
-	 * registered ability, or any deprecation notice from another plugin — corrupts
-	 * the JSON-RPC / OAuth JSON, and the client drops the connection ("OAuth
-	 * connection terminated"). This runs regardless of WP_DEBUG_DISPLAY; errors
-	 * still go to the log. rest_pre_dispatch fires before the route callback and
-	 * response serialization, so this covers where such output would land.
-	 *
-	 * @param string $route Requested REST route.
-	 * @return void
-	 */
-	private static function harden_json_output( string $route ): void {
-		if ( self::is_mcp_route( $route ) || self::is_oauth_route( $route ) ) {
-			// phpcs:ignore WordPress.PHP.IniSet.display_errors_Disallowed -- deliberately silencing on-screen errors so they cannot corrupt this JSON response; they still log.
-			@ini_set( 'display_errors', '0' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-		}
-	}
-
-	/**
 	 * rest_pre_serve_request filter — tell LiteSpeed / proxies not to cache or
 	 * buffer MCP responses (the leading suspect for intermittent "connector isn't
 	 * responding" on shared LiteSpeed hosting).
@@ -115,8 +95,8 @@ class EMCP_Tools_MCP_Host_Guard {
 			return $result;
 		}
 		$route = (string) $request->get_route();
-		// Keep our JSON responses clean on both MCP and OAuth routes.
-		self::harden_json_output( $route );
+		// Apply only to this plugin's MCP transport.
+
 		if ( ! self::is_mcp_route( $route ) ) {
 			return $result;
 		}
@@ -131,7 +111,7 @@ class EMCP_Tools_MCP_Host_Guard {
 
 		$req_host = $request->get_header( 'host' );
 		if ( ! is_string( $req_host ) || '' === $req_host ) {
-			$req_host = isset( $_SERVER['HTTP_HOST'] ) && is_string( $_SERVER['HTTP_HOST'] ) ? wp_unslash( $_SERVER['HTTP_HOST'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- host_matches strictly validates the complete host before use.
+			$req_host = isset( $_SERVER['HTTP_HOST'] ) && is_string( $_SERVER['HTTP_HOST'] ) ? sanitize_text_field( filter_var( wp_unslash( $_SERVER['HTTP_HOST'] ), FILTER_VALIDATE_REGEXP, array( 'options' => array( 'regexp' => '/\A(?:[a-z0-9.-]+|\[[a-f0-9:]+\])(?::[0-9]{1,5})?\z/i' ) ) ) ?: 'invalid-host.invalid' ) : '';
 		}
 		$expected = class_exists( 'EMCP_Tools_Site_Context' )
 			? EMCP_Tools_Site_Context::public_host()
@@ -142,7 +122,7 @@ class EMCP_Tools_MCP_Host_Guard {
 		}
 		$endpoint = class_exists( 'EMCP_Tools_Site_Context' )
 			? EMCP_Tools_Site_Context::mcp_endpoint()
-			: home_url( '/wp-json/mcp/emcp-tools-server' );
+			: rest_url( 'mcp/emcp-tools-server' );
 
 		return new WP_Error(
 			'emcp_host_mismatch',

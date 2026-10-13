@@ -92,7 +92,7 @@ final class EMCP_Tools_Change_Notices {
 		if ( self::on_frame() && class_exists( 'EMCP_Tools_Admin_Icons' ) ) {
 			printf(
 				'<div class="notice emcp-frame-notice eui-notice eui-notice--warning" role="status"><span class="eui-notice__icon">%1$s</span><div class="eui-notice__body"><strong class="eui-notice__title">%2$s</strong> %3$s</div><div class="eui-notice__actions"><a class="eui-btn eui-btn--secondary eui-btn--sm" href="%4$s"><span class="eui-btn__label">%5$s</span></a></div></div>',
-				EMCP_Tools_Admin_Icons::svg( 'triangle-alert', 16 ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static, trusted SVG.
+				wp_kses( EMCP_Tools_Admin_Icons::svg( 'triangle-alert', 16 ), EMCP_Lite_Edition::allowed_html() ),
 				esc_html( $title ),
 				esc_html( $text ),
 				esc_url( $url ),

@@ -50,7 +50,12 @@ final class EMCP_Tools_Admin_REST_History extends EMCP_Tools_Admin_REST_Controll
 				'tabs'   => array( 'history' ),
 				'boot'   => static function (): array {
 					// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only view filters, sanitized by filters().
-					$get = wp_unslash( $_GET );
+					$get = array();
+					foreach ( array( 'search', 'kind', 'client', 'range', 'from', 'to', 'before', 'limit' ) as $key ) {
+						if ( isset( $_GET[ $key ] ) && is_string( $_GET[ $key ] ) ) {
+							$get[ $key ] = sanitize_text_field( wp_unslash( $_GET[ $key ] ) );
+						}
+					}
 					return ( new EMCP_Tools_Admin_History_Data() )->payload( is_array( $get ) ? $get : array() );
 				},
 			)
@@ -129,7 +134,7 @@ final class EMCP_Tools_Admin_REST_History extends EMCP_Tools_Admin_REST_Controll
 	 * @param WP_REST_Request $request Request.
 	 */
 	private static function session_key( $request ): ?string {
-		$key = wp_unslash( (string) $request->get_param( 'session' ) );
+		$key = wp_unslash( self::string_param( $request, 'session' ) );
 		$ok  = preg_match( '/^(s:[^\x00-\x1f<>"]{1,100}|w:\d+-\d+:\d+:[A-Za-z0-9%._~!*\'()-]{0,300}|c:[a-f0-9]{6,32})$/', $key );
 		return 1 === $ok ? $key : null;
 	}
@@ -143,7 +148,7 @@ final class EMCP_Tools_Admin_REST_History extends EMCP_Tools_Admin_REST_Controll
 		if ( null === $key ) {
 			return self::invalid_session();
 		}
-		return new WP_REST_Response( ( new EMCP_Tools_Admin_History_Data() )->rows( $key, (int) $request->get_param( 'before' ), self::view( $request ) ) );
+		return new WP_REST_Response( ( new EMCP_Tools_Admin_History_Data() )->rows( $key, self::int_param( $request, 'before' ), self::view( $request ) ) );
 	}
 
 	public function undo_session( $request ) {
@@ -207,7 +212,7 @@ final class EMCP_Tools_Admin_REST_History extends EMCP_Tools_Admin_REST_Controll
 	}
 
 	public function retention( $request ) {
-		$days = (int) $request->get_param( 'days' );
+		$days = self::int_param( $request, 'days' );
 		if ( ! in_array( $days, EMCP_Tools_Change_Retention::ALLOWED, true ) ) {
 			return new WP_Error( 'invalid_retention', __( 'Choose 30, 90, 180 or 365 days.', 'emcp-lite' ), array( 'status' => 400 ) );
 		}

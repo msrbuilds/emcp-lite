@@ -86,7 +86,12 @@ class EMCP_Tools_OAuth_Token {
 	 * @return WP_REST_Response
 	 */
 	public static function handle_token( $request ) {
-		$p          = $request->get_body_params();
+		$p = $request->get_body_params();
+		foreach ( array( 'grant_type', 'code', 'client_id', 'redirect_uri', 'code_verifier', 'resource', 'refresh_token', 'scope' ) as $key ) {
+			if ( isset( $p[ $key ] ) && ( ! is_string( $p[ $key ] ) || strlen( $p[ $key ] ) > 4096 || preg_match( '/[\x00-\x1f\x7f]/', $p[ $key ] ) ) ) {
+				return self::error( 'invalid_request', 'Malformed token parameter.' );
+			}
+		}
 		$grant_type = (string) ( $p['grant_type'] ?? '' );
 
 		if ( 'authorization_code' === $grant_type ) {
@@ -190,7 +195,11 @@ class EMCP_Tools_OAuth_Token {
 	 * @return WP_REST_Response
 	 */
 	public static function handle_revoke( $request ) {
-		$token = (string) ( $request->get_body_params()['token'] ?? '' );
+		$params = $request->get_body_params();
+		$token = $params['token'] ?? '';
+		if ( ! is_string( $token ) || strlen( $token ) > 4096 || preg_match( '/[\x00-\x20\x7f]/', $token ) ) {
+			return self::error( 'invalid_request', 'Malformed token.' );
+		}
 		if ( '' !== $token ) {
 			foreach ( array( 'access', 'refresh' ) as $type ) {
 				$row = EMCP_Tools_OAuth_Store::find_token( $token, $type );

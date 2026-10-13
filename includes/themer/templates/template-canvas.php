@@ -27,15 +27,15 @@ $emcp_slots = class_exists( 'EMCP_Tools_Themer_Render_Controller' )
 <?php wp_body_open(); ?>
 <?php
 if ( ! empty( $emcp_slots['header'] ) ) {
-	echo EMCP_Tools_Themer_Content_Renderer::render( (int) $emcp_slots['header'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	echo wp_kses( EMCP_Tools_Themer_Content_Renderer::render( (int) $emcp_slots['header'] ), EMCP_Lite_Edition::allowed_html() );
 }
 if ( ! empty( $emcp_slots['body'] ) ) {
 	echo '<main class="emcp-themer-body">';
-	echo EMCP_Tools_Themer_Content_Renderer::render( (int) $emcp_slots['body'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	echo wp_kses( EMCP_Tools_Themer_Content_Renderer::render( (int) $emcp_slots['body'] ), EMCP_Lite_Edition::allowed_html() );
 	echo '</main>';
 }
 if ( ! empty( $emcp_slots['footer'] ) ) {
-	echo EMCP_Tools_Themer_Content_Renderer::render( (int) $emcp_slots['footer'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	echo wp_kses( EMCP_Tools_Themer_Content_Renderer::render( (int) $emcp_slots['footer'] ), EMCP_Lite_Edition::allowed_html() );
 }
 wp_footer();
 ?>

@@ -480,17 +480,17 @@ class EMCP_Tools_Themer_CPT {
 	 */
 	public static function sanitize_loop_preview( $raw ): array {
 		$raw  = is_array( $raw ) ? $raw : array();
-		$type = isset( $raw['post_type'] ) ? sanitize_key( (string) $raw['post_type'] ) : 'post';
+		$type = isset( $raw['post_type'] ) && is_string( $raw['post_type'] ) ? sanitize_key( $raw['post_type'] ) : 'post';
 		if ( '' === $type || ! post_type_exists( $type ) ) {
 			$type = 'post';
 		}
-		$width = isset( $raw['width'] ) ? (int) $raw['width'] : 0;
+		$width = isset( $raw['width'] ) && is_scalar( $raw['width'] ) ? (int) $raw['width'] : 0;
 		if ( $width <= 0 ) {
 			$width = self::LOOP_PREVIEW_DEFAULT_WIDTH;
 		}
 		return array(
 			'post_type' => $type,
-			'post_id'   => isset( $raw['post_id'] ) ? absint( $raw['post_id'] ) : 0,
+			'post_id'   => isset( $raw['post_id'] ) && is_scalar( $raw['post_id'] ) ? absint( $raw['post_id'] ) : 0,
 			'width'     => max( self::LOOP_PREVIEW_MIN_WIDTH, min( self::LOOP_PREVIEW_MAX_WIDTH, $width ) ),
 		);
 	}
@@ -563,7 +563,7 @@ class EMCP_Tools_Themer_CPT {
 			}
 		}
 		foreach ( array( 'post', 'post_id', 'editor_post_id' ) as $key ) {
-			if ( isset( $_REQUEST[ $key ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only lookup of the edited post.
+			if ( isset( $_REQUEST[ $key ] ) && is_scalar( $_REQUEST[ $key ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only lookup of the edited post.
 				$id = absint( wp_unslash( $_REQUEST[ $key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				if ( $id > 0 && self::POST_TYPE === get_post_type( $id ) ) {
 					return $id;

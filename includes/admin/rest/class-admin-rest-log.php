@@ -18,7 +18,7 @@ final class EMCP_Tools_Admin_REST_Log extends EMCP_Tools_Admin_REST_Controller {
 	const EXPORT_ROUTE = '/emcp-tools/v1/admin/log/export.csv';
 
 	/**
-	 * Register the routes and the raw CSV printer.
+	 * Register the routes.
 	 */
 	public function register_routes(): void {
 		$this->route( 'log/export\.csv', array( 'methods' => 'GET', 'callback' => array( $this, 'export' ) ) );
@@ -35,7 +35,6 @@ final class EMCP_Tools_Admin_REST_Log extends EMCP_Tools_Admin_REST_Controller {
 				),
 			)
 		);
-		add_filter( 'rest_pre_serve_request', array( __CLASS__, 'serve_csv' ), 10, 3 );
 	}
 
 	/**
@@ -49,7 +48,12 @@ final class EMCP_Tools_Admin_REST_Log extends EMCP_Tools_Admin_REST_Controller {
 				'tabs'   => array( 'mcp-log' ),
 				'boot'   => static function (): array {
 					// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only view filters, sanitized by payload().
-					$get = wp_unslash( $_GET );
+					$get = array();
+					foreach ( array( 'status', 'search', 'paged' ) as $key ) {
+						if ( isset( $_GET[ $key ] ) && is_string( $_GET[ $key ] ) ) {
+							$get[ $key ] = sanitize_text_field( wp_unslash( $_GET[ $key ] ) );
+						}
+					}
 					$get = is_array( $get ) ? $get : array();
 					return ( new EMCP_Tools_Admin_Log_Data() )->payload(
 						array(
@@ -71,9 +75,9 @@ final class EMCP_Tools_Admin_REST_Log extends EMCP_Tools_Admin_REST_Controller {
 	 */
 	private static function args( $request ): array {
 		return array(
-			'status' => (string) $request->get_param( 'status' ),
-			'search' => sanitize_text_field( (string) $request->get_param( 'search' ) ),
-			'page'   => (int) $request->get_param( 'page' ),
+			'status' => ( is_string( $request->get_param( 'status' ) ) ? sanitize_text_field( $request->get_param( 'status' ) ) : '' ),
+			'search' => sanitize_text_field( ( is_string( $request->get_param( 'search' ) ) ? sanitize_text_field( $request->get_param( 'search' ) ) : '' ) ),
+			'page'   => ( is_scalar( $request->get_param( 'page' ) ) ? absint( $request->get_param( 'page' ) ) : 1 ),
 		);
 	}
 
@@ -108,27 +112,13 @@ final class EMCP_Tools_Admin_REST_Log extends EMCP_Tools_Admin_REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function export( $request ) {
-		$res = new WP_REST_Response( EMCP_Tools_MCP_Request_Log::export_csv( self::args( $request ) ) );
-		$res->header( 'Content-Type', 'text/csv; charset=utf-8' );
-		$res->header( 'Content-Disposition', 'attachment; filename="emcp-mcp-log-' . gmdate( 'Ymd-His' ) . '.csv"' );
+		$res = new WP_REST_Response( array(
+			'csv' => EMCP_Tools_MCP_Request_Log::export_csv( self::args( $request ) ),
+			'filename' => 'emcp-mcp-log-' . gmdate( 'Ymd-His' ) . '.csv',
+		) );
 		$res->header( 'Cache-Control', 'no-store' );
 		$res->header( 'X-Content-Type-Options', 'nosniff' );
 		return $res;
 	}
 
-	/**
-	 * Print the export route's CSV raw instead of JSON-encoding it.
-	 *
-	 * @param bool             $served  Whether a handler already served it.
-	 * @param WP_REST_Response $result  Response.
-	 * @param WP_REST_Request  $request Request.
-	 * @return bool
-	 */
-	public static function serve_csv( $served, $result, $request ) {
-		if ( $served || ! $request || self::EXPORT_ROUTE !== $request->get_route() || ! $result instanceof WP_REST_Response || ! is_string( $result->get_data() ) ) {
-			return $served;
-		}
-		echo $result->get_data(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSV body, cells neutralised in export_csv().
-		return true;
-	}
 }

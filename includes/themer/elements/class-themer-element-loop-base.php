@@ -122,8 +122,8 @@ abstract class EMCP_Tools_Themer_Element_Loop_Base extends EMCP_Tools_Themer_Ele
 		}
 		$var  = self::page_var( $uid );
 		$page = (int) get_query_var( $var, 0 );
-		if ( $page < 1 && isset( $_GET[ $var ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- public pagination.
-			$page = (int) $_GET[ $var ]; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( $page < 1 && isset( $_GET[ $var ] ) && is_string( $_GET[ $var ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- public pagination.
+			$page = absint( wp_unslash( $_GET[ $var ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		}
 		return max( 1, $page );
 	}

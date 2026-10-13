@@ -4,7 +4,7 @@ Tags: mcp, ai, automation, elementor, gutenberg
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -38,7 +38,7 @@ Direct MCP connections communicate with the AI client you choose. The client rec
 
 EMCP Cloud is optional. Local tools work without a Cloud account. Choosing Connect sends your site URL, site name, installation identifier and OAuth registration/authorization information to emcptools.com. Once connected, the plugin exchanges and refreshes tokens and can request account/service status. Settings sync sends supported preferences, including tool toggles, modules and free-text site context. Credential options are excluded, but site-context text is not automatically redacted: do not put passwords or API keys in it. Extensions can narrow, but cannot expand, Lite's settings-sync allowlist. Hosted services may require a paid service plan. The default Cloud endpoint is emcptools.com; a developer or site administrator can configure a different endpoint. Review that service before connecting.
 
-Gateway access is a separate opt-in, initially unchecked. Enabling it provisions a revocable credential for the authorizing WordPress user and sends it to the EMCP service. Gateway requests act as that user, subject to enabled tools and that user's WordPress permissions; the credential is not limited to read-only operations. Gateway connections relay MCP requests and responses, including any content or personal data returned by the selected tools. You can disable Gateway access and disconnect Cloud from the Connection screen.
+Gateway access is a separate opt-in, initially unchecked. Enabling it provisions a revocable, resource-bound EMCP OAuth refresh token for the authorizing WordPress user and sends it to the EMCP service. It does not send a WordPress application password. This token authenticates only the EMCP MCP endpoint, not wp-admin, core REST administration, or EMCP dashboard configuration endpoints. Gateway requests act as that user, subject to enabled tools and that user's WordPress permissions; the credential is not limited to read-only operations. Gateway connections relay MCP requests and responses, including any content or personal data returned by the selected tools. You can disable Gateway access and disconnect Cloud from the Connection screen.
 
 Service: https://emcptools.com/
 Terms: https://emcptools.com/terms-of-service/
@@ -90,6 +90,14 @@ No. Content, Themer layouts, brand-kit backups and change-history records are pr
 No. History shows which operations support undo. Undo may be refused if the resource changed afterward or an operation is not reversible.
 
 == Changelog ==
+
+= 1.0.2 =
+
+* Security: remove arbitrary SQL reads from Lite to prevent credential-bearing database values being exposed. Structured content queries and database schema inspection remain available.
+* Validate OAuth consent, request types and credential headers at their input boundaries.
+* Escape dashboard and Themer output, use JSON transport for CSV downloads, and protect inline asset data.
+* Respect configured directories and REST URLs; resolve Spectra's installed attribute files safely.
+* Exclude dependency development folders and preserve the site error-reporting configuration.
 
 = 1.0.1 =
 * Removes remote administration and arbitrary code insertion from Lite while retaining content tools and the dashboard.

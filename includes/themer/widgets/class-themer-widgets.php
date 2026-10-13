@@ -165,7 +165,7 @@ class EMCP_Tools_Themer_Widgets {
 		// there is nothing here for a nonce to protect.
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		foreach ( array( 'editor_post_id', 'post' ) as $k ) {
-			if ( ! empty( $_REQUEST[ $k ] ) ) {
+			if ( ! empty( $_REQUEST[ $k ] ) && is_scalar( $_REQUEST[ $k ] ) ) {
 				$id = absint( wp_unslash( $_REQUEST[ $k ] ) );
 				if ( $id > 0 ) {
 					return $id;

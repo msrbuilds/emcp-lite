@@ -28,7 +28,7 @@ if ( ! empty( $emcp_slots['body'] ) ) {
 	// theme wraps it in a flexbox container (e.g. Astra's ast-two-container). Without
 	// this the <main> only takes its intrinsic width, leaving empty space beside it.
 	echo '<main class="emcp-themer-body" style="width:100%;flex:1 1 auto;min-width:0;">';
-	echo EMCP_Tools_Themer_Content_Renderer::render( (int) $emcp_slots['body'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	echo wp_kses( EMCP_Tools_Themer_Content_Renderer::render( (int) $emcp_slots['body'] ), EMCP_Lite_Edition::allowed_html() );
 	echo '</main>';
 }
 

@@ -30,7 +30,7 @@ final class EMCP_Tools_Management_Access_Admin {
 		$version = isset( $_POST['version'] ) && is_string( $_POST['version'] ) ? filter_var( wp_unslash( $_POST['version'] ), FILTER_VALIDATE_INT ) : false;
 		$text = isset( $_POST['users'] ) && is_string( $_POST['users'] ) ? sanitize_text_field( wp_unslash( $_POST['users'] ) ) : '';
 		$users = 'all_admins' === $mode ? array() : EMCP_Tools_Management_Policy::parse_users( $text );
-		if ( false === $version || $version < 0 || '1' !== sanitize_text_field( wp_unslash( $_POST['confirm'] ?? '' ) ) || is_wp_error( $users ) ) {
+		if ( false === $version || $version < 0 || '1' !== sanitize_text_field( wp_unslash( isset( $_POST['confirm'] ) && is_string( $_POST['confirm'] ) ? $_POST['confirm'] : '' ) ) || is_wp_error( $users ) ) {
 			wp_die( esc_html__( 'Confirm the policy and supply valid administrator IDs. Reload before trying again.', 'emcp-lite' ), '', array( 'response' => 400 ) );
 		}
 		$result = EMCP_Tools_Management_Policy::save( $mode, $users, $version, (int) get_current_user_id() );

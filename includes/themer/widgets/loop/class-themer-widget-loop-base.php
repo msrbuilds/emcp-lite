@@ -92,7 +92,7 @@ if ( ! class_exists( 'EMCP_Tools_Themer_Widget_Loop_Base' ) && class_exists( '\E
 				? EMCP_Tools_Themer_Element_Loop_Carousel::render( $args )
 				: EMCP_Tools_Themer_Element_Loop_Grid::render( $args );
 			// The element renderers escape their own output.
-			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo wp_kses( $html, EMCP_Lite_Edition::allowed_html() );
 		}
 
 		/** The element id, used as the instance id. */

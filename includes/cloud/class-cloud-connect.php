@@ -397,7 +397,7 @@ class EMCP_Tools_Cloud_Connect {
 		$verifier           = EMCP_Tools_OAuth_Util::generate_code_verifier();
 		$csrf               = EMCP_Tools_OAuth_Util::generate_token();
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce already checked by check_admin_referer() above.
-		$gateway_optin = isset( $_POST['emcp_gateway_optin'] );
+		$gateway_optin = isset( $_POST['emcp_gateway_optin'] ) && is_string( $_POST['emcp_gateway_optin'] ) && '1' === sanitize_text_field( wp_unslash( $_POST['emcp_gateway_optin'] ) );
 		set_transient(
 			self::PENDING_TRANSIENT,
 			self::pending_record( $verifier, $csrf, $client_id, $registration_proof, $gateway_optin ),
@@ -431,8 +431,8 @@ class EMCP_Tools_Cloud_Connect {
 			self::back( 'cloud_error=site_identity_conflict' );
 		}
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- provider redirect; validated by state below.
-		$code     = isset( $_GET['code'] ) ? sanitize_text_field( wp_unslash( $_GET['code'] ) ) : '';
-		$state_in = isset( $_GET['state'] ) ? sanitize_text_field( wp_unslash( $_GET['state'] ) ) : '';
+		$code     = isset( $_GET['code'] ) && is_string( $_GET['code'] ) ? sanitize_text_field( wp_unslash( $_GET['code'] ) ) : '';
+		$state_in = isset( $_GET['state'] ) && is_string( $_GET['state'] ) ? sanitize_text_field( wp_unslash( $_GET['state'] ) ) : '';
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 		$pending = get_transient( self::PENDING_TRANSIENT );
 		// CLI approval belongs to the initiating administrator and installation.
@@ -600,7 +600,7 @@ class EMCP_Tools_Cloud_Connect {
 	public static function handle_separate(): void {
 		self::guard_cap();
 		check_admin_referer( self::ACTION_SEPARATE );
-		if ( 'post' !== sanitize_key( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) || '1' !== sanitize_text_field( wp_unslash( $_POST['confirm_separate'] ?? '' ) ) ) {
+		if ( 'post' !== sanitize_key( wp_unslash( isset( $_SERVER['REQUEST_METHOD'] ) && is_string( $_SERVER['REQUEST_METHOD'] ) ? $_SERVER['REQUEST_METHOD'] : '' ) ) || '1' !== sanitize_text_field( wp_unslash( isset( $_POST['confirm_separate'] ) && is_string( $_POST['confirm_separate'] ) ? $_POST['confirm_separate'] : '' ) ) ) {
 			wp_die( esc_html__( 'Confirm that this is a separate site before continuing.', 'emcp-lite' ), '', array( 'response' => 400 ) );
 		}
 		EMCP_Tools_Cloud::separate_identity();

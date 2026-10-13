@@ -125,6 +125,9 @@ class EMCP_Tools_Themer_Loop_REST {
 			}
 		);
 		$data           = $collected['output'];
+		if ( isset( $data['html'] ) && is_string( $data['html'] ) ) {
+			$data['html'] = wp_kses( $data['html'], EMCP_Lite_Edition::allowed_html() );
+		}
 		$data['assets'] = $collected['assets'];
 		return self::respond( $data, 200 );
 	}

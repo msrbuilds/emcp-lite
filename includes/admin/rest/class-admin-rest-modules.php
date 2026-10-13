@@ -112,7 +112,7 @@ final class EMCP_Tools_Admin_REST_Modules extends EMCP_Tools_Admin_REST_Controll
 	 * @return EMCP_Tools_Module|WP_Error
 	 */
 	private function module( $request ) {
-		$module = EMCP_Tools_Modules_Registry::instance()->get( sanitize_key( (string) $request->get_param( 'id' ) ) );
+		$module = EMCP_Tools_Modules_Registry::instance()->get( sanitize_key( self::string_param( $request, 'id' ) ) );
 		if ( ! $module || array() === $module->settings_schema() ) {
 			return new WP_Error( 'unknown_module', __( 'That module has no settings here.', 'emcp-lite' ), array( 'status' => 404 ) );
 		}
@@ -157,7 +157,7 @@ final class EMCP_Tools_Admin_REST_Modules extends EMCP_Tools_Admin_REST_Controll
 	 */
 	public function bulk( $request ) {
 		$optimizer = $this->optimizer();
-		return is_wp_error( $optimizer ) ? $optimizer : new WP_REST_Response( $optimizer->run_batch( (int) $request->get_param( 'batch' ) ) );
+		return is_wp_error( $optimizer ) ? $optimizer : new WP_REST_Response( $optimizer->run_batch( self::int_param( $request, 'batch' ) ) );
 	}
 
 	/**
