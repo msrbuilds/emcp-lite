@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.3
+
+- Remove site-settings writes: Lite reads site settings but never changes them, including through History undo.
+- Verify the OAuth consent nonce before reading any submitted field, and use standard nonce checks for downloads.
+- Update enshrined/svg-sanitize to 1.0.0 and the WordPress MCP adapter to 0.7.1.
+- Avoid WordPress debug notices on sites without Elementor.
+
 ## 1.0.2
 
 * Security: remove arbitrary SQL reads from Lite to prevent credential-bearing database values being exposed. Structured content queries and database schema inspection remain available.

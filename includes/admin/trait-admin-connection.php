@@ -368,12 +368,8 @@ trait EMCP_Tools_Admin_Connection_Trait {
 	 * @since 3.0.0
 	 */
 	public function handle_download_mcpb(): void {
-		if (
-			! isset( $_POST['_emcp_nonce'] ) || ! is_string( $_POST['_emcp_nonce'] )
-			|| ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_emcp_nonce'] ) ), self::NONCE_DOWNLOAD_MCPB )
-		) {
-			wp_die( esc_html__( 'Invalid request.', 'emcp-lite' ), '', array( 'response' => 403 ) );
-		}
+		// Dies with a 403 unless the request carries a valid nonce for this action.
+		check_admin_referer( self::NONCE_DOWNLOAD_MCPB, '_emcp_nonce' );
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'You do not have permission to download this.', 'emcp-lite' ), '', array( 'response' => 403 ) );
 		}

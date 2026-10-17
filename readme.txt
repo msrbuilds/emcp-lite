@@ -4,7 +4,7 @@ Tags: mcp, ai, automation, elementor, gutenberg
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -18,7 +18,7 @@ Use it to manage WordPress content and media, work with Elementor and Gutenberg 
 
 Features include:
 
-* WordPress posts, pages, taxonomies, menus, media and curated settings tools.
+* WordPress posts, pages, taxonomies, menus and media tools, with read-only site settings.
 * Elementor page structures, widgets, templates, styles and supported global design controls, when Elementor is active.
 * Gutenberg blocks and patterns, with integrations for supported installed plugins.
 * Bundled prompts and brand kits.
@@ -28,7 +28,7 @@ Features include:
 * Per-tool controls, WordPress capability checks, local management access controls and supported change-history undo operations.
 * Direct MCP connections, plus optional EMCP Cloud settings sync and hosted Gateway access.
 
-This edition does not include Freemius, remote plugin/theme installation or lifecycle changes, user administration, critical site-settings changes, managed Cloud configuration deployment, arbitrary CSS/JavaScript/PHP insertion, generated executable widgets/blocks, PHP templates, shell commands, arbitrary filesystem tools, raw database writes, or executable Cloud/Marketplace artifact installation. Ordinary Elementor widgets, Gutenberg blocks and Themer layouts remain available. Use structured design controls for styling.
+This edition does not include Freemius, remote plugin/theme installation or lifecycle changes, user administration, site-settings changes, managed Cloud configuration deployment, arbitrary CSS/JavaScript/PHP insertion, generated executable widgets/blocks, PHP templates, shell commands, arbitrary filesystem tools, raw database writes, or executable Cloud/Marketplace artifact installation. Ordinary Elementor widgets, Gutenberg blocks and Themer layouts remain available. Use structured design controls for styling.
 
 Some optional integrations require their respective plugins. Elementor is not required for the ordinary WordPress tools. EMCP Lite is independently developed and is not affiliated with WordPress or Elementor.
 
@@ -90,6 +90,12 @@ No. Content, Themer layouts, brand-kit backups and change-history records are pr
 No. History shows which operations support undo. Undo may be refused if the resource changed afterward or an operation is not reversible.
 
 == Changelog ==
+
+= 1.0.3 =
+
+* Remove site-settings writes: Lite reads site settings but never changes them, including through History undo.
+* Verify the OAuth consent nonce before reading any submitted field.
+* Update enshrined/svg-sanitize to 1.0.0 and the WordPress MCP adapter to 0.7.1.
 
 = 1.0.2 =
 

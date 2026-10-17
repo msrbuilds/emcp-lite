@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ddad591b0985554146d332a496c1218f",
+    "content-hash": "5445b99713bdd339b1ffcb1e2344951e",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -72,16 +72,16 @@
         },
         {
             "name": "enshrined/svg-sanitize",
-            "version": "0.22.0",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/darylldoyle/svg-sanitizer.git",
-                "reference": "0afa95ea74be155a7bcd6c6fb60c276c39984500"
+                "reference": "f3300fcd1bbf67d205b52217c75d0f7d6a8c47ff"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/darylldoyle/svg-sanitizer/zipball/0afa95ea74be155a7bcd6c6fb60c276c39984500",
-                "reference": "0afa95ea74be155a7bcd6c6fb60c276c39984500",
+                "url": "https://api.github.com/repos/darylldoyle/svg-sanitizer/zipball/f3300fcd1bbf67d205b52217c75d0f7d6a8c47ff",
+                "reference": "f3300fcd1bbf67d205b52217c75d0f7d6a8c47ff",
                 "shasum": ""
             },
             "require": {
@@ -111,22 +111,22 @@
             "description": "An SVG sanitizer for PHP",
             "support": {
                 "issues": "https://github.com/darylldoyle/svg-sanitizer/issues",
-                "source": "https://github.com/darylldoyle/svg-sanitizer/tree/0.22.0"
+                "source": "https://github.com/darylldoyle/svg-sanitizer/tree/1.0.0"
             },
-            "time": "2025-08-12T10:13:48+00:00"
+            "time": "2026-09-01T09:35:47+00:00"
         },
         {
             "name": "wordpress/mcp-adapter",
-            "version": "v0.7.0",
+            "version": "v0.7.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/WordPress/mcp-adapter",
-                "reference": "54ed266a8c46b71fdb8e5b8a7d35668f90fb8994"
+                "url": "https://github.com/WordPress/mcp-adapter.git",
+                "reference": "5bdb40b49c307e517413f77f9157272d46d52e07"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/WordPress/mcp-adapter/zipball/54ed266a8c46b71fdb8e5b8a7d35668f90fb8994",
-                "reference": "54ed266a8c46b71fdb8e5b8a7d35668f90fb8994",
+                "url": "https://api.github.com/repos/WordPress/mcp-adapter/zipball/5bdb40b49c307e517413f77f9157272d46d52e07",
+                "reference": "5bdb40b49c307e517413f77f9157272d46d52e07",
                 "shasum": ""
             },
             "require": {
@@ -141,8 +141,8 @@
                 "php-stubs/wp-cli-stubs": "^2.12",
                 "phpcompatibility/phpcompatibility-wp": "^3.0.0-alpha",
                 "phpstan/extension-installer": "^1.3",
-                "phpstan/php-8-stubs": "^0.4.41",
-                "phpstan/phpstan": "^2.2.14",
+                "phpstan/php-8-stubs": "^0.4.43",
+                "phpstan/phpstan": "^2.2.16",
                 "phpstan/phpstan-deprecation-rules": "^2.0.5",
                 "phpunit/phpunit": "^9.6",
                 "slevomat/coding-standard": "^8.0",
@@ -185,7 +185,7 @@
                 "issues": "https://github.com/wordpress/mcp-adapter/issues",
                 "source": "https://github.com/wordpress/mcp-adapter"
             },
-            "time": "2026-10-02T14:10:31+00:00"
+            "time": "2026-10-16T08:58:28+00:00"
         },
         {
             "name": "wordpress/php-mcp-schema",

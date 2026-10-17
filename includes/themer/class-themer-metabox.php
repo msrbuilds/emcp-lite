@@ -323,13 +323,14 @@ JS;
 	 * @param WP_Post $post    Post.
 	 */
 	public function save( $post_id, $post ): void {
-		if ( ! isset( $_POST[ self::NONCE ] ) || ! is_string( $_POST[ self::NONCE ] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST[ self::NONCE ] ) ), self::NONCE ) ) {
-			return;
-		}
-		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		$nonce = isset( $_POST[ self::NONCE ] ) && is_string( $_POST[ self::NONCE ] ) ? sanitize_text_field( wp_unslash( $_POST[ self::NONCE ] ) ) : '';
+		if ( ! wp_verify_nonce( $nonce, self::NONCE ) ) {
 			return;
 		}
 		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			return;
+		}
+		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 			return;
 		}
 

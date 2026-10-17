@@ -87,8 +87,8 @@ class EMCP_Tools_OAuth_Authorize {
 		}
 	}
 
-	/** Authorization request fields read from the query string or consent form. */
-	const PARAM_KEYS = array( 'response_type', 'client_id', 'redirect_uri', 'code_challenge', 'code_challenge_method', 'state', 'scope', 'resource', 'action', '_emcp_oauth_nonce' );
+	/** OAuth authorization request fields (RFC 6749 section 4.1.1). */
+	const PARAM_KEYS = array( 'response_type', 'client_id', 'redirect_uri', 'code_challenge', 'code_challenge_method', 'state', 'scope', 'resource' );
 
 	/**
 	 * OAuth state and registered redirect URIs are opaque: they are compared
@@ -101,37 +101,75 @@ class EMCP_Tools_OAuth_Authorize {
 	const TOKEN_PATTERN = '/\A(?=[ -~]{0,4096}\z)(?:[A-Za-z0-9._~:\/@!$&\'()*+,;=-]+(?: [A-Za-z0-9._~:\/@!$&\'()*+,;=-]+)*)?\z/';
 
 	/**
-	 * Read the named authorization fields, validating each one as it is read.
-	 * A present but malformed field becomes null so validate_params() rejects
-	 * it instead of silently applying a default. Unknown fields are ignored.
+	 * filter_var() rule for a field.
 	 *
-	 * @param string $method 'GET' or 'POST'.
+	 * @param string $key Field name.
+	 * @return array
+	 */
+	private static function field_rule( string $key ): array {
+		return array( 'options' => array( 'regexp' => self::is_opaque( $key ) ? self::OPAQUE_PATTERN : self::TOKEN_PATTERN ) );
+	}
+
+	/** Whether a field is opaque (kept byte-for-byte). */
+	private static function is_opaque( string $key ): bool {
+		return in_array( $key, array( 'state', 'redirect_uri', 'resource' ), true );
+	}
+
+	/**
+	 * Finish a validated field: false (malformed) becomes null so validate_params()
+	 * rejects it instead of silently applying a default.
+	 *
+	 * @param string       $key   Field name.
+	 * @param string|false $value filter_var() result.
+	 * @return string|null
+	 */
+	private static function finish_field( string $key, $value ): ?string {
+		if ( ! is_string( $value ) ) {
+			return null;
+		}
+		// Token fields contain nothing sanitize_text_field() would alter.
+		return self::is_opaque( $key ) ? $value : sanitize_text_field( $value );
+	}
+
+	/**
+	 * Authorization request from the query string.
+	 *
+	 * This is the public OAuth authorization endpoint: the connecting client
+	 * application starts the request, so it cannot carry a WordPress nonce. The
+	 * GET request only validates the parameters and displays the consent screen
+	 * to a logged-in administrator; nothing is stored until the nonce-verified
+	 * consent POST (consent_params()).
+	 *
 	 * @return array<string,string|null>
 	 */
-	private static function request_params( string $method ): array {
+	private static function authorization_params(): array {
 		$out = array();
 		foreach ( self::PARAM_KEYS as $key ) {
-			$opaque = in_array( $key, array( 'state', 'redirect_uri', 'resource' ), true );
-			$rule   = array( 'options' => array( 'regexp' => $opaque ? self::OPAQUE_PATTERN : self::TOKEN_PATTERN ) );
-			// phpcs:disable WordPress.Security.NonceVerification -- Read-only; handle_post() verifies the nonce before any write.
-			if ( 'POST' === $method ) {
-				if ( ! isset( $_POST[ $key ] ) ) {
-					continue;
-				}
-				$value = is_string( $_POST[ $key ] ) ? filter_var( wp_unslash( $_POST[ $key ] ), FILTER_VALIDATE_REGEXP, $rule ) : false;
-			} else {
-				if ( ! isset( $_GET[ $key ] ) ) {
-					continue;
-				}
-				$value = is_string( $_GET[ $key ] ) ? filter_var( wp_unslash( $_GET[ $key ] ), FILTER_VALIDATE_REGEXP, $rule ) : false;
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Public OAuth authorization request (no state change); see docblock.
+			if ( isset( $_GET[ $key ] ) ) {
+				$out[ $key ] = self::finish_field( $key, is_string( $_GET[ $key ] ) ? filter_var( wp_unslash( $_GET[ $key ] ), FILTER_VALIDATE_REGEXP, self::field_rule( $key ) ) : false );
 			}
-			// phpcs:enable WordPress.Security.NonceVerification
-			if ( ! is_string( $value ) ) {
-				$out[ $key ] = null;
-				continue;
+			// phpcs:enable WordPress.Security.NonceVerification.Recommended
+		}
+		return $out;
+	}
+
+	/**
+	 * The consent form submission. The nonce is verified before any other field
+	 * is read; null means the nonce is missing or invalid.
+	 *
+	 * @return array<string,string|null>|null
+	 */
+	private static function consent_params(): ?array {
+		$nonce = isset( $_POST['_emcp_oauth_nonce'] ) && is_string( $_POST['_emcp_oauth_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_emcp_oauth_nonce'] ) ) : '';
+		if ( ! wp_verify_nonce( $nonce, self::NONCE_ACTION ) ) {
+			return null;
+		}
+		$out = array();
+		foreach ( array_merge( self::PARAM_KEYS, array( 'action' ) ) as $key ) {
+			if ( isset( $_POST[ $key ] ) ) {
+				$out[ $key ] = self::finish_field( $key, is_string( $_POST[ $key ] ) ? filter_var( wp_unslash( $_POST[ $key ] ), FILTER_VALIDATE_REGEXP, self::field_rule( $key ) ) : false );
 			}
-			// Token fields contain nothing sanitize_text_field() would alter.
-			$out[ $key ] = $opaque ? $value : sanitize_text_field( $value );
 		}
 		return $out;
 	}
@@ -150,7 +188,7 @@ class EMCP_Tools_OAuth_Authorize {
 	// ---------------------------------------------------------------------
 
 	private static function handle_get(): void {
-		$params       = self::request_params( 'GET' );
+		$params       = self::authorization_params();
 		$client_id    = (string) ( $params['client_id'] ?? '' );
 		$redirect_uri = (string) ( $params['redirect_uri'] ?? '' );
 		$client       = self::lookup_client( $client_id );
@@ -201,9 +239,8 @@ class EMCP_Tools_OAuth_Authorize {
 			self::error_page( __( 'You are not allowed to authorize this connection.', 'emcp-lite' ) );
 		}
 
-		$p     = self::request_params( 'POST' );
-		$nonce = (string) ( $p['_emcp_oauth_nonce'] ?? '' );
-		if ( ! wp_verify_nonce( $nonce, self::NONCE_ACTION ) ) {
+		$p = self::consent_params();
+		if ( null === $p ) {
 			self::error_page( __( 'Security check failed. Please start the connection again.', 'emcp-lite' ) );
 		}
 
@@ -482,8 +519,7 @@ class EMCP_Tools_OAuth_Authorize {
 	 */
 	private static function current_url(): string {
 		// The destination uses the configured origin, never a request Host header.
-		$params = array_filter( self::request_params( 'GET' ), 'is_string' );
-		$params = array_intersect_key( $params, array_flip( array( 'response_type', 'client_id', 'redirect_uri', 'code_challenge', 'code_challenge_method', 'state', 'scope', 'resource' ) ) );
+		$params = array_filter( self::authorization_params(), 'is_string' );
 		return esc_url_raw( add_query_arg( $params, self::endpoint_url() ) );
 	}
 }

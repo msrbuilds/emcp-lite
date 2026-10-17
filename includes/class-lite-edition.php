@@ -40,16 +40,9 @@ final class EMCP_Lite_Edition {
 	}
 
 	const CODE_POST_TYPES = array( 'custom_css', 'elementor_snippet', 'emcp_php_snippet', 'emcp_code_snippet', 'wpcode', 'wpcode_snippet' );
-	/** Presentation preferences exposed for remote writes and their undo. */
-	const WRITABLE_OPTIONS = array(
-		'blogname', 'blogdescription', 'date_format', 'time_format', 'start_of_week',
-		'posts_per_page', 'posts_per_rss', 'rss_use_excerpt', 'default_category',
-		'default_post_format', 'comments_per_page', 'thread_comments',
-		'thumbnail_size_w', 'thumbnail_size_h', 'medium_size_w', 'medium_size_h',
-		'large_size_w', 'large_size_h', 'uploads_use_yearmonth_folders',
-	);
 	const REMOVED_TOOLS = array(
 		'emcp-tools/query',
+		'emcp-tools/update-settings',
 		'emcp-tools/add-custom-css',
 		'emcp-tools/install-plugin',
 		'emcp-tools/activate-plugin',

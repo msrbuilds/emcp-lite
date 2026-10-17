@@ -954,7 +954,7 @@ class EMCP_Tools_Change_Log {
 			case 'post-restore':
 				return self::rollback_post_restore( $rb );
 			case 'option':
-				return self::rollback_option( $rb );
+				return self::rollback_option();
 			case 'attachment-delete':
 				return self::rollback_attachment_delete( $rb );
 			case 'user-create':
@@ -1123,36 +1123,14 @@ class EMCP_Tools_Change_Log {
 	}
 
 	/**
-	 * Restore option values from a before-image. `values` maps each option to its
-	 * prior value, or the marker '__ABSENT__' when it did not exist (deleted on undo).
+	 * Site-settings undo is not available in EMCP Lite: it never writes site
+	 * settings. Entries from earlier Lite builds or another edition are refused;
+	 * the administrator can change those settings in wp-admin.
 	 *
-	 * @param array $rb Rollback ref: { values:{ option => prior|'__ABSENT__' } } or { option, before }.
-	 * @return true|WP_Error
+	 * @return WP_Error
 	 */
-	private static function rollback_option( array $rb ) {
-		$values = ( isset( $rb['values'] ) && is_array( $rb['values'] ) ) ? $rb['values'] : array();
-		if ( empty( $values ) ) {
-			return new WP_Error( 'rollback_failed', __( 'No option values to restore.', 'emcp-lite' ) );
-		}
-		if ( array_diff( array_keys( $values ), EMCP_Lite_Edition::WRITABLE_OPTIONS ) ) {
-			return new WP_Error( 'emcp_lite_unsupported_rollback', __( 'Only presentation preferences can be restored in EMCP Lite.', 'emcp-lite' ) );
-		}
-		foreach ( $values as $name => $value ) {
-			$name = (string) $name;
-			if ( '__ABSENT__' === $value ) {
-				delete_option( $name );
-				$absent = new \stdClass();
-				if ( $absent !== get_option( $name, $absent ) ) {
-					return new WP_Error( 'rollback_failed', __( 'Could not remove the created option.', 'emcp-lite' ) );
-				}
-			} else {
-				update_option( $name, $value );
-				if ( maybe_serialize( get_option( $name ) ) !== maybe_serialize( $value ) ) {
-					return new WP_Error( 'rollback_failed', __( 'Could not restore the option value.', 'emcp-lite' ) );
-				}
-			}
-		}
-		return true;
+	private static function rollback_option(): WP_Error {
+		return new WP_Error( 'emcp_lite_unsupported_rollback', __( 'Site settings cannot be restored by EMCP Lite. Change them in Settings in your WordPress dashboard.', 'emcp-lite' ) );
 	}
 
 	/**
