@@ -55,21 +55,7 @@ final class EMCP_Tools_Admin_REST_Prompts extends EMCP_Tools_Admin_REST_Controll
 	}
 
 	public function sync( $request ) {
-		if ( ! EMCP_Tools_Admin_Prompts_Data::pro_class() ) {
-			return new WP_Error( 'emcp_no_license', __( 'Syncing the prompt library needs an active EMCP Pro licence.', 'emcp-lite' ), array( 'status' => 403 ) );
-		}
-		$bundle = EMCP_Tools_Pro_Prompts::get_bundle( true );
-		if ( is_wp_error( $bundle ) ) {
-			return new WP_Error( 'emcp_sync_failed', $bundle->get_error_message(), array( 'status' => 400 ) );
-		}
-		delete_transient( 'emcp_tools_nav_counts' );
-		if ( class_exists( 'EMCP_Tools_Attention' ) ) {
-			EMCP_Tools_Attention::flush();
-		}
-		$payload = ( new EMCP_Tools_Admin_Prompts_Data() )->payload();
-		/* translators: 1: prompt count, 2: category count. */
-		$payload['message'] = sprintf( __( 'Synced %1$d prompts across %2$d categories.', 'emcp-lite' ), $payload['total'], count( $payload['categories'] ) );
-		return new WP_REST_Response( $payload );
+		return new WP_Error( 'emcp_no_license', __( 'Syncing the prompt library needs an active EMCP Pro licence.', 'emcp-lite' ), array( 'status' => 403 ) );
 	}
 
 	public function dismiss_notice( $request ) {
@@ -84,11 +70,6 @@ final class EMCP_Tools_Admin_REST_Prompts extends EMCP_Tools_Admin_REST_Controll
 		if ( null === $prompt ) {
 			return new WP_Error( 'emcp_unknown_prompt', __( 'That prompt is not in the library.', 'emcp-lite' ), array( 'status' => 404 ) );
 		}
-		$recorded = false;
-		if ( 'pro' === ( $prompt['tier'] ?? '' ) && class_exists( 'EMCP_Tools_Pro_Usage' ) ) {
-			EMCP_Tools_Pro_Usage::record( 'prompt', $slug, $category );
-			$recorded = true;
-		}
-		return new WP_REST_Response( array( 'recorded' => $recorded ) );
+		return new WP_REST_Response( array( 'recorded' => false ) );
 	}
 }

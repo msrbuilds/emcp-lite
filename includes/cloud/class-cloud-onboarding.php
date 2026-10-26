@@ -35,16 +35,11 @@ class EMCP_Tools_Cloud_Onboarding {
 	}
 
 	public static function preflight(): array {
-		$license = 'unavailable';
-		if ( function_exists( 'emcp_tools_fs' ) ) {
-			$fs = emcp_tools_fs();
-			$license = $fs && $fs->can_use_premium_code() ? 'premium_access_available' : 'premium_access_unavailable';
-		}
 		return array(
 			'contract_version' => 1, 'state' => 'ready', 'site_url' => EMCP_Tools_Cloud::installation_base(),
 			'site_uuid' => (string) get_option( EMCP_Tools_Cloud::OPTION_SITE_UUID, '' ),
 			'plugin_version' => defined( 'EMCP_TOOLS_VERSION' ) ? EMCP_TOOLS_VERSION : '',
-			'license' => $license, 'cloud_connected' => EMCP_Tools_Cloud::is_connected(),
+			'license' => 'unavailable', 'cloud_connected' => EMCP_Tools_Cloud::is_connected(),
 			'gateway_local' => (bool) get_option( EMCP_Tools_Gateway_Credential::OPTION_FLAG, false ),
 			'identity_conflict' => EMCP_Tools_Cloud::identity_conflict(), 'health' => 'not_checked',
 		);

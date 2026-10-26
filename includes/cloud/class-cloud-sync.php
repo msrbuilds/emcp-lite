@@ -10,11 +10,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class EMCP_Tools_Cloud_Sync {
-	/**
-	 * @return EMCP_Tools_Sandbox_Cloud_Abilities
-	 */
-
-
 	private static function not_connected(): \WP_Error {
 		return new \WP_Error( 'not_connected', __( 'This site is not connected to EMCP Cloud.', 'emcp-lite' ) );
 	}

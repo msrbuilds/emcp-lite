@@ -80,27 +80,6 @@ final class EMCP_Tools_Attention_History extends EMCP_Tools_Attention_Base {
 	}
 }
 
-/** Sandbox drafts whose review flagged something. */
-final class EMCP_Tools_Attention_Sandbox extends EMCP_Tools_Attention_Base {
-	private function count(): int {
-		return class_exists( 'EMCP_Tools_Admin_Sandbox_Data' ) ? EMCP_Tools_Admin_Sandbox_Data::flagged_count() : 0;
-	}
-	public function id(): string {
-		return 'sandbox-review';
-	}
-	public function applies(): bool {
-		return $this->count() > 0;
-	}
-	public function state(): string {
-		return (string) $this->count();
-	}
-	public function item(): array {
-		$n = $this->count();
-		/* translators: %d: number of sandbox items. */
-		return $this->make( 'warning', 'code', sprintf( _n( '%d sandbox item awaiting review', '%d sandbox items awaiting review', $n, 'emcp-lite' ), $n ), __( 'AI-authored code stays inactive until you approve it.', 'emcp-lite' ), __( 'Review drafts', 'emcp-lite' ), self::url( '-widgets' ) );
-	}
-}
-
 /**
  * Tools switched off on the Tools screen, counted like the Dashboard health
  * strip (visible tools minus enabled ones): the disabled option also lists
@@ -170,25 +149,6 @@ final class EMCP_Tools_Attention_Updates extends EMCP_Tools_Attention_Base {
 		$n = array_sum( $this->counts() );
 		/* translators: %d: number of updates. */
 		return $this->make( 'info', 'refresh-cw', sprintf( _n( '%d update available', '%d updates available', $n, 'emcp-lite' ), $n ), __( 'Plugins and themes with a newer version.', 'emcp-lite' ), __( 'Open Updates', 'emcp-lite' ), self_admin_url( 'update-core.php' ) );
-	}
-}
-
-/** EMCP Cloud disconnected while Marketplace installs depend on it. */
-final class EMCP_Tools_Attention_Cloud extends EMCP_Tools_Attention_Base {
-	public function id(): string {
-		return 'cloud-disconnected';
-	}
-	public function applies(): bool {
-		if ( ! class_exists( 'EMCP_Tools_Cloud' ) || EMCP_Tools_Cloud::is_connected() ) {
-			return false;
-		}
-		return class_exists( 'EMCP_Tools_Marketplace_Installs' ) && array() !== EMCP_Tools_Marketplace_Installs::all();
-	}
-	public function state(): string {
-		return 'off';
-	}
-	public function item(): array {
-		return $this->make( 'warning', 'cloud', __( 'EMCP Cloud is disconnected', 'emcp-lite' ), __( 'Your Marketplace items can\'t get updates until you reconnect.', 'emcp-lite' ), __( 'Reconnect', 'emcp-lite' ), self::url( '-connection&section=cloud' ) );
 	}
 }
 

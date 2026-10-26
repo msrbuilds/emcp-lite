@@ -29,7 +29,7 @@ final class EMCP_Tools_Admin_Screens {
 		'widgets:export'  => 'includes/admin/rest/class-admin-rest-sandbox-export.php',
 	);
 
-	/** Pro-only tabs that also need an active licence; unlicensed means locked (spec 8.25). */
+	/** Pro-only tabs that also need an active Pro licence, which Lite never has, so they are always locked (spec 8.25). */
 	const LICENCE_TABS = array( 'ai-chat', 'templates', 'skills', 'skills:custom', 'memory', 'migrate', 'widgets:widgets', 'widgets:blocks', 'widgets:export' );
 
 	/** Warn (under WP_DEBUG) when a screen's boot data grows past this (spec 5.2). */
@@ -182,7 +182,7 @@ final class EMCP_Tools_Admin_Screens {
 		if ( isset( self::LOCKED_TABS[ $key ] ) && ! $exists( self::LOCKED_TABS[ $key ] ) ) {
 			return 'locked';
 		}
-		if ( in_array( $key, self::LICENCE_TABS, true ) && ! ( function_exists( 'emcp_tools_fs' ) && emcp_tools_fs()->can_use_premium_code() ) ) {
+		if ( in_array( $key, self::LICENCE_TABS, true ) ) {
 			return 'locked';
 		}
 		return $id;

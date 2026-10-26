@@ -64,18 +64,13 @@ final class EMCP_Tools_Admin_REST_Frame extends EMCP_Tools_Admin_REST_Controller
 	}
 
 	/**
-	 * Mark notifications read and return the new unread count.
+	 * Mark notifications read and return the new unread count. Lite has no
+	 * notification feed, so there is nothing to mark and the count is 0.
 	 *
 	 * @param WP_REST_Request $request Request.
 	 * @return WP_REST_Response
 	 */
 	public function read_notifications( $request ) {
-		$ids  = array_map( 'strval', array_filter( (array) $request->get_param( 'ids' ), 'is_scalar' ) );
-		$user = get_current_user_id();
-		if ( class_exists( 'EMCP_Tools_Notifications' ) ) {
-			EMCP_Tools_Notifications::mark_read( $user, $ids );
-		}
-		$unread = class_exists( 'EMCP_Tools_Notifications' ) ? EMCP_Tools_Notifications::unread_count( $user ) : 0;
-		return new WP_REST_Response( array( 'unread' => (int) $unread ) );
+		return new WP_REST_Response( array( 'unread' => 0 ) );
 	}
 }

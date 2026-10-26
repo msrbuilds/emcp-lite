@@ -39,13 +39,8 @@ final class EMCP_Tools_Admin_Nav {
 	 *
 	 * @param string[] $visible_tabs Tab ids that get_submenus() shows.
 	 * @param int[]    $counts       Tab id => count badge.
-	 * @param bool     $affiliate    Whether the Freemius affiliation page exists.
-	 * @param string[] $links        Optional footer URLs: 'account' (the Freemius
-	 *                               licence page) and 'upgrade' (unlicensed sites).
-	 *                               The WordPress submenu that used to carry them is
-	 *                               hidden, so the frame must.
 	 */
-	public function __construct( array $visible_tabs, array $counts = array(), bool $affiliate = false, array $links = array() ) {
+	public function __construct( array $visible_tabs, array $counts = array() ) {
 		foreach ( self::definitions() as $tab => $def ) {
 			if ( ! in_array( $tab, $visible_tabs, true ) ) {
 				continue;
@@ -78,36 +73,6 @@ final class EMCP_Tools_Admin_Nav {
 				'url'      => self::url( 'changelog' ),
 				'external' => false,
 				'badge'    => __( 'New', 'emcp-lite' ),
-			);
-		}
-		if ( ! empty( $links['account'] ) ) {
-			$this->footer[] = array(
-				'id'       => 'account',
-				'label'    => __( 'Account', 'emcp-lite' ),
-				'icon'     => 'circle-user',
-				'url'      => (string) $links['account'],
-				'external' => false,
-				'badge'    => null,
-			);
-		}
-		if ( ! empty( $links['upgrade'] ) ) {
-			$this->footer[] = array(
-				'id'       => 'upgrade',
-				'label'    => __( 'Upgrade to Pro', 'emcp-lite' ),
-				'icon'     => 'crown',
-				'url'      => (string) $links['upgrade'],
-				'external' => true,
-				'badge'    => null,
-			);
-		}
-		if ( $affiliate ) {
-			$this->footer[] = array(
-				'id'       => 'affiliate',
-				'label'    => __( 'Affiliate', 'emcp-lite' ),
-				'icon'     => 'dollar-sign',
-				'url'      => admin_url( 'admin.php?page=' . self::SLUG . '-affiliation' ),
-				'external' => false,
-				'badge'    => null,
 			);
 		}
 	}
@@ -211,8 +176,8 @@ final class EMCP_Tools_Admin_Nav {
 		return $this->footer;
 	}
 
-	/** Footer items the top bar shows as icons (the avatar is Account). */
-	const TOPBAR_LINKS = array( 'help', 'changelog', 'account', 'affiliate' );
+	/** Footer items the top bar shows as icons. */
+	const TOPBAR_LINKS = array( 'help', 'changelog' );
 
 	/**
 	 * The footer items the top bar carries, keyed by id.
@@ -230,7 +195,7 @@ final class EMCP_Tools_Admin_Nav {
 	}
 
 	/**
-	 * The footer items that stay in the sidebar (Upgrade to Pro).
+	 * The footer items that stay in the sidebar.
 	 *
 	 * @return array[]
 	 */

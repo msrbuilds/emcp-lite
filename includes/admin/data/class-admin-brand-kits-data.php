@@ -1,8 +1,8 @@
 <?php
 /**
- * Brand Kits screen data (spec 8.17): the bundled free kits, or the synced
- * Pro library when licensed (falling back to the free kits when the sync
- * fails), plus apply and restore on free code and the current-kit record.
+ * Brand Kits screen data (spec 8.17): the bundled free kits (the synced
+ * library ships with EMCP Pro), plus apply and restore and the current-kit
+ * record.
  *
  * @package EMCP_Tools
  */
@@ -25,23 +25,6 @@ final class EMCP_Tools_Admin_Brand_Kits_Data {
 		return class_exists( 'EMCP_Tools_Bootstrap' ) && EMCP_Tools_Bootstrap::elementor_active();
 	}
 
-	private static function licensed(): bool {
-		return class_exists( 'EMCP_Tools_Pro_Brand_Kits' ) && EMCP_Tools_Pro_Brand_Kits::user_has_access();
-	}
-
-	/** @return array{bundle: array, source: string, error: string} */
-	private function library(): array {
-		if ( self::licensed() ) {
-			$bundle = EMCP_Tools_Pro_Brand_Kits::get_bundle();
-			if ( ! is_wp_error( $bundle ) && ! empty( $bundle['categories'] ) ) {
-				return array( 'bundle' => $bundle, 'source' => 'pro', 'error' => '' );
-			}
-			$error = is_wp_error( $bundle ) ? $bundle->get_error_message() : __( 'The brand kit library is empty.', 'emcp-lite' );
-			return array( 'bundle' => EMCP_Tools_Free_Brand_Kits::get_bundle(), 'source' => 'free', 'error' => $error );
-		}
-		return array( 'bundle' => EMCP_Tools_Free_Brand_Kits::get_bundle(), 'source' => 'free', 'error' => '' );
-	}
-
 	/** @return string[] Four colours: primary, secondary, text, accent. */
 	public static function swatches( array $kit ): array {
 		$preview = $kit['preview']['swatches'] ?? null;
@@ -56,7 +39,7 @@ final class EMCP_Tools_Admin_Brand_Kits_Data {
 	}
 
 	public function find( string $category, string $slug ): ?array {
-		foreach ( $this->library()['bundle']['categories'] ?? array() as $cat ) {
+		foreach ( EMCP_Tools_Free_Brand_Kits::get_bundle()['categories'] ?? array() as $cat ) {
 			if ( ( $cat['slug'] ?? '' ) !== $category ) {
 				continue;
 			}
@@ -152,10 +135,9 @@ final class EMCP_Tools_Admin_Brand_Kits_Data {
 	}
 
 	public function payload( array $query = array() ): array {
-		$lib     = $this->library();
 		$current = self::current();
 		$list    = EMCP_Tools_Admin_Library_List::build(
-			$lib['bundle']['categories'] ?? array(),
+			EMCP_Tools_Free_Brand_Kits::get_bundle()['categories'] ?? array(),
 			'kits',
 			static function ( array $k ): string {
 				return ( $k['title'] ?? '' ) . ' ' . ( $k['description'] ?? '' ) . ' ' . implode( ' ', (array) ( $k['tags'] ?? array() ) );
@@ -187,10 +169,10 @@ final class EMCP_Tools_Admin_Brand_Kits_Data {
 			array(
 				'current'         => $current,
 				'restorable'      => (bool) EMCP_Tools_Kit_Backup_Store::list_backups( 1 ),
-				'source'          => $lib['source'],
-				'syncedAt'        => 'pro' === $lib['source'] ? (int) ( $lib['bundle']['fetched_at'] ?? 0 ) : 0,
-				'error'           => $lib['error'],
-				'licensed'        => self::licensed(),
+				'source'          => 'free',
+				'syncedAt'        => 0,
+				'error'           => '',
+				'licensed'        => false,
 				'elementorActive' => self::elementor_active(),
 				'upgradeUrl'      => function_exists( 'emcp_tools_upgrade_url' ) ? emcp_tools_upgrade_url() : 'https://emcptools.com/pricing',
 			)

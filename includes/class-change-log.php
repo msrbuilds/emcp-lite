@@ -1051,10 +1051,6 @@ class EMCP_Tools_Change_Log {
 			if ( file_exists( $orig ) ) {
 				return new WP_Error( 'restore_identity_conflict', __( 'An attachment destination is already occupied. Nothing was restored.', 'emcp-lite' ) );
 			}
-			$safe = self::guard_target( $orig );
-			if ( is_wp_error( $safe ) ) {
-				return $safe;
-			}
 		}
 		unset( $post['ID'] );
 		if ( $old_id > 0 && ! get_post( $old_id ) ) {
@@ -1363,19 +1359,6 @@ class EMCP_Tools_Change_Log {
 			}
 		}
 		return true;
-	}
-
-	/**
-	 * Confine a filesystem target to ABSPATH via the shared guard.
-	 *
-	 * @param string $target Absolute path.
-	 * @return string|WP_Error Canonical path or error.
-	 */
-	private static function guard_target( string $target ) {
-		if ( class_exists( 'EMCP_Tools_Filesystem_Guard' ) ) {
-			return EMCP_Tools_Filesystem_Guard::resolve_path( $target );
-		}
-		return $target;
 	}
 
 	/**

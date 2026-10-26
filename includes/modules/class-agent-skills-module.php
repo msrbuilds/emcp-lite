@@ -7,11 +7,9 @@
  * into the discovery context. Turning it off removes both (and their ~900-token
  * footprint) without touching the local-install path on the Skills tab.
  *
- * Pro tier, on by default. Metadata only — the gating is read statically:
- *   - the ability registrar checks is_enabled() before registering the tools,
- *   - EMCP_Tools_Skill_Catalog::discovery_catalog() checks it before injecting.
- * So this class carries no Pro logic and lives safely in the free tree, like
- * EMCP_Tools_Templates_Module.
+ * Pro tier, on by default. Metadata only: Lite lists the module on the
+ * Modules screen as locked, and the skills tools ship with EMCP Pro. This
+ * class carries no Pro logic, like EMCP_Tools_Templates_Module.
  *
  * @package EMCP_Tools
  * @since   3.2.0
@@ -58,9 +56,9 @@ class EMCP_Tools_Agent_Skills_Module extends EMCP_Tools_Module {
 		return true;
 	}
 
-	/** Requires an active Pro license (the skills are Pro content). */
+	/** Requires an active Pro license (the skills are Pro content), which Lite never has. */
 	public function is_available(): bool {
-		return function_exists( 'emcp_tools_fs' ) && emcp_tools_fs()->can_use_premium_code();
+		return false;
 	}
 
 	/** The Skills tab is where the skills live (download + guides). */
@@ -71,18 +69,6 @@ class EMCP_Tools_Agent_Skills_Module extends EMCP_Tools_Module {
 	/** No overlay knobs — the on/off toggle is the whole control. */
 	public function render_settings(): void {}
 
-	/** Nothing to wire on boot — the two consumers gate themselves via is_enabled(). */
+	/** Nothing to wire on boot: the skills tools and catalog ship with EMCP Pro. */
 	public function register(): void {}
-
-	/**
-	 * Whether the module is active (static helper for the ability registrar,
-	 * which runs on wp_abilities_api_init, before the module's init:5 boot).
-	 * Reads the active-modules option directly.
-	 *
-	 * @return bool
-	 */
-	public static function is_enabled(): bool {
-		$active = (array) get_option( EMCP_Tools_Module::OPTION_ACTIVE, array() );
-		return in_array( 'agent-skills', $active, true );
-	}
 }

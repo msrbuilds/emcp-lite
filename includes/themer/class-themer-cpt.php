@@ -240,24 +240,6 @@ class EMCP_Tools_Themer_CPT {
 	}
 
 	/**
-	 * Whether this install can use Pro code (Themer unlimited templates + granular
-	 * conditions). Free installs get the quota gate and the upsell banner.
-	 *
-	 * @return bool
-	 */
-	private static function is_premium(): bool {
-		return function_exists( 'emcp_tools_fs' ) && emcp_tools_fs()->can_use_premium_code();
-	}
-
-	/**
-	 * Show the Free-tier limits and a Pro upsell banner on the CPT list screen.
-	 * Renders only for free installs; premium hides it entirely. Lists per-type
-	 * usage (used / cap) so the 1-per-type quota is visible before the user hits
-	 * the "Add New" wall, and states exactly what Pro unlocks.
-	 */
-
-
-	/**
 	 * Show the detected theme-adapter status as a notice on the CPT list screen.
 	 */
 	public function render_adapter_notice(): void {

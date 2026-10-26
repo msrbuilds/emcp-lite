@@ -27,10 +27,8 @@ final class EMCP_Tools_Attention {
 		return array(
 			new EMCP_Tools_Attention_Server_Off(),
 			new EMCP_Tools_Attention_History(),
-			new EMCP_Tools_Attention_Sandbox(),
 			new EMCP_Tools_Attention_Tools(),
 			new EMCP_Tools_Attention_Updates(),
-			new EMCP_Tools_Attention_Cloud(),
 			new EMCP_Tools_Adapter_Attention(),
 		);
 	}

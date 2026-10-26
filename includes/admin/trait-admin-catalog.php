@@ -1450,7 +1450,7 @@ trait EMCP_Tools_Admin_Catalog_Trait {
 						'description'      => __( 'Catalog of the GenerateBlocks V2 blocks (list-blocks) and each block\'s attributes + styles model (get-block-schema).', 'emcp-lite' ),
 						'badges'           => array( 'read-only', 'pro' ),
 						'operations'       => array( 'list-blocks', 'get-block-schema' ),
-						'available'        => self::generateblocks_available(),
+						'available'        => false,
 						'requires'         => array( 'name' => 'GenerateBlocks', 'kind' => 'plugin' ),
 					),
 					'emcp-tools/generateblocks-write' => array(
@@ -1458,7 +1458,7 @@ trait EMCP_Tools_Admin_Catalog_Trait {
 						'description'      => __( 'Insert a GenerateBlocks V2 block with a generated uniqueId, styles object + compiled css, and content (add-block).', 'emcp-lite' ),
 						'badges'           => array( 'pro' ),
 						'operations'       => array( 'add-block' ),
-						'available'        => self::generateblocks_available(),
+						'available'        => false,
 						'requires'         => array( 'name' => 'GenerateBlocks', 'kind' => 'plugin' ),
 					),
 				),
@@ -1497,7 +1497,7 @@ trait EMCP_Tools_Admin_Catalog_Trait {
 						'description'      => __( 'Catalog of the Blocksy blocks (list-blocks) and each block\'s attributes (get-block-schema).', 'emcp-lite' ),
 						'badges'           => array( 'read-only', 'pro' ),
 						'operations'       => array( 'list-blocks', 'get-block-schema' ),
-						'available'        => self::blocksy_blocks_available(),
+						'available'        => false,
 						'requires'         => array( 'name' => 'Blocksy Companion', 'kind' => 'plugin' ),
 					),
 					'emcp-tools/blocksy-blocks-write'     => array(
@@ -1505,7 +1505,7 @@ trait EMCP_Tools_Admin_Catalog_Trait {
 						'description'      => __( 'Insert a Blocksy block into a post (add-block); query/tax-query get a scaffolded template child.', 'emcp-lite' ),
 						'badges'           => array( 'pro' ),
 						'operations'       => array( 'add-block' ),
-						'available'        => self::blocksy_blocks_available(),
+						'available'        => false,
 						'requires'         => array( 'name' => 'Blocksy Companion', 'kind' => 'plugin' ),
 					),
 					'emcp-tools/blocksy-extensions-read'  => array(
@@ -1941,42 +1941,6 @@ trait EMCP_Tools_Admin_Catalog_Trait {
 			);
 		}
 
-		// Brand Kits (Pro). Only shown to licensed sites — the underlying
-		// abilities register only for Pro, matching this gate. No 'pro' badge so
-		// they are NOT auto-disabled by maybe_apply_default_disabled_tools (this
-		// is a headline Pro feature, on by default for licensed users).
-		if (
-			class_exists( 'EMCP_Tools_Pro_Brand_Kits' )
-			&& EMCP_Tools_Pro_Brand_Kits::user_has_access()
-		) {
-			$tools['brand_kits'] = array(
-				'platform' => 'elementor',
-				'label' => __( 'Brand Kits', 'emcp-lite' ),
-				'tools' => array(
-					'emcp-tools/list-brand-kits'           => array(
-						'label'       => __( 'List Brand Kits', 'emcp-lite' ),
-						'description' => __( 'Lists available premium brand kits from the cached library.', 'emcp-lite' ),
-						'badges'      => array( 'read-only' ),
-					),
-					'emcp-tools/apply-brand-kit'           => array(
-						'label'       => __( 'Apply Brand Kit', 'emcp-lite' ),
-						'description' => __( 'Applies a brand kit: replaces system colors + typography site-wide.', 'emcp-lite' ),
-						'badges'      => array( 'destructive' ),
-					),
-					'emcp-tools/replace-system-colors'     => array(
-						'label'       => __( 'Replace System Colors', 'emcp-lite' ),
-						'description' => __( 'Replaces the four Elementor system color slots atomically.', 'emcp-lite' ),
-						'badges'      => array( 'destructive' ),
-					),
-					'emcp-tools/replace-system-typography' => array(
-						'label'       => __( 'Replace System Typography', 'emcp-lite' ),
-						'description' => __( 'Replaces the four Elementor system typography slots atomically.', 'emcp-lite' ),
-						'badges'      => array( 'destructive' ),
-					),
-				),
-			);
-		}
-
 		// PHP Code Snippets (Sandbox) — free, but capability-gated and powerful,
 		// so all six ship disabled-by-default (maybe_apply_default_disabled_tools
 		// v4) and the admin re-enables them here. There is no "activate" tool: an
@@ -2405,24 +2369,6 @@ trait EMCP_Tools_Admin_Catalog_Trait {
 			);
 		}
 
-		if ( class_exists( 'EMCP_Tools_Bricks_Integration' ) ) {
-			$tools = array_merge( $tools, EMCP_Tools_Bricks_Integration::admin_categories() );
-		}
-		if (class_exists('EMCP_Tools_Beaver_Integration')) { $tools=array_merge($tools,EMCP_Tools_Beaver_Integration::admin_categories()); }
-		if (class_exists('EMCP_Tools_Visual_Composer_Integration')) { $tools=array_merge($tools,EMCP_Tools_Visual_Composer_Integration::admin_categories()); }
-		if (class_exists('EMCP_Tools_WPBakery_Integration')) { $tools=array_merge($tools,EMCP_Tools_WPBakery_Integration::admin_categories()); }
-		if (class_exists('EMCP_Tools_Kirki_Integration')) { $tools=array_merge($tools,EMCP_Tools_Kirki_Integration::admin_categories()); }
-		if (class_exists('EMCP_Tools_Oxygen_Integration')) { $tools=array_merge($tools,EMCP_Tools_Oxygen_Integration::admin_categories()); }
-		if ( class_exists( 'EMCP_Tools_Breakdance_Integration' ) ) {
-			$tools = array_merge( $tools, EMCP_Tools_Breakdance_Integration::admin_categories() );
-		}
-		if ( class_exists( 'EMCP_Tools_Avada_Integration' ) ) {
-			$tools = array_merge( $tools, EMCP_Tools_Avada_Integration::admin_categories() );
-		}
-		if ( class_exists( 'EMCP_Tools_Thrive_Integration' ) ) { $tools = array_merge( $tools, EMCP_Tools_Thrive_Integration::admin_categories() ); }
-		if ( class_exists( 'EMCP_Tools_Divi_Integration' ) ) {
-			$tools = array_merge( $tools, EMCP_Tools_Divi_Integration::admin_categories() );
-		}
 		foreach ( array('theme_astra_spectra'=>array('spectra','Astra'), 'theme_kadence'=>array('kadence-blocks','Kadence'), 'theme_generatepress'=>array('generateblocks','GeneratePress')) as $category => $split ) {
 			if (!isset($tools[$category])) { continue; }
 			[$id,$label]=$split;
@@ -2442,11 +2388,11 @@ trait EMCP_Tools_Admin_Catalog_Trait {
 		$tools['blocksy_companion_extensions']=array('platform'=>'plugins','group'=>'other','label'=>__('Blocksy Companion: Extensions','emcp-lite'),'pro'=>true,'tools'=>array_intersect_key($blocksy_legacy,array_flip(array('emcp-tools/blocksy-extensions-read','emcp-tools/blocksy-extensions-write'))));
 		unset($tools['theme_blocksy']);
 		foreach(array(
-			'blocksy-theme'=>array('themes','Blocksy Theme','EMCP_Tools_Blocksy_Theme_Integration',array('get-context','get-settings','get-design-settings'),array('update-settings')),
-			'blocksy-content'=>array('plugins','Blocksy Companion: Content Blocks','EMCP_Tools_Blocksy_Content_Integration',array('get-context','list-content-blocks','get-content-block','list-hooks'),array('create-content-block','update-content-block','publish-content-block','unpublish-content-block')),
+			'blocksy-theme'=>array('themes','Blocksy Theme',array('get-context','get-settings','get-design-settings'),array('update-settings')),
+			'blocksy-content'=>array('plugins','Blocksy Companion: Content Blocks',array('get-context','list-content-blocks','get-content-block','list-hooks'),array('create-content-block','update-content-block','publish-content-block','unpublish-content-block')),
 		) as $id=>$spec) {
 			$entries=array();
-			foreach(array('read','write') as $mode) { $entries['emcp-tools/'.$id.'-'.$mode]=array('label'=>$spec[1].' '.ucfirst($mode),'description'=>$id==='blocksy-theme'?__('Native theme layout settings and read-only design configuration.','emcp-lite'):__('Native Pro templates, hooks and popups. Create disabled drafts, edit content and explicitly publish.','emcp-lite'),'operations'=>$spec[$mode==='read'?3:4],'badges'=>$mode==='read'?array('read-only','pro'):array('pro'),'available'=>class_exists($spec[2]) && (new $spec[2]())->is_available(),'requires'=>array('name'=>$id==='blocksy-theme'?'Blocksy':'Blocksy Companion Pro','kind'=>$id==='blocksy-theme'?'theme':'plugin')); }
+			foreach(array('read','write') as $mode) { $entries['emcp-tools/'.$id.'-'.$mode]=array('label'=>$spec[1].' '.ucfirst($mode),'description'=>$id==='blocksy-theme'?__('Native theme layout settings and read-only design configuration.','emcp-lite'):__('Native Pro templates, hooks and popups. Create disabled drafts, edit content and explicitly publish.','emcp-lite'),'operations'=>$spec[$mode==='read'?2:3],'badges'=>$mode==='read'?array('read-only','pro'):array('pro'),'available'=>false,'requires'=>array('name'=>$id==='blocksy-theme'?'Blocksy':'Blocksy Companion Pro','kind'=>$id==='blocksy-theme'?'theme':'plugin')); }
 			$tools[$id]=array('platform'=>$spec[0],'group'=>'other','label'=>$spec[1],'pro'=>true,'tools'=>$entries);
 		}
 		$tools=array_merge($tools,EMCP_Tools_Block_Pack_Integration::admin_categories());

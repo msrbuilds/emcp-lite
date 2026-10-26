@@ -1,8 +1,7 @@
 <?php
 /**
- * Prompts screen data (spec 8.8): the bundled samples on free builds, the
- * synced Pro library when licensed (falling back to the samples when the
- * sync fails), paged 12 at a time with full content for Copy.
+ * Prompts screen data (spec 8.8): the bundled samples (the synced library
+ * ships with EMCP Pro), paged 12 at a time with full content for Copy.
  *
  * @package EMCP_Tools
  */
@@ -44,14 +43,8 @@ final class EMCP_Tools_Admin_Prompts_Data {
 		return array( 'categories' => array_values( $categories ) );
 	}
 
-	/** Whether EMCP_Tools_Pro_Prompts is present and usable. */
-	public static function pro_class(): bool {
-		return class_exists( 'EMCP_Tools_Pro_Prompts' ) && EMCP_Tools_Pro_Prompts::user_has_access();
-	}
-
 	/**
-	 * Prompt titles for the command palette, from cached data only: the free
-	 * samples, or the synced Pro library's transient or stored copy. Never
+	 * Prompt titles for the command palette, from the bundled samples. Never
 	 * fetches (spec 7: the palette must stay instant).
 	 */
 	public static function palette_items(): array {
@@ -62,17 +55,7 @@ final class EMCP_Tools_Admin_Prompts_Data {
 				return array();
 			}
 		}
-		$categories = array();
-		if ( self::pro_class() ) {
-			$bundle = get_transient( EMCP_Tools_Pro_Prompts::CACHE_KEY );
-			if ( ! is_array( $bundle ) ) {
-				$bundle = get_option( EMCP_Tools_Pro_Prompts::STORE_KEY );
-			}
-			$categories = is_array( $bundle ) ? (array) ( $bundle['categories'] ?? array() ) : array();
-		}
-		if ( ! $categories ) {
-			$categories = self::free_bundle()['categories'];
-		}
+		$categories = self::free_bundle()['categories'];
 		$base = admin_url( 'admin.php?page=emcp-tools-prompts' );
 		$out  = array();
 		foreach ( $categories as $cat ) {
@@ -91,27 +74,8 @@ final class EMCP_Tools_Admin_Prompts_Data {
 		return $out;
 	}
 
-	/** @return array{bundle: array, source: string, error: string} */
-	private function library(): array {
-		if ( self::pro_class() ) {
-			$bundle = EMCP_Tools_Pro_Prompts::get_bundle();
-			if ( ! is_wp_error( $bundle ) ) {
-				foreach ( $bundle['categories'] as &$cat ) {
-					foreach ( $cat['prompts'] as &$prompt ) {
-						$prompt['tier'] = 'pro';
-					}
-					unset( $prompt );
-				}
-				unset( $cat );
-				return array( 'bundle' => $bundle, 'source' => 'pro', 'error' => '' );
-			}
-			return array( 'bundle' => self::free_bundle(), 'source' => 'free', 'error' => $bundle->get_error_message() );
-		}
-		return array( 'bundle' => self::free_bundle(), 'source' => 'free', 'error' => '' );
-	}
-
 	public function find( string $category, string $slug ): ?array {
-		foreach ( $this->library()['bundle']['categories'] as $cat ) {
+		foreach ( self::free_bundle()['categories'] as $cat ) {
 			if ( ( $cat['slug'] ?? '' ) !== $category ) {
 				continue;
 			}
@@ -124,15 +88,9 @@ final class EMCP_Tools_Admin_Prompts_Data {
 		return null;
 	}
 
-	private static function ai_chat_url(): string {
-		$module = class_exists( 'EMCP_Tools_Modules_Registry' ) ? EMCP_Tools_Modules_Registry::instance()->get( 'ai-chat' ) : null;
-		return ( $module && $module->is_active() && $module->is_available() ) ? admin_url( 'admin.php?page=emcp-tools-ai-chat' ) : '';
-	}
-
 	public function payload( array $query = array() ): array {
-		$lib   = $this->library();
 		$list  = EMCP_Tools_Admin_Library_List::build(
-			$lib['bundle']['categories'] ?? array(),
+			self::free_bundle()['categories'],
 			'prompts',
 			static function ( array $p ): string {
 				return ( $p['title'] ?? '' ) . ' ' . ( $p['description'] ?? '' );
@@ -154,18 +112,17 @@ final class EMCP_Tools_Admin_Prompts_Data {
 			},
 			$list['items']
 		);
-		$pro = 'pro' === $lib['source'];
 		return array_merge(
 			$list,
 			array(
 				'items'           => $items,
-				'source'          => $lib['source'],
-				'syncedAt'        => $pro ? (int) ( $lib['bundle']['synced_at'] ?? $lib['bundle']['fetched_at'] ?? 0 ) : 0,
-				'error'           => $lib['error'],
-				'licensed'        => self::pro_class(),
+				'source'          => 'free',
+				'syncedAt'        => 0,
+				'error'           => '',
+				'licensed'        => false,
 				'noticeDismissed' => EMCP_Tools_Admin::prompts_notice_dismissed(),
-				'v1Url'           => ( $pro && EMCP_Tools_Pro_Prompts::v1_zip_available() ) ? EMCP_Tools_Pro_Prompts::v1_download_url() : '',
-				'aiChatUrl'       => self::pro_class() ? self::ai_chat_url() : '',
+				'v1Url'           => '',
+				'aiChatUrl'       => '',
 				'upgradeUrl'      => function_exists( 'emcp_tools_upgrade_url' ) ? emcp_tools_upgrade_url() : 'https://emcptools.com/pricing',
 			)
 		);

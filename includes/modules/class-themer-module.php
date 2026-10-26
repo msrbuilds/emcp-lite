@@ -148,8 +148,5 @@ class EMCP_Tools_Themer_Module extends EMCP_Tools_Module {
 		if ( class_exists( 'EMCP_Tools_Themer_Block_Bindings' ) ) {
 			EMCP_Tools_Themer_Block_Bindings::init();
 		}
-		if ( class_exists( 'EMCP_Tools_Themer_PHP' ) ) {
-			( new EMCP_Tools_Themer_PHP() )->init();
-		}
 	}
 }

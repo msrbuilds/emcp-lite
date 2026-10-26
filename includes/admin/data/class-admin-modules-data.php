@@ -37,7 +37,7 @@ final class EMCP_Tools_Admin_Modules_Data {
 				array( 'id' => 'ai', 'label' => __( 'AI & agents', 'emcp-lite' ) ),
 				array( 'id' => 'site', 'label' => __( 'Site & safety', 'emcp-lite' ) ),
 			),
-			'licensed' => function_exists( 'emcp_tools_fs' ) && emcp_tools_fs()->can_use_premium_code(),
+			'licensed' => false,
 		);
 	}
 

@@ -14,13 +14,14 @@ class EMCP_Tools_Page_Builders {
 	const SETTINGS_GROUP = 'emcp_tools_page_builders';
 	const BLOCK_PACK_OPTION = 'emcp_tools_block_packs';
 
+	/** Gutenberg block packs. Packs without a 'class' need EMCP Pro, which Lite does not ship. */
 	public static function block_packs(): array {
 		return array(
-			'otter' => array('label'=>'Otter Blocks', 'class'=>'EMCP_Tools_Otter_Integration', 'native_tools'=>true, 'requirement'=>__('Requires Otter Blocks 3.2.5–3.2.x and EMCP Pro. Otter Pro is optional.','emcp-lite')),
-			'blocksy-blocks' => array('label'=>'Blocksy Blocks', 'class'=>'EMCP_Tools_Blocksy_Blocks_Integration', 'requirement'=>__('Requires the Blocksy theme, Blocksy Companion and EMCP Pro.','emcp-lite')),
+			'otter' => array('label'=>'Otter Blocks', 'native_tools'=>true, 'requirement'=>__('Requires Otter Blocks 3.2.5–3.2.x and EMCP Pro. Otter Pro is optional.','emcp-lite')),
+			'blocksy-blocks' => array('label'=>'Blocksy Blocks', 'requirement'=>__('Requires the Blocksy theme, Blocksy Companion and EMCP Pro.','emcp-lite')),
 			'spectra' => array('label'=>'Spectra', 'class'=>'EMCP_Tools_Spectra_Integration'),
 			'kadence-blocks' => array('label'=>'Kadence Blocks', 'class'=>'EMCP_Tools_Kadence_Blocks_Integration'),
-			'generateblocks' => array('label'=>'GenerateBlocks', 'class'=>'EMCP_Tools_GenerateBlocks_Integration'),
+			'generateblocks' => array('label'=>'GenerateBlocks'),
 		);
 	}
 
@@ -67,25 +68,9 @@ class EMCP_Tools_Page_Builders {
 	}
 
 	public static function available( string $id ): bool {
-		if ('visual-composer' === $id) { return function_exists('emcp_tools_fs') && emcp_tools_fs()->can_use_premium_code() && class_exists('EMCP_Tools_Visual_Composer_Integration') && EMCP_Tools_Visual_Composer_Integration::supported(); }
 		if (isset(self::block_packs()[$id])) {
-			$class=self::block_packs()[$id]['class'];
-			return class_exists($class) && (new $class())->is_available();
-		}
-		if ('beaver' === $id) { return function_exists('emcp_tools_fs') && emcp_tools_fs()->can_use_premium_code() && class_exists('EMCP_Tools_Beaver_Integration') && EMCP_Tools_Beaver_Integration::supported(); }
-		if ('wpbakery' === $id) { return function_exists('emcp_tools_fs') && emcp_tools_fs()->can_use_premium_code() && class_exists('EMCP_Tools_WPBakery_Integration') && EMCP_Tools_WPBakery_Integration::supported(); }
-		if ('kirki' === $id) { return function_exists('emcp_tools_fs') && emcp_tools_fs()->can_use_premium_code() && class_exists('EMCP_Tools_Kirki_Integration') && EMCP_Tools_Kirki_Integration::supported(); }
-		if ('oxygen' === $id) { return function_exists('emcp_tools_fs') && emcp_tools_fs()->can_use_premium_code() && class_exists('EMCP_Tools_Oxygen_Integration') && EMCP_Tools_Oxygen_Integration::supported(); }
-		if ( 'thrive' === $id ) { return function_exists( 'emcp_tools_fs' ) && emcp_tools_fs()->can_use_premium_code() && class_exists( 'EMCP_Tools_Thrive_Integration' ) && EMCP_Tools_Thrive_Integration::supported(); }
-		if ( 'divi' === $id ) { return function_exists( 'emcp_tools_fs' ) && emcp_tools_fs()->can_use_premium_code() && class_exists( 'EMCP_Tools_Divi_Integration' ) && EMCP_Tools_Divi_Integration::supported(); }
-		if ( 'avada' === $id ) { return function_exists( 'emcp_tools_fs' ) && emcp_tools_fs()->can_use_premium_code() && class_exists( 'EMCP_Tools_Avada_Integration' ) && EMCP_Tools_Avada_Integration::supported(); }
-		if ( 'breakdance' === $id ) {
-			return function_exists( 'emcp_tools_fs' ) && emcp_tools_fs()->can_use_premium_code()
-				&& class_exists( 'EMCP_Tools_Breakdance_Integration' ) && EMCP_Tools_Breakdance_Integration::supported();
-		}
-		if ( 'bricks' === $id ) {
-			return function_exists( 'emcp_tools_fs' ) && emcp_tools_fs()->can_use_premium_code()
-				&& class_exists( 'EMCP_Tools_Bricks_Integration' ) && EMCP_Tools_Bricks_Integration::supported();
+			$class=self::block_packs()[$id]['class'] ?? '';
+			return '' !== $class && class_exists($class) && (new $class())->is_available();
 		}
 		if ( 'gutenberg' === $id ) {
 			return true;
@@ -93,11 +78,7 @@ class EMCP_Tools_Page_Builders {
 		if ( 'elementor' === $id ) {
 			return (bool) did_action( 'elementor/loaded' );
 		}
-		if ( 'bebuilder' === $id ) {
-			return 'betheme' === strtolower( get_template() )
-				&& function_exists( 'emcp_tools_fs' ) && emcp_tools_fs()->can_use_premium_code()
-				&& class_exists( 'EMCP_Tools_BeTheme_Integration' );
-		}
+		// Every other catalog builder needs EMCP Pro, which Lite does not ship.
 		return false;
 	}
 
@@ -107,12 +88,7 @@ class EMCP_Tools_Page_Builders {
 		if ( null !== $saved ) {
 			return is_string( $saved ) && isset( self::catalog()[ $saved ] ) ? $saved : '';
 		}
-		foreach ( array( 'elementor', 'bebuilder', 'bricks', 'breakdance', 'avada', 'divi', 'thrive', 'oxygen', 'kirki', 'wpbakery', 'beaver' ) as $id ) {
-			if ( self::available( $id ) ) {
-				return $id;
-			}
-		}
-		return '';
+		return self::available( 'elementor' ) ? 'elementor' : '';
 	}
 
 	public static function enabled( string $id ): bool {

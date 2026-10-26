@@ -42,10 +42,9 @@ final class EMCP_Tools_Admin_Frame {
 	/**
 	 * Announcements for the promo bar, in display order.
 	 *
-	 * @param bool $show_upgrade Whether the site has no Pro licence.
 	 * @return array[]
 	 */
-	public static function announcements( bool $show_upgrade ): array {
+	public static function announcements(): array {
 		$list = array(
 			array(
 				'key'   => 'cloud',
@@ -57,27 +56,25 @@ final class EMCP_Tools_Admin_Frame {
 				'url'   => 'https://emcptools.com/cloud',
 			),
 		);
-		if ( $show_upgrade ) {
-			$upgrade = function_exists( 'emcp_tools_upgrade_url' ) ? emcp_tools_upgrade_url() : 'https://emcptools.com/pricing';
-			$list[]  = array(
-				'key'   => 'pro',
-				'badge' => __( 'Pro', 'emcp-lite' ),
-				'icon'  => 'crown',
-				'title' => __( 'Upgrade to EMCP Pro.', 'emcp-lite' ),
-				'text'  => __( 'Unlock AI Chat, the Widget and Block Builder, Templates, Skills and scheduled backups.', 'emcp-lite' ),
-				'cta'   => __( 'Upgrade to Pro', 'emcp-lite' ),
-				'url'   => $upgrade,
-			);
-			$list[]  = array(
-				'key'   => 'ltd',
-				'badge' => __( 'Limited', 'emcp-lite' ),
-				'icon'  => 'sparkles',
-				'title' => __( 'Lifetime deal ends soon.', 'emcp-lite' ),
-				'text'  => __( 'Pay once and own EMCP Pro forever. This lifetime deal is going away for good.', 'emcp-lite' ),
-				'cta'   => __( 'Get the LTD', 'emcp-lite' ),
-				'url'   => $upgrade,
-			);
-		}
+		$upgrade = function_exists( 'emcp_tools_upgrade_url' ) ? emcp_tools_upgrade_url() : 'https://emcptools.com/pricing';
+		$list[]  = array(
+			'key'   => 'pro',
+			'badge' => __( 'Pro', 'emcp-lite' ),
+			'icon'  => 'crown',
+			'title' => __( 'Upgrade to EMCP Pro.', 'emcp-lite' ),
+			'text'  => __( 'Unlock AI Chat, the Widget and Block Builder, Templates, Skills and scheduled backups.', 'emcp-lite' ),
+			'cta'   => __( 'Upgrade to Pro', 'emcp-lite' ),
+			'url'   => $upgrade,
+		);
+		$list[]  = array(
+			'key'   => 'ltd',
+			'badge' => __( 'Limited', 'emcp-lite' ),
+			'icon'  => 'sparkles',
+			'title' => __( 'Lifetime deal ends soon.', 'emcp-lite' ),
+			'text'  => __( 'Pay once and own EMCP Pro forever. This lifetime deal is going away for good.', 'emcp-lite' ),
+			'cta'   => __( 'Get the LTD', 'emcp-lite' ),
+			'url'   => $upgrade,
+		);
 		$list[] = array(
 			'key'   => 'whatsnew',
 			'badge' => EMCP_TOOLS_VERSION,
@@ -156,15 +153,14 @@ final class EMCP_Tools_Admin_Frame {
 	 * @param EMCP_Tools_Admin_Nav $nav        Registry.
 	 * @param string               $active_tab Current tab id.
 	 * @param string               $version    Plugin version.
-	 * @param bool                 $premium    Whether Pro is licensed.
 	 */
-	public static function sidebar( EMCP_Tools_Admin_Nav $nav, string $active_tab, string $version, bool $premium ): string {
+	public static function sidebar( EMCP_Tools_Admin_Nav $nav, string $active_tab, string $version ): string {
 		// A div, not <aside>: the frame sits inside core's role="main" (#wpbody-content),
 		// where a nested complementary landmark is an accessibility error.
 		$html  = '<div class="eui-frame__sidebar" id="emcp-frame-sidebar">';
 		$html .= '<div class="eui-frame-brand"><img class="eui-frame-brand__logo" src="' . esc_url( EMCP_TOOLS_URL . 'assets/img/icon-sm.png' ) . '" alt="" width="32" height="32">'
 			. '<span class="eui-frame-brand__text"><span class="eui-frame-brand__name">' . esc_html__( 'EMCP Tools', 'emcp-lite' ) . '</span>'
-			. '<span class="eui-frame-brand__version eui-mono">v' . esc_html( $version ) . ' · ' . esc_html( $premium ? __( 'Pro', 'emcp-lite' ) : __( 'Free', 'emcp-lite' ) ) . '</span></span></div>';
+			. '<span class="eui-frame-brand__version eui-mono">v' . esc_html( $version ) . ' · ' . esc_html__( 'Free', 'emcp-lite' ) . '</span></span></div>';
 		$html .= '<button type="button" class="eui-frame-search" data-emcp-palette-open>' . EMCP_Tools_Admin_Icons::svg( 'search', 16 )
 			. '<span class="eui-frame-search__label">' . esc_html__( 'Search...', 'emcp-lite' ) . '</span>'
 			. '<kbd class="eui-frame-search__kbd">' . esc_html__( 'Ctrl K', 'emcp-lite' ) . '</kbd></button>';
@@ -234,7 +230,7 @@ final class EMCP_Tools_Admin_Frame {
 	 * @param array      $status    EMCP_Tools_Admin_Bar::status().
 	 * @param int        $unread    Unread notification count.
 	 * @param array      $user      user_summary().
-	 * @param array      $links     Top-bar links (help, affiliate, changelog, account).
+	 * @param array      $links     Top-bar links (help, changelog).
 	 * @param bool       $collapsed Sidebar collapsed.
 	 * @param array|null $cloud     cloud_status(); null leaves the Cloud pill out.
 	 */
@@ -277,9 +273,6 @@ final class EMCP_Tools_Admin_Frame {
 		if ( isset( $links['help'] ) ) {
 			$help  = __( 'Get help (opens in a new tab)', 'emcp-lite' );
 			$html .= '<a class="eui-frame-iconlink" href="' . esc_url( $links['help']['url'] ) . '" target="_blank" rel="noopener noreferrer" aria-label="' . esc_attr( $help ) . '" title="' . esc_attr__( 'Get help', 'emcp-lite' ) . '">' . EMCP_Tools_Admin_Icons::svg( 'life-buoy', 18 ) . '</a>';
-		}
-		if ( isset( $links['affiliate'] ) ) {
-			$html .= '<a class="eui-frame-iconlink" href="' . esc_url( $links['affiliate']['url'] ) . '" aria-label="' . esc_attr__( 'Affiliate', 'emcp-lite' ) . '" title="' . esc_attr__( 'Affiliate', 'emcp-lite' ) . '">' . EMCP_Tools_Admin_Icons::svg( 'dollar-sign', 18 ) . '</a>';
 		}
 		// The sidebar's static New badge moved here as a dot.
 		$changelog = __( 'Changelog: new release', 'emcp-lite' );

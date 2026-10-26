@@ -82,17 +82,15 @@ final class EMCP_Tools_Admin_Dashboard_Data {
 	}
 
 	/**
-	 * The four KPIs (pure). Without Pro usage the Templates and Prompts KPIs
-	 * are replaced by Tool calls and Errors (spec 8.1).
+	 * The four KPIs (pure): changes, rollbacks, tool calls and errors (spec 8.1).
 	 *
-	 * @param int        $range   Days.
-	 * @param int        $changes Changes recorded.
-	 * @param int        $rolled  Changes rolled back.
-	 * @param int        $calls   Tool calls.
-	 * @param int        $errors  Failed calls.
-	 * @param array|null $usage   EMCP_Tools_Pro_Usage::local_summary(), or null.
+	 * @param int $range   Days.
+	 * @param int $changes Changes recorded.
+	 * @param int $rolled  Changes rolled back.
+	 * @param int $calls   Tool calls.
+	 * @param int $errors  Failed calls.
 	 */
-	public static function kpis( int $range, int $changes, int $rolled, int $calls, int $errors, ?array $usage ): array {
+	public static function kpis( int $range, int $changes, int $rolled, int $calls, int $errors ): array {
 		/* translators: %d: number of days. */
 		$last = sprintf( _n( 'Last %d day', 'Last %d days', $range, 'emcp-lite' ), $range );
 		$pct  = $changes ? (int) round( 100 * $rolled / $changes ) : 0;
@@ -111,21 +109,6 @@ final class EMCP_Tools_Admin_Dashboard_Data {
 				'sub'   => sprintf( __( '%d%% of changes', 'emcp-lite' ), $pct ),
 			),
 		);
-		if ( null !== $usage ) {
-			$kpis[] = array(
-				'key'   => 'templates',
-				'label' => __( 'Templates applied', 'emcp-lite' ),
-				'value' => (int) ( $usage['templates'] ?? 0 ),
-				'sub'   => __( 'All time', 'emcp-lite' ),
-			);
-			$kpis[] = array(
-				'key'   => 'prompts',
-				'label' => __( 'Prompts copied', 'emcp-lite' ),
-				'value' => (int) ( $usage['prompts'] ?? 0 ),
-				'sub'   => __( 'All time', 'emcp-lite' ),
-			);
-			return $kpis;
-		}
 		$kpis[] = array(
 			'key'   => 'calls',
 			'label' => __( 'Tool calls', 'emcp-lite' ),
@@ -176,8 +159,7 @@ final class EMCP_Tools_Admin_Dashboard_Data {
 				'errors' => (int) $s['errors'],
 			);
 		}
-		$usage = self::usage();
-		$most  = array();
+		$most = array();
 		foreach ( array_slice( $stats['tools'], 0, 5, true ) as $tool => $count ) {
 			$most[] = array(
 				'tool'  => (string) $tool,
@@ -187,14 +169,9 @@ final class EMCP_Tools_Admin_Dashboard_Data {
 		return array(
 			'range'    => $range,
 			'days'     => $days,
-			'kpis'     => self::kpis( $range, $changes, $rolled, $calls, $errors, $usage ),
+			'kpis'     => self::kpis( $range, $changes, $rolled, $calls, $errors ),
 			'mostUsed' => $most,
 		);
-	}
-
-	/** EMCP_Tools_Pro_Usage::local_summary(), or null when that class is absent. */
-	private static function usage(): ?array {
-		return class_exists( 'EMCP_Tools_Pro_Usage' ) ? EMCP_Tools_Pro_Usage::local_summary() : null;
 	}
 
 	/**
@@ -271,10 +248,9 @@ final class EMCP_Tools_Admin_Dashboard_Data {
 
 	/** "Jump to a feature" entries, gated like the sidebar. */
 	public function features(): array {
-		$page    = admin_url( 'admin.php?page=' . EMCP_Tools_Admin::PAGE_SLUG );
-		$premium = function_exists( 'emcp_tools_fs' ) && emcp_tools_fs()->can_use_premium_code();
-		$admin   = $this->admin;
-		$list    = array(
+		$page  = admin_url( 'admin.php?page=' . EMCP_Tools_Admin::PAGE_SLUG );
+		$admin = $this->admin;
+		$list  = array(
 			array( 'wrench', __( 'MCP Tools', 'emcp-lite' ), __( 'Choose what your AI can call', 'emcp-lite' ), $page . '-tools', false, true ),
 			array( 'plug', __( 'Connection', 'emcp-lite' ), __( 'Claude, Cursor, ChatGPT and more', 'emcp-lite' ), $page . '-connection', false, true ),
 			array( 'blocks', __( 'Modules', 'emcp-lite' ), __( 'Turn big features on and off', 'emcp-lite' ), $page . '-modules', false, true ),
@@ -295,7 +271,7 @@ final class EMCP_Tools_Admin_Dashboard_Data {
 				'title' => $f[1],
 				'desc'  => $f[2],
 				'url'   => $f[3],
-				'pro'   => $f[4] && ! $premium,
+				'pro'   => $f[4],
 			);
 		}
 		return $out;
@@ -362,12 +338,11 @@ final class EMCP_Tools_Admin_Dashboard_Data {
 	 * @param int|null $now Timestamp (tests).
 	 */
 	public function payload( ?int $now = null ): array {
-		$premium   = function_exists( 'emcp_tools_fs' ) && emcp_tools_fs()->can_use_premium_code();
 		$page      = admin_url( 'admin.php?page=' . EMCP_Tools_Admin::PAGE_SLUG );
 		$connected = class_exists( 'EMCP_Tools_Cloud' ) && EMCP_Tools_Cloud::is_connected();
 		return array(
 			'header'     => array(
-				'premium'    => $premium,
+				'premium'    => false,
 				'aiChatUrl'  => ( $this->admin && $this->admin->ai_chat_tab_visible() ) ? $page . '-ai-chat' : '',
 				'connectUrl' => $page . '-connection',
 				'site'       => (string) wp_parse_url( home_url(), PHP_URL_HOST ),

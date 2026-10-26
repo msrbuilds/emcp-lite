@@ -102,7 +102,6 @@ final class EMCP_Tools_Admin_Tools_Data {
 
 	/** The screen payload. */
 	public function payload(): array {
-		$licensed  = function_exists( 'emcp_tools_fs' ) && emcp_tools_fs()->can_use_premium_code();
 		$elementor = class_exists( 'EMCP_Tools_Bootstrap' ) ? EMCP_Tools_Bootstrap::elementor_active() : false;
 		$disabled  = (array) get_option( EMCP_Tools_Admin::OPTION_DISABLED_TOOLS, array() );
 		$labels    = EMCP_Tools_Admin::platform_tabs();
@@ -117,7 +116,7 @@ final class EMCP_Tools_Admin_Tools_Data {
 			if ( ! isset( $labels[ $platform ] ) || ! in_array( $platform, $visible, true ) ) {
 				continue;
 			}
-			$pro_locked         = ! empty( $category['pro'] ) && ! $licensed;
+			$pro_locked         = ! empty( $category['pro'] );
 			$elementor_category = EMCP_Tools_Admin::is_elementor_category( $category );
 			$tools              = array();
 			foreach ( (array) ( $category['tools'] ?? array() ) as $slug => $tool ) {
@@ -170,7 +169,7 @@ final class EMCP_Tools_Admin_Tools_Data {
 			'themerPhp'       => null,
 			'defaults'        => array_values( array_intersect( $this->admin->default_disabled_tool_slugs(), array_keys( $enabled ) ) ),
 			'elementorActive' => $elementor,
-			'licensed'        => $licensed,
+			'licensed'        => false,
 			'upgradeUrl'      => function_exists( 'emcp_tools_upgrade_url' ) ? emcp_tools_upgrade_url() : 'https://emcptools.com/pricing',
 		);
 	}

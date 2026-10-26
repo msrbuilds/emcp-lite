@@ -60,8 +60,7 @@ final class EMCP_Tools_Admin_REST_Brand_Kits extends EMCP_Tools_Admin_REST_Contr
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		}
-		$view = class_exists( 'EMCP_Tools_Pro_Ajax' ) ? EMCP_Tools_Pro_Ajax::recent_elementor_page_url() : home_url( '/' );
-		return new WP_REST_Response( array_merge( $data->payload(), array( 'applied' => $result, 'viewUrl' => $view ) ) );
+		return new WP_REST_Response( array_merge( $data->payload(), array( 'applied' => $result, 'viewUrl' => home_url( '/' ) ) ) );
 	}
 
 	public function restore( $request ) {
@@ -74,20 +73,6 @@ final class EMCP_Tools_Admin_REST_Brand_Kits extends EMCP_Tools_Admin_REST_Contr
 	}
 
 	public function sync( $request ) {
-		if ( ! class_exists( 'EMCP_Tools_Pro_Brand_Kits' ) || ! EMCP_Tools_Pro_Brand_Kits::user_has_access() ) {
-			return new WP_Error( 'emcp_no_license', __( 'Syncing the brand kit library needs an active EMCP Pro licence.', 'emcp-lite' ), array( 'status' => 403 ) );
-		}
-		$bundle = EMCP_Tools_Pro_Brand_Kits::get_bundle( true );
-		if ( is_wp_error( $bundle ) ) {
-			return new WP_Error( 'emcp_sync_failed', $bundle->get_error_message(), array( 'status' => 400 ) );
-		}
-		delete_transient( 'emcp_tools_nav_counts' );
-		if ( class_exists( 'EMCP_Tools_Attention' ) ) {
-			EMCP_Tools_Attention::flush();
-		}
-		$payload = ( new EMCP_Tools_Admin_Brand_Kits_Data() )->payload();
-		/* translators: %d: kit count. */
-		$payload['message'] = sprintf( __( 'Synced %d brand kits.', 'emcp-lite' ), $payload['total'] );
-		return new WP_REST_Response( $payload );
+		return new WP_Error( 'emcp_no_license', __( 'Syncing the brand kit library needs an active EMCP Pro licence.', 'emcp-lite' ), array( 'status' => 403 ) );
 	}
 }

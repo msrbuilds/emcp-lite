@@ -169,26 +169,10 @@ class EMCP_Tools_Themer_Loop_Renderer {
 			if ( ! class_exists( '\Elementor\Plugin' ) ) {
 				return '';
 			}
-			// EMCP_Tools_Themer_Content_Renderer::render() already resolves an
-			// attached PHP region template before falling back to the Elementor
-			// document (and enqueues the template's static CSS once). Checking
-			// the PHP template again here, ahead of this branch, would execute
-			// the same user PHP a second time per card.
 			return EMCP_Tools_Themer_Content_Renderer::render( $template_id );
 		}
-		// Non-Elementor path only: an attached PHP region template wins, as
-		// everywhere in Themer. Content_Renderer::render() would duplicate this
-		// check AND run the full the_content chain, which render_blocks_content()
-		// deliberately avoids, so it is not used here.
-		if ( class_exists( 'EMCP_Tools_Themer_PHP' ) && EMCP_Tools_Themer_PHP::enabled() ) {
-			$php_id = (int) get_post_meta( $template_id, '_emcp_themer_php_template', true );
-			if ( $php_id > 0 && class_exists( 'EMCP_Tools_Themer_PHP_Renderer' ) ) {
-				$out = EMCP_Tools_Themer_PHP_Renderer::render( $php_id );
-				if ( '' !== $out ) {
-					return $out;
-				}
-			}
-		}
+		// Content_Renderer::render() would run the full the_content chain, which
+		// render_blocks_content() deliberately avoids, so it is not used here.
 		$post = get_post( $template_id );
 		return $post ? self::render_blocks_content( (string) $post->post_content ) : '';
 	}

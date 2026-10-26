@@ -53,9 +53,9 @@ class EMCP_Tools_Templates_Module extends EMCP_Tools_Module {
 		return true;
 	}
 
-	/** Requires an active Pro license. */
+	/** Requires an active Pro license, which Lite never has. */
 	public function is_available(): bool {
-		return function_exists( 'emcp_tools_fs' ) && emcp_tools_fs()->can_use_premium_code();
+		return false;
 	}
 
 	/** The dedicated Templates admin tab is the config surface. */

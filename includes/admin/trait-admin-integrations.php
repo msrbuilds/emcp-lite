@@ -232,28 +232,6 @@ trait EMCP_Tools_Admin_Integrations_Trait {
 	}
 
 	/**
-	 * Whether the GenerateBlocks integration's tools are available (the
-	 * GenerateBlocks plugin is active; Pro).
-	 *
-	 * @since 3.9.1
-	 * @return bool
-	 */
-	public static function generateblocks_available(): bool {
-		return class_exists( 'EMCP_Tools_GenerateBlocks_Catalog' ) && EMCP_Tools_GenerateBlocks_Catalog::is_active();
-	}
-
-	/**
-	 * Whether the Blocksy blocks integration's tools are available (Blocksy
-	 * Companion active; Pro).
-	 *
-	 * @since 3.9.1
-	 * @return bool
-	 */
-	public static function blocksy_blocks_available(): bool {
-		return class_exists( 'EMCP_Tools_Blocksy_Blocks_Catalog' ) && EMCP_Tools_Blocksy_Blocks_Catalog::is_active();
-	}
-
-	/**
 	 * Whether the Blocksy extensions integration's tools are available (the Blocksy
 	 * ExtensionsManager exists; Pro).
 	 *
@@ -280,47 +258,47 @@ trait EMCP_Tools_Admin_Integrations_Trait {
 		return defined( 'WFFN_VERSION' ) && function_exists( 'WFFN_Core' );
 	}
 
-	/** Same detector as EMCP_Tools_FunnelKit_Automations::automations_active(). @since 3.19.0 */
+	/** Whether FunnelKit Automations is active. @since 3.19.0 */
 	public static function funnelkit_automations_available(): bool {
 		return defined( 'BWFAN_VERSION' ) && class_exists( 'BWFAN_Core' );
 	}
 
-	/** Same detector as EMCP_Tools_TablePress_Integration::tablepress_active(). @since 3.19.0 */
+	/** Whether TablePress is active. @since 3.19.0 */
 	public static function tablepress_available(): bool {
 		return class_exists( 'TablePress' );
 	}
 
-	/** Same detector as EMCP_Tools_Tutor_Integration::tutor_active(). @since 3.19.0 */
+	/** Whether Tutor LMS is active. @since 3.19.0 */
 	public static function tutor_available(): bool {
 		return function_exists( 'tutor' ) && defined( 'TUTOR_VERSION' );
 	}
 
-	/** Same detector as EMCP_Tools_FluentCRM_Integration::fluentcrm_active(). @since 3.19.0 */
+	/** Whether FluentCRM is active. @since 3.19.0 */
 	public static function fluentcrm_available(): bool {
 		return defined( 'FLUENTCRM_PLUGIN_VERSION' ) && function_exists( 'fluentCrmDb' );
 	}
 
-	/** Same detector as EMCP_Tools_MailPoet_Integration::mailpoet_active(). @since 3.19.0 */
+	/** Whether MailPoet is active. @since 3.19.0 */
 	public static function mailpoet_available(): bool {
 		return defined( 'MAILPOET_VERSION' ) && class_exists( '\MailPoet\API\MP\v1\API' );
 	}
 
-	/** Same detector as EMCP_Tools_Amelia_Integration::amelia_active(). @since 3.19.0 */
+	/** Whether Amelia is active. @since 3.19.0 */
 	public static function amelia_available(): bool {
 		return defined( 'AMELIA_VERSION' ) && class_exists( 'AmeliaBooking\Plugin' );
 	}
 
-	/** Same detector as EMCP_Tools_TEC_Integration::tec_active(). @since 3.19.0 */
+	/** Whether The Events Calendar is active. @since 3.19.0 */
 	public static function tec_available(): bool {
 		return class_exists( 'Tribe__Events__Main' );
 	}
 
-	/** Same detector as EMCP_Tools_LifterLMS_Integration::lifterlms_active(). @since 3.19.0 */
+	/** Whether LifterLMS is active. @since 3.19.0 */
 	public static function lifterlms_available(): bool {
 		return function_exists( 'llms' );
 	}
 
-	/** Same detector as EMCP_Tools_TranslatePress_Integration::translatepress_active(). @since 3.19.0 */
+	/** Whether TranslatePress is active. @since 3.19.0 */
 	public static function translatepress_available(): bool {
 		return class_exists( 'TRP_Translate_Press' );
 	}
@@ -335,7 +313,7 @@ trait EMCP_Tools_Admin_Integrations_Trait {
 		return defined( 'RWMB_VER' ) && function_exists( 'rwmb_get_registry' );
 	}
 
-	/** Same detector as EMCP_Tools_Polylang_Integration::polylang_active(). @since 3.19.0 */
+	/** Whether Polylang is active. @since 3.19.0 */
 	public static function polylang_available(): bool {
 		return function_exists( 'pll_languages_list' ) && function_exists( 'PLL' );
 	}
@@ -552,29 +530,6 @@ trait EMCP_Tools_Admin_Integrations_Trait {
 	 */
 	public static function uae_available(): bool {
 		return self::uae_templates_available() || self::uae_pro_available();
-	}
-
-	/**
-	 * Whether Freemius's Affiliation page actually exists right now.
-	 *
-	 * We hide the Affiliation submenu (see the `is_submenu_visible` filter in
-	 * the bootstrap) and link to it from the header instead. Hiding keeps the
-	 * page URL-reachable, BUT Freemius only *registers* its submenu pages when
-	 * `should_add_submenu_or_action_links()` passes — which is false in
-	 * **activation mode**. A fresh install (free especially) sits in activation
-	 * mode until the user opts in or skips, so the page doesn't exist yet and
-	 * linking to it yields "Sorry, you are not allowed to access this page."
-	 * Mirror Freemius's own condition so the link only shows when it works.
-	 *
-	 * @since 3.4.2
-	 * @return bool
-	 */
-	public static function affiliation_page_available(): bool {
-		if ( ! function_exists( 'emcp_tools_fs' ) ) {
-			return false;
-		}
-		$fs = emcp_tools_fs();
-		return $fs->has_affiliate_program() && ! $fs->is_activation_mode();
 	}
 
 	/**

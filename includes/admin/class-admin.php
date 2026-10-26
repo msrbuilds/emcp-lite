@@ -168,20 +168,6 @@ class EMCP_Tools_Admin {
 		return $this->module_tab_visible( 'memory' );
 	}
 
-	/**
-	 * Number of agent-proposed project-memory entries awaiting review (0 when the
-	 * Memory tab is hidden or the store is unavailable). Surfaced as a count badge
-	 * on the Memory submenu + in-page nav so pending proposals aren't forgotten.
-	 *
-	 * @return int
-	 */
-	public function memory_pending_count(): int {
-		if ( ! $this->memory_tab_visible() || ! class_exists( 'EMCP_Tools_Memory_Store' ) ) {
-			return 0;
-		}
-		return EMCP_Tools_Memory_Store::instance()->pending_count();
-	}
-
 	private function get_submenus(): array {
 		if ( null === $this->submenus ) {
 			$this->submenus = array(
@@ -320,25 +306,6 @@ class EMCP_Tools_Admin {
 		if ( class_exists( 'EMCP_Tools_Redirect_Module' ) && EMCP_Tools_Redirect_Module::is_enabled() ) {
 			EMCP_Tools_Admin_REST_Redirects::register_screen();
 		}
-
-		if ( class_exists( 'EMCP_Tools_Admin_REST_Templates' ) ) {
-			EMCP_Tools_Admin_REST_Templates::register_screen();
-		}
-		if ( class_exists( 'EMCP_Tools_Admin_REST_Backup' ) && class_exists( 'EMCP_Tools_Migrate_Module' ) && EMCP_Tools_Migrate_Module::is_enabled() ) {
-			EMCP_Tools_Admin_REST_Backup::register_screen();
-		}
-		if ( class_exists( 'EMCP_Tools_Admin_REST_Skills' ) ) {
-			EMCP_Tools_Admin_REST_Skills::register_screen();
-		}
-		if ( class_exists( 'EMCP_Tools_Admin_REST_Memory' ) ) {
-			EMCP_Tools_Admin_REST_Memory::register_screen();
-		}
-		if ( class_exists( 'EMCP_Tools_Admin_AI_Chat_Data' ) ) {
-			EMCP_Tools_Admin_AI_Chat_Data::register_screen();
-		}
-		if ( class_exists( 'EMCP_Tools_Admin_REST_Sandbox_Export' ) ) {
-			EMCP_Tools_Admin_REST_Sandbox_Export::register_screen();
-		}
 		add_action( 'admin_enqueue_scripts', array( $this, 'print_menu_icon_style' ) );
 		add_action( 'admin_post_emcp_tools_download_mcpb', array( $this, 'handle_download_mcpb' ) );
 		add_action( 'admin_post_emcp_tools_settings_push', array( $this, 'handle_settings_push' ) );
@@ -443,18 +410,10 @@ class EMCP_Tools_Admin {
 		);
 
 		foreach ( $this->get_submenus() as $slug => $label ) {
-			$menu_title = $label;
-			// Native WordPress count bubble on the Memory submenu for pending proposals.
-			if ( self::PAGE_SLUG . '-memory' === $slug ) {
-				$pending = $this->memory_pending_count();
-				if ( $pending > 0 ) {
-					$menu_title = $label . ' <span class="awaiting-mod"><span class="pending-count" aria-hidden="true">' . (int) $pending . '</span></span>';
-				}
-			}
 			$this->hook_suffixes[] = add_submenu_page(
 				self::PAGE_SLUG,
 				$label,
-				$menu_title,
+				$label,
 				EMCP_Tools_Management_Access::CAPABILITY,
 				$slug,
 				array( $this, 'render_page' )
@@ -513,31 +472,7 @@ class EMCP_Tools_Admin {
 		foreach ( array_keys( $this->get_submenus() ) as $slug ) {
 			$tabs[] = EMCP_Tools_Admin_Nav::tab_from_slug( $slug );
 		}
-		return new EMCP_Tools_Admin_Nav( $tabs, $this->nav_counts(), self::affiliation_page_available(), $this->nav_links() );
-	}
-
-	/**
-	 * Licence links for the sidebar footer. The WordPress submenu that carried
-	 * Freemius's Account and Upgrade items is hidden by the frame, so the frame
-	 * offers them instead.
-	 *
-	 * @since 3.18.0
-	 *
-	 * @return string[] Optional 'account' and 'upgrade' URLs.
-	 */
-	private function nav_links(): array {
-		if ( ! function_exists( 'emcp_tools_fs' ) ) {
-			return array();
-		}
-		$fs    = emcp_tools_fs();
-		$links = array();
-		if ( method_exists( $fs, 'is_registered' ) && method_exists( $fs, 'get_account_url' ) && $fs->is_registered() ) {
-			$links['account'] = (string) $fs->get_account_url();
-		}
-		if ( ! $fs->can_use_premium_code() ) {
-			$links['upgrade'] = function_exists( 'emcp_tools_upgrade_url' ) ? emcp_tools_upgrade_url() : 'https://emcptools.com/pricing';
-		}
-		return $links;
+		return new EMCP_Tools_Admin_Nav( $tabs, $this->nav_counts() );
 	}
 
 	/**
@@ -554,11 +489,11 @@ class EMCP_Tools_Admin {
 		}
 		$counts = array(
 			'tools'   => $this->get_enabled_tool_count(),
-			'memory'  => $this->memory_pending_count(),
-			'widgets' => class_exists( 'EMCP_Tools_Admin_Sandbox_Data' ) ? EMCP_Tools_Admin_Sandbox_Data::flagged_count() : 0,
+			'memory'  => 0,
+			'widgets' => 0,
 		);
 		// Cached reads only: the frame must never make a remote call (spec 5.1).
-		foreach ( $this->get_dashboard_stats( true ) as $stat ) {
+		foreach ( $this->get_dashboard_stats() as $stat ) {
 			if ( isset( $stat['key'], $stat['value'] ) && in_array( $stat['key'], array( 'prompts', 'templates', 'brand-kits' ), true ) ) {
 				$counts[ $stat['key'] ] = (int) $stat['value'];
 			}
@@ -620,21 +555,6 @@ class EMCP_Tools_Admin {
 				);
 			}
 		}
-		$user   = get_current_user_id();
-		$notifs = array();
-		if ( class_exists( 'EMCP_Tools_Notifications' ) ) {
-			foreach ( EMCP_Tools_Notifications::get() as $n ) {
-				$id       = (string) ( $n['id'] ?? '' );
-				$notifs[] = array(
-					'id'     => $id,
-					'title'  => (string) ( $n['title'] ?? '' ),
-					'body'   => (string) ( $n['body'] ?? '' ),
-					'url'    => (string) ( $n['url'] ?? '' ),
-					'cta'    => (string) ( $n['cta'] ?? '' ),
-					'unread' => ! EMCP_Tools_Notifications::is_read( $user, $id ),
-				);
-			}
-		}
 		return array(
 			'nav'           => $nav,
 			'tools'         => $tools,
@@ -660,8 +580,8 @@ class EMCP_Tools_Admin {
 					'url'   => EMCP_Tools_Admin_Nav::url( 'page-builders' ),
 				),
 			),
-			'notifications' => $notifs,
-			'unread'        => class_exists( 'EMCP_Tools_Notifications' ) ? EMCP_Tools_Notifications::unread_count( $user ) : 0,
+			'notifications' => array(),
+			'unread'        => 0,
 		);
 	}
 
@@ -675,8 +595,8 @@ class EMCP_Tools_Admin {
 		return array(
 			'version' => EMCP_TOOLS_VERSION,
 			'tier'    => array(
-				'premium'  => function_exists( 'emcp_tools_fs' ) && emcp_tools_fs()->is_premium(),
-				'licensed' => function_exists( 'emcp_tools_fs' ) && emcp_tools_fs()->can_use_premium_code(),
+				'premium'  => false,
+				'licensed' => false,
 			),
 			'user'    => EMCP_Tools_Admin_Frame::user_summary( $user ),
 			'site'    => array(
@@ -765,20 +685,17 @@ class EMCP_Tools_Admin {
 	/**
 	 * Build the headline stat cards shown on the Dashboard.
 	 *
-	 * Always includes catalog, site, enabled, and Pro tool counts. Prompts, Brand Kits,
-	 * and Templates are appended only when their module is active (and, for the
-	 * Pro-gated counts, when a value is available) — mirroring the module-tab
-	 * visibility rules. Each entry is `key`/`value`/`label`; the view maps `key`
-	 * to an icon.
+	 * Always includes catalog, site, enabled, and Pro tool counts. Prompts and
+	 * Brand Kits are appended only when their module is active (and, for Brand
+	 * Kits, when a value is available) — mirroring the module-tab visibility
+	 * rules. Each entry is `key`/`value`/`label`; the view maps `key` to an icon.
+	 * Reads local data only, never a remote call.
 	 *
 	 * @since 3.1.0
-	 * @since 3.18.0 $cached_only: read the templates library from its cache
-	 *               only, never fetch it (the frame's sidebar counts).
 	 *
-	 * @param bool $cached_only Never make a remote call.
 	 * @return array<int,array{key:string,value:int,label:string}>
 	 */
-	public function get_dashboard_stats( bool $cached_only = false ): array {
+	public function get_dashboard_stats(): array {
 		$catalog_tools = array();
 		$pro_tools     = array();
 		foreach ( $this->get_all_tools() as $category ) {
@@ -807,51 +724,19 @@ class EMCP_Tools_Admin {
 			$stats[] = array( 'key' => 'modules', 'value' => $active_modules, 'label' => __( 'Active Modules', 'emcp-lite' ) );
 		}
 
-		// Count prompts. For Pro sites with a synced bundle, use the actual
-		// premium-library count (matches the Prompts tab). Otherwise count the
-		// bundled sample files in prompts/.
+		// Count the bundled sample prompt files in prompts/.
 		if ( $this->module_tab_visible( 'prompts' ) ) {
-			$prompt_count = 0;
-			if ( class_exists( 'EMCP_Tools_Pro_Prompts' ) && EMCP_Tools_Pro_Prompts::user_has_access() ) {
-				$prompt_count = EMCP_Tools_Pro_Prompts::cached_count();
-			}
-			if ( 0 === $prompt_count ) {
-				$prompts_dir  = EMCP_TOOLS_DIR . 'prompts/';
-				$prompt_files = is_dir( $prompts_dir ) ? glob( $prompts_dir . '*.md' ) : array();
-				$prompt_count = count( $prompt_files );
-			}
+			$prompts_dir  = EMCP_TOOLS_DIR . 'prompts/';
+			$prompt_files = is_dir( $prompts_dir ) ? glob( $prompts_dir . '*.md' ) : array();
+			$prompt_count = count( $prompt_files );
 			$stats[] = array( 'key' => 'prompts', 'value' => (int) $prompt_count, 'label' => __( 'Prompts', 'emcp-lite' ) );
 		}
 
-		// Brand kits: Pro shows the cached remote library count; everyone else
-		// shows the bundled free-kit count (applying is a free feature).
+		// Brand kits: the bundled free-kit count (applying is a free feature).
 		if ( $this->module_tab_visible( 'brand-kits' ) ) {
-			$brand_kit_count = 0;
-			$show_brand_kits = false;
-			if ( class_exists( 'EMCP_Tools_Pro_Brand_Kits' ) && EMCP_Tools_Pro_Brand_Kits::user_has_access() ) {
-				$brand_kit_count = EMCP_Tools_Pro_Brand_Kits::count_cached_kits();
-				$show_brand_kits = true;
-			} elseif ( class_exists( 'EMCP_Tools_Free_Brand_Kits' ) ) {
-				$brand_kit_count = EMCP_Tools_Free_Brand_Kits::count_kits();
-				$show_brand_kits = $brand_kit_count > 0;
-			}
-			if ( $show_brand_kits ) {
+			$brand_kit_count = class_exists( 'EMCP_Tools_Free_Brand_Kits' ) ? EMCP_Tools_Free_Brand_Kits::count_kits() : 0;
+			if ( $brand_kit_count > 0 ) {
 				$stats[] = array( 'key' => 'brand-kits', 'value' => (int) $brand_kit_count, 'label' => __( 'Brand Kits', 'emcp-lite' ) );
-			}
-		}
-
-		// Templates: Pro shows the templates-library total (sum across
-		// categories). Hidden for free users and when the bundle can't be fetched.
-		if ( $this->module_tab_visible( 'templates' ) && class_exists( 'EMCP_Tools_Pro_Templates' ) && EMCP_Tools_Pro_Templates::user_has_access() ) {
-			$template_count  = 0;
-			$emcp_tpl_bundle = $cached_only ? get_transient( EMCP_Tools_Pro_Templates::CACHE_KEY ) : EMCP_Tools_Pro_Templates::get_bundle();
-			if ( ! is_wp_error( $emcp_tpl_bundle ) && is_array( $emcp_tpl_bundle ) && ! empty( $emcp_tpl_bundle['categories'] ) ) {
-				foreach ( $emcp_tpl_bundle['categories'] as $emcp_tpl_cat ) {
-					$template_count += is_array( $emcp_tpl_cat['templates'] ?? null ) ? count( $emcp_tpl_cat['templates'] ) : 0;
-				}
-			}
-			if ( $template_count > 0 ) {
-				$stats[] = array( 'key' => 'templates', 'value' => $template_count, 'label' => __( 'Templates', 'emcp-lite' ) );
 			}
 		}
 
@@ -963,13 +848,10 @@ class EMCP_Tools_Admin {
 			}
 		}
 
-		// Pro sections are always present in the catalog so free users see the
-		// (locked) Pro surface. On a build without a usable Pro license, lock
-		// every tool in a `pro` category — disable its toggle and swap in a
-		// "Requires EMCP Pro" note — and ensure it carries the `pro` badge. On a
-		// licensed build the category's own availability (e.g. WooCommerce active)
-		// is left untouched, and the abilities themselves stay license-gated.
-		$emcp_is_pro = function_exists( 'emcp_tools_fs' ) && emcp_tools_fs()->can_use_premium_code();
+		// Pro sections are always present in the catalog so Lite users see the
+		// (locked) Pro surface. Lock every tool in a `pro` category — disable its
+		// toggle and swap in a "Requires EMCP Pro" note — and ensure it carries
+		// the `pro` badge.
 		foreach ( $catalog as &$emcp_pro_cat ) {
 			if ( empty( $emcp_pro_cat['pro'] ) || empty( $emcp_pro_cat['tools'] ) ) {
 				continue;
@@ -981,10 +863,8 @@ class EMCP_Tools_Admin {
 				if ( ! in_array( 'pro', $emcp_pro_tool['badges'], true ) ) {
 					array_unshift( $emcp_pro_tool['badges'], 'pro' );
 				}
-				if ( ! $emcp_is_pro ) {
-					$emcp_pro_tool['available']        = false;
-					$emcp_pro_tool['unavailable_note'] = __( 'Requires EMCP Pro.', 'emcp-lite' );
-				}
+				$emcp_pro_tool['available']        = false;
+				$emcp_pro_tool['unavailable_note'] = __( 'Requires EMCP Pro.', 'emcp-lite' );
 			}
 			unset( $emcp_pro_tool );
 		}

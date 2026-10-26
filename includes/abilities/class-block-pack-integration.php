@@ -6,8 +6,8 @@ class EMCP_Tools_Block_Pack_Integration {
     private $adapter;
     public function __construct(string $id) {
         $this->id=$id;
-        $class=EMCP_Tools_Page_Builders::block_packs()[$id]['class'];
-        $this->adapter=class_exists($class)?new $class():null;
+        $class=EMCP_Tools_Page_Builders::block_packs()[$id]['class'] ?? '';
+        $this->adapter=('' !== $class && class_exists($class))?new $class():null;
     }
     public function definitions(): array {
         $str=array('type'=>'string'); $obj=array('type'=>'object');
@@ -112,10 +112,7 @@ class EMCP_Tools_Block_Pack_Integration {
     public static function admin_categories(): array {
         $out=array();
         foreach(EMCP_Tools_Page_Builders::block_packs() as $id=>$pack) {
-            if(!empty($pack['native_tools'])) {
-                if(class_exists($pack['class'])) { $out=array_merge($out,$pack['class']::admin_categories()); }
-                continue;
-            }
+            if(!empty($pack['native_tools'])) { continue; }
             $api=new self($id);
             foreach($api->definitions() as $slug=>$d) {
                 $key=$id.'_'.strtolower($d[0]);

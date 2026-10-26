@@ -2,8 +2,8 @@
 /**
  * Free Brand Kits — the 10 bundled, no-license-required brand kits.
  *
- * This is the free-tier counterpart to EMCP_Tools_Pro_Brand_Kits. Where the
- * Pro service fetches 50+ kits from emcptools.com behind a license, this
+ * This is the free-tier counterpart to the EMCP Pro brand kit library. Where
+ * the Pro service fetches 50+ kits from emcptools.com behind a license, this
  * one reads a small curated set shipped inside the plugin
  * (`assets/brand-kits/free-brand-kits.json`) and is available to everyone — the
  * same model as the 5 bundled sample prompts.
