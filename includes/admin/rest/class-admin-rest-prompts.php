@@ -85,17 +85,9 @@ final class EMCP_Tools_Admin_REST_Prompts extends EMCP_Tools_Admin_REST_Controll
 			return new WP_Error( 'emcp_unknown_prompt', __( 'That prompt is not in the library.', 'emcp-lite' ), array( 'status' => 404 ) );
 		}
 		$recorded = false;
-		if ( 'pro' === ( $prompt['tier'] ?? '' ) && class_exists( 'EMCP_Tools_Pro_Loader' ) ) {
-			if ( ! class_exists( 'EMCP_Tools_Pro_Usage' ) ) {
-				$file = EMCP_Tools_Pro_Loader::path( 'includes/admin/class-pro-usage.php' );
-				if ( '' !== $file && file_exists( $file ) ) {
-					require_once $file;
-				}
-			}
-			if ( class_exists( 'EMCP_Tools_Pro_Usage' ) ) {
-				EMCP_Tools_Pro_Usage::record( 'prompt', $slug, $category );
-				$recorded = true;
-			}
+		if ( 'pro' === ( $prompt['tier'] ?? '' ) && class_exists( 'EMCP_Tools_Pro_Usage' ) ) {
+			EMCP_Tools_Pro_Usage::record( 'prompt', $slug, $category );
+			$recorded = true;
 		}
 		return new WP_REST_Response( array( 'recorded' => $recorded ) );
 	}

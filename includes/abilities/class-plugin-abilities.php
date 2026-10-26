@@ -67,7 +67,7 @@ class EMCP_Tools_Plugin_Abilities {
 	 * @return array
 	 */
 	public function execute_list_plugins( $input ): array {
-		EMCP_Tools_Package_Guard::load_upgrader_deps();
+		EMCP_Tools_Package_Guard::load_admin_includes();
 		$filter  = in_array( $input['status'] ?? 'all', array( 'all', 'active', 'inactive' ), true ) ? ( $input['status'] ?? 'all' ) : 'all';
 		$all     = function_exists( 'get_plugins' ) ? get_plugins() : array();
 		$updates = get_site_transient( 'update_plugins' );
@@ -130,7 +130,7 @@ class EMCP_Tools_Plugin_Abilities {
 		if ( '' === $search ) {
 			return new \WP_Error( 'missing_params', __( 'A "search" keyword is required.', 'emcp-lite' ) );
 		}
-		EMCP_Tools_Package_Guard::load_upgrader_deps();
+		EMCP_Tools_Package_Guard::load_admin_includes();
 		$per_page = max( 1, min( 50, absint( $input['per_page'] ?? 10 ) ) );
 		$api      = plugins_api( 'query_plugins', array( 'search' => $search, 'per_page' => $per_page, 'fields' => array( 'short_description' => true, 'icons' => false ) ) );
 		if ( is_wp_error( $api ) ) {

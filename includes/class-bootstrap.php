@@ -28,10 +28,6 @@ class EMCP_Tools_Bootstrap {
 	 * @since 2.1.0 (since 1.0.0 as emcp_tools_init)
 	 */
 	public static function boot(): void {
-		// Fallback legacy-data migration (the primary snapshot happens in the
-		// legacy guard while the old plugin is still present). Idempotent.
-
-
 		// Make the MCP Adapter available (active standalone plugin, else our
 		// bundled copy) BEFORE the dependency check, so the adapter is never a
 		// "go install this" blocker. The Abilities API is core in WP 6.9+/7.0.
@@ -43,11 +39,6 @@ class EMCP_Tools_Bootstrap {
 		}
 
 		self::load_classes();
-
-		// Relocate the sandbox from the legacy uploads/emcp-widgets location to
-		// wp-content/emcp-sandbox once. Runs here (plugins_loaded) so it completes
-		// before the artifact loaders fire on `init`. Idempotent, option-gated.
-
 		self::wire_hooks();
 
 		// The MCP tool surface (~80 ability classes + infra) is only used to
@@ -152,7 +143,6 @@ class EMCP_Tools_Bootstrap {
 		require_once EMCP_TOOLS_DIR . 'includes/validators/class-element-validator.php';
 		require_once EMCP_TOOLS_DIR . 'includes/validators/class-settings-validator.php';
 		require_once EMCP_TOOLS_DIR . 'includes/validators/class-widget-setting-keys.php';
-		// Widget catalog, source of truth for the 5 catalog-backed widget tools.
 		require_once EMCP_TOOLS_DIR . 'includes/class-secret.php';
 		require_once EMCP_TOOLS_DIR . 'includes/oauth/class-oauth-util.php';
 		require_once EMCP_TOOLS_DIR . 'includes/cloud/class-cloud.php';
@@ -225,52 +215,15 @@ class EMCP_Tools_Bootstrap {
 		// Editor-side auto-repair for AI-inserted static-save blocks (Kadence).
 		require_once EMCP_TOOLS_DIR . 'includes/class-block-repair.php';
 		add_action( 'init', array( 'EMCP_Tools_Nav_Menu_Shortcode', 'register' ) );
-		// ACF tools (field values + field group discovery/authoring; writes off by default).
-		// Meta Box tools (field values + field group discovery; writes off by default).
-
-		// Themes domain: the child-theme builder + the dispatcher base (must load
-		// before its subclasses) + the integrations.
-		// Forms-tab integrations, abstract base + CF7 (free). Pro form adapters
-		// (WPForms/Gravity/Fluent/Ninja/Formidable) load via EMCP_Tools_Pro_Loader.
-		// SEO plugin integrations, abstract base + Slim SEO (free). The 6 Pro SEO
-		// adapters (Yoast/RankMath/AIOSEO/SeoPress/SEOFramework/SureRank) load via
-		// EMCP_Tools_Pro_Loader.
-		// Performance Analyzer (v3.0.0), read-only server/WP/page audit.
-		// Filesystem tools (read/scan + write/edit/delete; writes off by default).
-		// Database tools (read-only query + structured writes; writes off by default).
-		// WP-CLI tools (run + background jobs; disabled-by-default, manage_options).
-		// Security & Malware Scanner (v3.0.0), read-only multi-audit scan.
-		// Brand Kits. The free writer + backup store + free-kit fetcher load
-		// unconditionally so the MCP REST/CLI/proxy surface can reach them. The
-		// Pro brand-kit admin + system-kit abilities live in the private Pro
-		// overlay and are loaded by EMCP_Tools_Pro_Loader below.
+		// Brand Kits. The writer + backup store + free-kit fetcher load
+		// unconditionally so the MCP REST/CLI/proxy surface can reach them.
 		require_once EMCP_TOOLS_DIR . 'includes/class-system-kit-writer.php';
 		require_once EMCP_TOOLS_DIR . 'includes/class-kit-backup-store.php';
 		require_once EMCP_TOOLS_DIR . 'includes/class-free-brand-kits.php';
-		// Widget Builder infra (free base). The store + loader load unconditionally
-		// so the MCP surface + CPT registration can reach them; the generator +
-		// builder abilities ship in the Pro overlay (loaded via Pro_Loader).
-		// Central sandbox storage location (wp-content/emcp-sandbox). Every store
-		// resolves paths through this, so it must load before them.
-		// Paged listing shared by all three artifact stores. Loaded alongside
-		// them, not with the admin, because the stores name it in a default.
-		// Sandbox Bundle, portable cloud-ready format for blocks/widgets/snippets.
-		// Bundle adapters, present the Widget Builder + PHP Snippet stores as the
-		// same cloud-ready artifact surface (EMCP_Tools_Sandbox_Artifact) as the
-		// block store, without touching either store's internals.
-		// Sandbox Cloud abilities, export/import any sandbox artifact (block/
-		// widget/snippet) as a portable bundle over the cloud contract. Free tree;
-		// registration is wired by the ability registrar (a later task).
-		// PHP Code Snippets (Sandbox), free, capability-gated. AI can author +
-		// validate drafts via MCP; only an admin can activate. The loader runs
-		// ACTIVE snippets (hash-verified, fatal-isolated).
 		// Atomic elements support (Elementor 4.0+).
 		require_once EMCP_TOOLS_DIR . 'includes/class-atomic-props.php';
 		require_once EMCP_TOOLS_DIR . 'includes/class-atomic-styles.php';
 		require_once EMCP_TOOLS_DIR . 'includes/class-atomic-widget-map.php';
-		// Global Classes (Class Manager) reader, self-gates on Elementor 4.0+.
-		// Background library refresh.
-		require_once EMCP_TOOLS_DIR . 'includes/class-library-refresher.php';
 		// Modules framework (free) + built-in modules. The registry boots active
 		// modules on `init`; each module self-gates on its options + availability.
 		require_once EMCP_TOOLS_DIR . 'includes/modules/class-module.php';
@@ -333,32 +286,18 @@ class EMCP_Tools_Bootstrap {
 		require_once EMCP_TOOLS_DIR . 'includes/themer/class-themer-metabox.php';
 		require_once EMCP_TOOLS_DIR . 'includes/modules/class-themer-module.php';
 		require_once EMCP_TOOLS_DIR . 'includes/modules/class-redirect-module.php';
-		// Pro-tier units (SEO/a11y helpers + abilities, widget generator + builder
-		// abilities, system-kit abilities, Pro brand kits, AI Chat). These ship in
-		// the private Pro overlay (pro/) and are absent from the free build; the
-		// loader require_once's each only when present, so the free plugin runs
-		// with zero Pro references. Each unit still self-gates on license.
-		// Integration BASE classes stay runtime: the Pro form/SEO/theme adapters
-		// (loaded eagerly by Pro_Loader::load_runtime below) extend them, and their
-		// free subclasses in the deferred MCP surface do too. Bases must precede both.
+		// Integration base classes stay runtime: their subclasses in the deferred
+		// MCP surface extend them, so the bases must load first.
 		require_once EMCP_TOOLS_DIR . 'includes/abilities/class-theme-integration.php';
 		require_once EMCP_TOOLS_DIR . 'includes/abilities/class-block-pack-integration.php';
 		require_once EMCP_TOOLS_DIR . 'includes/abilities/forms/class-form-integration.php';
 		require_once EMCP_TOOLS_DIR . 'includes/abilities/seo/class-seo-integration.php';
-		require_once EMCP_TOOLS_DIR . 'includes/class-pro-loader.php';
-		EMCP_Tools_Pro_Loader::load_runtime();
 
 		require_once EMCP_TOOLS_DIR . 'includes/class-lite-edition.php';
 		require_once EMCP_TOOLS_DIR . 'includes/abilities/class-ability-registrar.php';
 		require_once EMCP_TOOLS_DIR . 'includes/class-plugin.php';
 	}
 
-	/**
-	 * Registers the non-admin runtime hooks shared by all contexts (post types,
-	 * sandbox loaders, background library refresh).
-	 *
-	 * @since 2.1.0
-	 */
 	/** @var bool Whether the MCP tool surface (ability classes + infra) is loaded. */
 	private static $mcp_surface_loaded = false;
 
@@ -452,16 +391,13 @@ class EMCP_Tools_Bootstrap {
 		require_once EMCP_TOOLS_DIR . 'includes/abilities/class-global-classes-write-abilities.php';
 		require_once EMCP_TOOLS_DIR . 'includes/abilities/class-global-variables-abilities.php';
 		require_once EMCP_TOOLS_DIR . 'includes/abilities/class-themer-abilities.php';
-
-		// Pro-tier ability classes (SEO/a11y, widget builder, system-kit, migrate,
-		// memory) defer here too once the Pro loader splits its file list; until
-		// then they load with the Pro runtime. method_exists-guarded so this is a
-		// no-op on builds without the deferred Pro surface.
-		if ( class_exists( 'EMCP_Tools_Pro_Loader' ) && method_exists( 'EMCP_Tools_Pro_Loader', 'load_mcp_surface' ) ) {
-			EMCP_Tools_Pro_Loader::load_mcp_surface();
-		}
 	}
 
+	/**
+	 * Registers the runtime hooks shared by all contexts.
+	 *
+	 * @since 2.1.0
+	 */
 	private static function wire_hooks(): void {
 		EMCP_Tools_Management_Access::init();
 		EMCP_Tools_Attention::init();
@@ -501,19 +437,8 @@ class EMCP_Tools_Bootstrap {
 		// Auto-repair flagged posts' AI-inserted blocks in the block editor.
 		EMCP_Tools_Block_Repair::init();
 		add_action( 'init', array( 'EMCP_Tools_Kit_Backup_Store', 'register_post_type' ) );
-		// Block Builder (Pro overlay). Registers the emcp_block CPT + Gutenberg
-		// block-category/init hooks only when the Pro class is present; the
-		// loader self-gates on license internally.
-		if ( class_exists( 'EMCP_Tools_Block_Store' ) ) {
-			add_action( 'init', array( 'EMCP_Tools_Block_Store', 'register_post_type' ) );
-			( new EMCP_Tools_Block_Loader() )->register_hooks();
-		}
-		// Background refresh of the Pro Prompts / Brand Kits libraries, registered
-		// unconditionally (cron runs in a non-admin context) so an expired 24h
-		// cache self-heals without the user clicking "Sync Library".
-		EMCP_Tools_Library_Refresher::register();
-		// Modules: register built-ins + Pro modules, seed defaults once, boot the
-		// active ones on `init` (after registration, before most feature hooks).
+		// Modules: register built-ins, seed defaults once, boot the active ones
+		// on `init` (after registration, before most feature hooks).
 		$emcp_modules = EMCP_Tools_Modules_Registry::instance();
 		$emcp_modules->register( new EMCP_Tools_Image_Optimization_Module() );
 		$emcp_modules->register( new EMCP_Tools_Prompts_Module() );
@@ -524,13 +449,9 @@ class EMCP_Tools_Bootstrap {
 		$emcp_modules->register( new EMCP_Tools_Agent_Skills_Module() );
 		$emcp_modules->register( new EMCP_Tools_SVG_Support_Module() );
 		$emcp_modules->register( new EMCP_Tools_Cloud_Module() );
-		EMCP_Tools_Pro_Loader::register_modules( $emcp_modules );
 		do_action( 'emcp_tools_register_modules', $emcp_modules );
 		$emcp_modules->apply_defaults();
 		add_action( 'init', array( $emcp_modules, 'boot_active' ), 5 );
-		// AI Chat (Pro): REST routes + weekly model-list refresh cron + saved-
-		// conversation CPT. No-op in the free build (classes absent).
-		EMCP_Tools_Pro_Loader::wire_runtime_hooks();
 
 		// Admin-bar MCP status + exposure toggle (front-end + wp-admin; the class
 		// self-gates on capability + is_admin_bar_showing()).
@@ -553,16 +474,8 @@ class EMCP_Tools_Bootstrap {
 		if ( class_exists( 'EMCP_Tools_Redirect_Module' ) && EMCP_Tools_Redirect_Module::is_enabled() ) {
 			( new EMCP_Tools_Admin_REST_Redirects() )->register(); // The table exists only while the module is on.
 		}
-
-		// Free-tier updates from GitHub releases (self-disables on premium builds,
-		// where Freemius owns updates).
 	}
 
-	/**
-	 * Loads admin-only classes and wires the Pro library admin-ajax handlers.
-	 *
-	 * @since 2.1.0
-	 */
 	/**
 	 * Load the admin classes without wiring any admin hooks. The admin REST
 	 * endpoints need them, and REST requests are not is_admin().
@@ -575,18 +488,14 @@ class EMCP_Tools_Bootstrap {
 		require_once EMCP_TOOLS_DIR . 'includes/admin/class-admin.php';
 	}
 
+	/**
+	 * Loads admin-only classes.
+	 *
+	 * @since 2.1.0
+	 */
 	private static function load_admin(): void {
 		self::require_admin_classes();
 		require_once EMCP_TOOLS_DIR . 'includes/admin/class-mcpb-builder.php';
-
-		// Pro admin units (AI Chat page assets + Pro prompts/templates/skills +
-		// Pro-library ajax). Loaded from the private Pro overlay when present;
-		// no-op in the free build. wire_admin_hooks() replicates the previous
-		// order: AI-chat page init, then the emcp_tools_fs()-gated Pro handlers.
-		EMCP_Tools_Pro_Loader::load_admin();
-		EMCP_Tools_Pro_Loader::wire_admin_hooks();
-
-
 	}
 
 	/**

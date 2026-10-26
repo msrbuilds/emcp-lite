@@ -58,7 +58,7 @@ class EMCP_Tools_Theme_Abilities {
 	 * @return array
 	 */
 	public function execute_list_themes( $input ): array {
-		EMCP_Tools_Package_Guard::load_upgrader_deps();
+		EMCP_Tools_Package_Guard::load_admin_includes();
 		$active  = function_exists( 'get_stylesheet' ) ? (string) get_stylesheet() : '';
 		$updates = get_site_transient( 'update_themes' );
 		$resp    = ( is_object( $updates ) && isset( $updates->response ) && is_array( $updates->response ) ) ? $updates->response : array();
@@ -118,7 +118,7 @@ class EMCP_Tools_Theme_Abilities {
 		if ( '' === $search ) {
 			return new \WP_Error( 'missing_params', __( 'A "search" keyword is required.', 'emcp-lite' ) );
 		}
-		EMCP_Tools_Package_Guard::load_upgrader_deps();
+		EMCP_Tools_Package_Guard::load_admin_includes();
 		$per_page = max( 1, min( 50, absint( $input['per_page'] ?? 10 ) ) );
 		$api      = themes_api( 'query_themes', array( 'search' => $search, 'per_page' => $per_page, 'fields' => array( 'description' => false ) ) );
 		if ( is_wp_error( $api ) ) {

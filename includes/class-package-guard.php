@@ -1,13 +1,11 @@
 <?php
 /**
- * Shared safety helper for the Plugins & Themes MCP tools.
+ * Shared read-only helper for the Plugins & Themes MCP tools.
  *
- * Centralizes the guardrails that protect a site from an AI agent (or a buggy
- * caller) breaking it: a protected-plugin list (never disable/delete EMCP Tools,
- * Elementor, or Elementor Pro), active-target checks, a direct-filesystem gate
- * (so a headless MCP request never hangs on an FTP-credential prompt), on-demand
- * loading of the wp-admin upgrader includes (absent on REST/WP-CLI requests),
- * and a quiet upgrader skin so installer output is captured, not echoed.
+ * Reports which plugins are active or protected, and loads the wp-admin
+ * includes that the plugin/theme listing and WordPress.org search tools need
+ * (they are absent on REST/WP-CLI requests). EMCP Lite never installs,
+ * updates, activates, deactivates or deletes plugins or themes.
  *
  * @package EMCP_Tools
  * @since   3.0.0
@@ -18,21 +16,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Static guard utilities shared by the plugin + theme ability groups.
+ * Static helpers shared by the plugin + theme ability groups.
  *
  * @since 3.0.0
  */
 class EMCP_Tools_Package_Guard {
-	const ZIP_MAX_ENTRIES       = 5000;
-	const ZIP_MAX_EXPANDED_SIZE = 268435456; // 256 MB.
-	const ZIP_MAX_RATIO         = 200;
-	const PACKAGE_HEADER_BYTES  = 16384;
 
 	/**
-	 * Plugin files that must never be deactivated or deleted via MCP.
+	 * Plugin files reported as protected in the plugin listing.
 	 *
-	 * EMCP Tools itself (disabling it kills the MCP server mid-session) and
-	 * Elementor / Elementor Pro (EMCP's hard dependency). The EMCP basename is
+	 * EMCP itself and Elementor / Elementor Pro. The EMCP basename is
 	 * self-resolved from the constant, never hardcoded.
 	 *
 	 * @since 3.0.0
@@ -40,8 +33,7 @@ class EMCP_Tools_Package_Guard {
 	 */
 	public static function protected_plugin_files(): array {
 		// Hardcoded core list — ALWAYS enforced. The filter can only ADD to it,
-		// never remove an entry (a malicious plugin must not be able to empty the
-		// list and then deactivate/delete Elementor or EMCP Tools itself).
+		// never remove an entry.
 		$core = array( 'elementor/elementor.php', 'elementor-pro/elementor-pro.php' );
 		if ( defined( 'EMCP_TOOLS_BASENAME' ) ) {
 			$core[] = EMCP_TOOLS_BASENAME;
@@ -58,7 +50,7 @@ class EMCP_Tools_Package_Guard {
 	}
 
 	/**
-	 * Whether a plugin file is protected from deactivate/delete.
+	 * Whether a plugin file is protected.
 	 *
 	 * @since 3.0.0
 	 * @param string $file Plugin basename (e.g. "elementor/elementor.php").
@@ -83,138 +75,24 @@ class EMCP_Tools_Package_Guard {
 	}
 
 	/**
-	 * The active stylesheet plus its template (parent), both protected from delete.
+	 * Load the wp-admin plugin/theme includes on demand.
 	 *
-	 * @since 3.0.0
-	 * @return string[]
-	 */
-	public static function active_theme_stylesheets(): array {
-		$out = array();
-		if ( function_exists( 'get_stylesheet' ) ) {
-			$out[] = (string) get_stylesheet();
-		}
-		if ( function_exists( 'get_template' ) ) {
-			$out[] = (string) get_template();
-		}
-		return array_values( array_unique( array_filter( $out ) ) );
-	}
-
-	/**
-	 * Ensure the filesystem is directly writable before any install/update/delete.
-	 *
-	 * Returns true when WP can write without credentials; otherwise a WP_Error,
-	 * so the tool fails cleanly instead of triggering an interactive FTP prompt
-	 * that would hang a headless MCP request.
-	 *
-	 * @since 3.0.0
-	 * @return true|\WP_Error
-	 */
-	public static function filesystem_ready() {
-		self::load_upgrader_deps();
-		$method = function_exists( 'get_filesystem_method' ) ? get_filesystem_method() : 'direct';
-		if ( 'direct' !== $method ) {
-			return new \WP_Error(
-				'filesystem_unavailable',
-				__( 'The WordPress filesystem is not directly writable on this host (it needs FTP/SSH credentials), so plugin/theme install, update, and delete cannot run over MCP. Use SFTP or set the FS_METHOD/credentials in wp-config.php.', 'emcp-lite' )
-			);
-		}
-		if ( function_exists( 'WP_Filesystem' ) && ! WP_Filesystem() ) {
-			return new \WP_Error( 'filesystem_unavailable', __( 'Could not initialise the WordPress filesystem.', 'emcp-lite' ) );
-		}
-		return true;
-	}
-
-	/**
-	 * Load the wp-admin upgrader/plugin/theme includes on demand.
-	 *
-	 * These live under wp-admin/includes and are NOT loaded on the REST/WP-CLI
-	 * requests the MCP server runs in. Guarded so each file loads at most once.
+	 * get_plugins(), plugins_api() and themes_api() live under wp-admin/includes
+	 * and are NOT loaded on the REST/WP-CLI requests the MCP server runs in.
 	 *
 	 * @since 3.0.0
 	 */
-	public static function load_upgrader_deps(): void {
-		if ( ! defined( 'ABSPATH' ) ) {
-			return;
-		}
+	public static function load_admin_includes(): void {
 		$includes = array(
 			'wp-admin/includes/plugin.php',
 			'wp-admin/includes/plugin-install.php',
 			'wp-admin/includes/theme.php',
-			'wp-admin/includes/theme-install.php',
-			'wp-admin/includes/file.php',
-			'wp-admin/includes/misc.php',
-			'wp-admin/includes/update.php',
-			'wp-admin/includes/class-wp-upgrader.php',
 		);
 		foreach ( $includes as $rel ) {
 			$path = ABSPATH . $rel;
 			if ( is_readable( $path ) ) {
 				require_once $path;
 			}
-		}
-	}
-
-	/**
-	 * A quiet upgrader skin that captures messages instead of echoing HTML.
-	 *
-	 * @since 3.0.0
-	 * @return object|null Automatic_Upgrader_Skin instance, or null if unavailable.
-	 */
-	public static function make_skin() {
-		self::load_upgrader_deps();
-		if ( class_exists( '\Automatic_Upgrader_Skin' ) ) {
-			return new \Automatic_Upgrader_Skin();
-		}
-		return null;
-	}
-
-	/**
-	 * Pull captured messages off an upgrader skin, normalized to strings.
-	 *
-	 * @since 3.0.0
-	 * @param object|null $skin
-	 * @return string[]
-	 */
-	public static function skin_messages( $skin ): array {
-		if ( $skin && method_exists( $skin, 'get_upgrade_messages' ) ) {
-			return array_map( 'wp_strip_all_tags', (array) $skin->get_upgrade_messages() );
-		}
-		return array();
-	}
-
-	/**
-	 * Validate a ZIP stored as a WordPress media attachment.
-	 *
-	 * This never accepts a URL or server path. It returns the verified local
-	 * attachment path only after archive and package-level checks pass.
-	 *
-	 * @param int    $attachment_id Attachment ID from upload-media.
-	 * @param string $expected_sha256 Expected lowercase/uppercase SHA-256.
-	 * @param string $kind plugin or theme.
-	 * @return array|\WP_Error
-	 */
-
-
-	/** Parse the small, explicit header subset needed before extraction. */
-
-
-	/** Run one native upgrader operation, restricted to WordPress.org packages. */
-	public static function run_directory_upgrade( $upgrader, string $method, string $target ) {
-		if ( ! in_array( $method, array( 'install', 'upgrade' ), true ) ) {
-			return new WP_Error( 'emcp_lite_upgrade_method', __( 'Unsupported upgrade operation.', 'emcp-lite' ) );
-		}
-		$guard = static function ( $reply, $package ) {
-			$parts = wp_parse_url( (string) $package );
-			if ( ! is_array( $parts ) || 'https' !== ( $parts['scheme'] ?? '' ) || 'downloads.wordpress.org' !== ( $parts['host'] ?? '' ) || isset( $parts['user'] ) || isset( $parts['pass'] ) || ( isset( $parts['port'] ) && 443 !== $parts['port'] ) ) {
-				return new WP_Error( 'emcp_lite_package_source', __( 'EMCP Lite only installs and updates packages hosted on WordPress.org.', 'emcp-lite' ) );
-			}
-			return $reply;
-		};
-		add_filter( 'upgrader_pre_download', $guard, PHP_INT_MAX, 2 );
-		try {
-			return $upgrader->$method( $target );
-		} finally {
-			remove_filter( 'upgrader_pre_download', $guard, PHP_INT_MAX );
 		}
 	}
 }

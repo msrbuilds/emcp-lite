@@ -95,8 +95,9 @@ final class EMCP_Tools_Admin_Screens {
 	 * @param string        $view            The ?view= child, '' for none.
 	 */
 	public static function screen_for_tab( string $tab, ?callable $pro_view_exists = null, string $view = '' ): ?string {
+		// Lite ships no Pro view files, so locked tabs stay locked unless a test injects a check.
 		$exists = $pro_view_exists ?? static function ( string $rel ): bool {
-			return class_exists( 'EMCP_Tools_Pro_Loader' ) && '' !== EMCP_Tools_Pro_Loader::path( $rel );
+			return false;
 		};
 		$key = self::route_key( $tab, $view );
 		if ( $key !== $tab ) {
@@ -260,16 +261,7 @@ final class EMCP_Tools_Admin_Screens {
 	private static function paths( array $screen ): ?array {
 		$base = $screen['script'];
 		if ( 'pro' === $screen['root'] ) {
-			if ( ! class_exists( 'EMCP_Tools_Pro_Loader' ) ) {
-				return null;
-			}
-			$rel = 'assets/admin/build-pro/' . $base;
-			return array(
-				'asset'   => EMCP_Tools_Pro_Loader::path( $rel . '.asset.php' ),
-				'url'     => EMCP_Tools_Pro_Loader::url( $rel . '.js' ),
-				'css'     => EMCP_Tools_Pro_Loader::path( $rel . '.css' ),
-				'css_url' => EMCP_Tools_Pro_Loader::url( $rel . '.css' ),
-			);
+			return null; // Lite ships no Pro screen builds.
 		}
 		return array(
 			'asset'   => EMCP_TOOLS_DIR . 'assets/admin/build/' . $base . '.asset.php',

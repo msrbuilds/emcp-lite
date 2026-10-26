@@ -44,14 +44,8 @@ final class EMCP_Tools_Admin_Prompts_Data {
 		return array( 'categories' => array_values( $categories ) );
 	}
 
-	/** Load EMCP_Tools_Pro_Prompts (admin-only in the Pro loader) and report whether it is usable. */
+	/** Whether EMCP_Tools_Pro_Prompts is present and usable. */
 	public static function pro_class(): bool {
-		if ( ! class_exists( 'EMCP_Tools_Pro_Prompts' ) && class_exists( 'EMCP_Tools_Pro_Loader' ) ) {
-			$file = EMCP_Tools_Pro_Loader::path( 'includes/admin/class-pro-prompts.php' );
-			if ( '' !== $file && file_exists( $file ) ) {
-				require_once $file;
-			}
-		}
 		return class_exists( 'EMCP_Tools_Pro_Prompts' ) && EMCP_Tools_Pro_Prompts::user_has_access();
 	}
 
