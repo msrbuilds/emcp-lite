@@ -492,6 +492,16 @@ class EMCP_Tools_Change_Recorder {
 	}
 
 	/**
+	 * Root of the managed trash dir that holds deleted attachments' file copies.
+	 *
+	 * @return string
+	 */
+	public static function attachment_trash_root(): string {
+		$up = function_exists( 'wp_get_upload_dir' ) ? wp_get_upload_dir() : array( 'basedir' => sys_get_temp_dir() );
+		return rtrim( (string) ( $up['basedir'] ?? sys_get_temp_dir() ), '/\\' ) . '/emcp-originals/trash';
+	}
+
+	/**
 	 * Copy an attachment's files (main + sub-sizes) into a managed trash dir under
 	 * uploads, so a delete is reversible. Returns [{ orig, trashed }].
 	 *
@@ -517,8 +527,7 @@ class EMCP_Tools_Change_Recorder {
 				}
 			}
 		}
-		$up    = function_exists( 'wp_get_upload_dir' ) ? wp_get_upload_dir() : array( 'basedir' => sys_get_temp_dir() );
-		$trash = rtrim( (string) ( $up['basedir'] ?? sys_get_temp_dir() ), '/\\' ) . '/emcp-originals/trash/' . $att_id;
+		$trash = self::attachment_trash_root() . '/' . $att_id;
 		if ( ! is_dir( $trash ) && function_exists( 'wp_mkdir_p' ) ) {
 			wp_mkdir_p( $trash );
 		}

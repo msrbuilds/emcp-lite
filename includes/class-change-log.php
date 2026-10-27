@@ -1042,9 +1042,16 @@ class EMCP_Tools_Change_Log {
 			return new WP_Error( 'restore_identity_conflict', __( 'The original attachment ID is unavailable. Nothing was restored.', 'emcp-lite' ) );
 		}
 		// Validate every required backup before creating a post or copying files.
+		// Destinations must stay inside uploads and sources inside the managed
+		// trash, so a tampered snapshot cannot read or write anywhere else.
+		$uploads = (string) ( wp_get_upload_dir()['basedir'] ?? '' );
+		$trash   = EMCP_Tools_Change_Recorder::attachment_trash_root();
 		foreach ( (array) ( $snap['files'] ?? array() ) as $file ) {
 			$orig = (string) ( $file['orig'] ?? '' );
 			$backup = (string) ( $file['trashed'] ?? '' );
+			if ( '' !== $orig && '' !== $backup && ( ! self::path_inside( $orig, $uploads ) || ! self::path_inside( $backup, $trash ) ) ) {
+				return new WP_Error( 'restore_path_rejected', __( 'An attachment file path is outside the uploads or backup folder. Nothing was restored.', 'emcp-lite' ) );
+			}
 			if ( '' === $orig || '' === $backup || ! is_readable( $backup ) || ! is_file( $backup ) ) {
 				return new WP_Error( 'backup_missing', __( 'A required attachment backup is unavailable. Nothing was restored.', 'emcp-lite' ) );
 			}
@@ -1359,6 +1366,43 @@ class EMCP_Tools_Change_Log {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Whether a path resolves strictly inside a root directory. The path need not
+	 * exist: its nearest existing ancestor is resolved with realpath() (so no
+	 * symlink can lead out of the root) and the missing tail is re-appended.
+	 * Relative paths and any `..` segment are rejected outright.
+	 *
+	 * @param string $path Absolute path.
+	 * @param string $root Root directory.
+	 * @return bool
+	 */
+	private static function path_inside( string $path, string $root ): bool {
+		$root = '' === $root ? false : realpath( $root );
+		if ( false === $root || '' === $path || ! path_is_absolute( $path ) ) {
+			return false;
+		}
+		$path = wp_normalize_path( $path );
+		if ( preg_match( '#(^|/)\.\.(/|$)#', $path ) ) {
+			return false;
+		}
+		$tail = '';
+		$dir  = $path;
+		while ( ! file_exists( $dir ) && ! is_link( $dir ) ) {
+			$parent = dirname( $dir );
+			if ( $parent === $dir ) {
+				return false;
+			}
+			$tail = '/' . basename( $dir ) . $tail;
+			$dir  = $parent;
+		}
+		$real = realpath( $dir ); // False for a dangling symlink.
+		if ( false === $real ) {
+			return false;
+		}
+		$real = untrailingslashit( wp_normalize_path( $real ) ) . $tail;
+		return str_starts_with( $real, untrailingslashit( wp_normalize_path( $root ) ) . '/' );
 	}
 
 	/**
