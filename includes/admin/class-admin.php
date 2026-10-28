@@ -836,6 +836,10 @@ class EMCP_Tools_Admin {
 					if ( isset( $emcp_tool['available'] ) && ! $emcp_tool['available'] ) {
 						continue;
 					}
+					// Elementor Pro tools register only while Elementor Pro is active.
+					if ( ! defined( 'ELEMENTOR_PRO_VERSION' ) && in_array( 'elementor-pro', (array) ( $emcp_tool['badges'] ?? array() ), true ) ) {
+						continue;
+					}
 					// is_registered() is a silent isset() check — unlike wp_get_ability()
 					// / get_registered(), it does not _doing_it_wrong() "Ability not
 					// found" for env-gated tools, which was flooding debug.log (#71).

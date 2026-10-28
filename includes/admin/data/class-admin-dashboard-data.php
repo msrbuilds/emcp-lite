@@ -182,7 +182,7 @@ final class EMCP_Tools_Admin_Dashboard_Data {
 	public function health( ?int $now = null ): array {
 		$now      = $now ?? time();
 		$abilities = function_exists( 'wp_register_ability' );
-		$adapter   = class_exists( 'EMCP_Tools_Adapter_Bootstrap' ) && EMCP_Tools_Adapter_Bootstrap::is_loaded();
+		$adapter   = class_exists( 'EMCP_Tools_Adapter_Bootstrap' ) && EMCP_Tools_Adapter_Bootstrap::is_ready();
 		$online   = (bool) get_option( 'emcp_tools_server_enabled', true ) && $abilities && $adapter;
 		$clients  = self::clients_from_log( class_exists( 'EMCP_Tools_MCP_Request_Log' ) ? EMCP_Tools_MCP_Request_Log::all() : array(), $now );
 		$enabled  = $this->admin ? $this->admin->get_enabled_tool_count() : 0;

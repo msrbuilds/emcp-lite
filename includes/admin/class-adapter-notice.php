@@ -72,18 +72,40 @@ final class EMCP_Tools_Adapter_Notice {
 			echo '<p>' . esc_html__( 'MCP Adapter could not be installed automatically. Install it from Plugins > Add New instead.', 'emcp-lite' ) . '</p>';
 		}
 
-		if ( 'outdated' === $status ) {
-			echo '<p>' . esc_html(
-				sprintf(
+		$core = EMCP_Tools_Adapter_Bootstrap::core_source();
+		$old  = EMCP_Tools_Adapter_Bootstrap::loaded_version();
+
+		if ( 'outdated' === $status || 'conflict' === $status ) {
+			if ( 'conflict' === $status ) {
+				$message = sprintf(
+					/* translators: 1: plugin folder that bundles the adapter, 2: its adapter version, 3: minimum version. */
+					__( 'The %1$s plugin loads its own MCP Adapter %2$s instead of the MCP Adapter plugin, and EMCP Lite needs %3$s or later. Update %1$s to its latest version to connect AI clients.', 'emcp-lite' ),
+					(string) $core['plugin'],
+					'' !== $old ? $old : '?',
+					EMCP_Tools_Adapter_Bootstrap::MIN_VERSION
+				);
+			} else {
+				$message = sprintf(
 					/* translators: %s: minimum MCP Adapter version. */
 					__( 'EMCP Lite needs MCP Adapter %s or later. Update it on the Plugins screen to connect AI clients.', 'emcp-lite' ),
 					EMCP_Tools_Adapter_Bootstrap::MIN_VERSION
-				)
-			) . '</p><p><a class="button button-primary" href="' . esc_url( self_admin_url( 'plugins.php' ) ) . '">' . esc_html__( 'Go to Plugins', 'emcp-lite' ) . '</a></p></div>';
+				);
+			}
+			echo '<p>' . esc_html( $message ) . '</p><p><a class="button button-primary" href="' . esc_url( self_admin_url( 'plugins.php' ) ) . '">' . esc_html__( 'Go to Plugins', 'emcp-lite' ) . '</a></p></div>';
 			return;
 		}
 
 		echo '<p>' . esc_html__( 'AI clients connect through the free, official MCP Adapter plugin from WordPress.org. Your EMCP settings and tools are ready and start working as soon as it is active.', 'emcp-lite' ) . '</p>';
+		if ( '' !== $old && empty( $core['ours'] ) && '' !== (string) $core['plugin'] ) {
+			echo '<p>' . esc_html(
+				sprintf(
+					/* translators: 1: plugin folder that bundles the adapter, 2: its adapter version. */
+					__( 'The %1$s plugin currently provides an older MCP Adapter (%2$s). The MCP Adapter plugin replaces it with the current version.', 'emcp-lite' ),
+					(string) $core['plugin'],
+					$old
+				)
+			) . '</p>';
+		}
 
 		$inactive = 'inactive' === $status;
 		if ( ! $inactive && ! current_user_can( 'install_plugins' ) ) {

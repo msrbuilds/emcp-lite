@@ -266,6 +266,12 @@ class EMCP_Tools_Plugin {
 			return;
 		}
 
+		// EMCP's server uses the MCP Adapter 0.7 API. Another plugin can boot an
+		// older bundled copy (Elementor 4.3 ships 0.6.1); do not register on it.
+		if ( class_exists( 'EMCP_Tools_Adapter_Bootstrap' ) && ! EMCP_Tools_Adapter_Bootstrap::is_ready() ) {
+			return;
+		}
+
 		// The default adapter server is optional (Elementor 4.3.3 disables it
 		// while its own MCP is off). Initialize our abilities independently so
 		// the endpoint does not silently disappear on a fresh REST request.

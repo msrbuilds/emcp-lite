@@ -108,18 +108,42 @@ final class EMCP_Tools_Adapter_Bootstrap {
 		return is_readable( trailingslashit( WP_PLUGIN_DIR ) . self::PLUGIN_FILE );
 	}
 
+	/** Version of the loaded McpAdapter class, or '' when none is loaded. */
+	public static function loaded_version(): string {
+		if ( ! self::is_loaded() ) {
+			return '';
+		}
+		return defined( 'WP\MCP\Core\McpAdapter::VERSION' ) ? (string) constant( 'WP\MCP\Core\McpAdapter::VERSION' ) : '';
+	}
+
+	/** Whether a compatible adapter (MIN_VERSION or later, from any source) is loaded. */
+	public static function is_ready(): bool {
+		$version = self::loaded_version();
+		return self::is_loaded() && ( '' === $version || version_compare( $version, self::MIN_VERSION, '>=' ) );
+	}
+
 	/**
 	 * What the site needs to do for MCP to work.
 	 *
-	 * @return string 'ready', 'outdated' (loaded but older than MIN_VERSION),
-	 *                'inactive' (installed, not active) or 'missing'.
+	 * Another plugin may bundle an older adapter (Elementor 4.3 ships 0.6.1).
+	 * Activating the MCP Adapter plugin normally replaces it, because both use
+	 * the Jetpack Autoloader, which loads the newest copy. So an old copy only
+	 * counts as a conflict once the MCP Adapter plugin is active.
+	 *
+	 * @return string 'ready'; 'missing' or 'inactive' (install or activate the
+	 *                MCP Adapter plugin); 'outdated' (the MCP Adapter plugin itself
+	 *                is older than MIN_VERSION); 'conflict' (it is active, but
+	 *                another plugin's older copy is loaded instead).
 	 */
 	public static function status(): string {
-		if ( self::is_loaded() ) {
-			$version = defined( 'WP\MCP\Core\McpAdapter::VERSION' ) ? (string) constant( 'WP\MCP\Core\McpAdapter::VERSION' ) : '';
-			return ( '' !== $version && version_compare( $version, self::MIN_VERSION, '<' ) ) ? 'outdated' : 'ready';
+		if ( self::is_ready() ) {
+			return 'ready';
 		}
-		return self::is_plugin_installed() ? 'inactive' : 'missing';
+		if ( ! self::is_plugin_active() ) {
+			return self::is_plugin_installed() ? 'inactive' : 'missing';
+		}
+		$core = self::core_source();
+		return empty( $core['ours'] ) && '' !== $core['plugin'] ? 'conflict' : 'outdated';
 	}
 
 	/**
