@@ -1,46 +1,18 @@
 <?php
 /**
- * Bundled MCP Adapter bootstrap.
+ * MCP Adapter integration.
  *
- * The plugin ships a copy of the WordPress MCP Adapter (`wordpress/mcp-adapter`)
- * under vendor/ so users never have to install it as a separate plugin. The
- * Abilities API is core in WordPress 6.9+/7.0, but core does NOT expose
- * abilities over MCP — the adapter is what creates the `/wp-json/mcp/...`
- * server endpoint. Bundling it makes EMCP self-contained.
+ * The Abilities API is core in WordPress 6.9+, but core does NOT expose
+ * abilities over MCP: the WordPress MCP Adapter is what creates the
+ * `/wp-json/mcp/...` server endpoint. EMCP Lite uses the official MCP Adapter
+ * plugin from WordPress.org (slug `mcp-adapter`) instead of bundling a copy.
+ * When the plugin is missing or inactive, EMCP Lite still loads its dashboard
+ * and EMCP_Tools_Adapter_Notice offers a one-click install and activation.
  *
- * The adapter's Composer dependencies load through the Automattic Jetpack
- * Autoloader (vendor/autoload_packages.php). When several active plugins each
- * bundle the same adapter (WooCommerce, Automattic MCP, …), the Jetpack
- * Autoloader coordinates via shared globals and registers only the HIGHEST
- * version of each class process-wide.
- *
- * That arbitration only covers plugins that USE the Jetpack Autoloader. A
- * plugin bundling the adapter behind its own plain autoloader (Rank Math SEO,
- * for one) never joins it — and PHP can only ever have ONE class of a given
- * name loaded per request, so the two copies race per class. The observed
- * failure (#99): McpAdapter/McpServer resolve from our v0.5.0 (loaded eagerly
- * at boot) while HttpTransport/SessionManager/RequestRouter/
- * HttpSessionValidator/McpErrorFactory resolve from the other plugin's v0.4.1
- * (loaded lazily mid-request, where its autoloader wins the race). The result
- * is a SHEARED namespace — a half-and-half runtime that fails with
- * "McpServerError: Session terminated" (JSON-RPC -32600).
- *
- * Checking `class_exists( McpAdapter )` cannot detect this: one class loading
- * from our copy says nothing about where the transport/session/handler/error
- * classes will come from later. So we stop relying on load-order luck and
- * register a PREPENDED resolver that serves the ENTIRE `WP\MCP\` namespace
- * from our bundled copy. Registered at plugin-file load — before any other
- * plugin can reference an adapter class — it makes one version authoritative
- * for the whole request. Consistency beats version-maximisation here: a
- * coherent v0.5.0 works, a sheared 0.4.1/0.5.0 mix cannot.
- *
- * Define EMCP_TOOLS_NO_ADAPTER_PRELOAD in wp-config.php to opt out.
- *
- * "Loadable" is not "booted": a plugin can autoload the WP\MCP classes without
- * instantiating the adapter (WooCommerce does this unless its MCP feature flag
- * is on). If nobody boots it, `mcp_adapter_init` never fires and our server
- * route is never created. So ensure() also boots the adapter itself
- * (idempotent) rather than assuming an external owner did.
+ * The adapter plugin boots itself when it loads (`WP\MCP\Plugin::instance()`),
+ * which fires `mcp_adapter_init`, where EMCP registers its server. ensure()
+ * also boots it (idempotent) in case another plugin only autoloaded the
+ * classes without instantiating the adapter.
  *
  * @package EMCP_Tools
  * @since   1.7.4
@@ -51,140 +23,68 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Loads/boots the MCP Adapter — bundled copy or already-active external one.
+ * Locates and boots the MCP Adapter plugin.
  *
  * @since 1.7.4
  */
 final class EMCP_Tools_Adapter_Bootstrap {
 
-	/**
-	 * Version of the bundled adapter at the last update; bundled_version() reads the copied
-	 * source itself.
-	 */
-	const BUNDLED_VERSION = '0.7.1';
+	/** WordPress.org slug of the official MCP Adapter plugin. */
+	const PLUGIN_SLUG = 'mcp-adapter';
+
+	/** Plugin basename of the official MCP Adapter plugin. */
+	const PLUGIN_FILE = 'mcp-adapter/mcp-adapter.php';
+
+	/** Oldest adapter release whose server API EMCP Lite supports. */
+	const MIN_VERSION = '0.7.0';
 
 	/**
-	 * Root namespace of the MCP Adapter, with trailing separator.
-	 */
-	const ADAPTER_NAMESPACE = 'WP\\MCP\\';
-
-	/**
-	 * Where the adapter came from: 'external', 'bundled', or 'none'.
+	 * Where the adapter came from: 'plugin' (the MCP Adapter plugin),
+	 * 'external' (a copy bundled in another plugin) or 'none'.
 	 *
 	 * @var string
 	 */
 	private static $source = 'none';
 
 	/**
-	 * Ensures the MCP Adapter is available, booting the bundled copy if needed.
+	 * Loads EMCP's own Composer dependencies and boots the adapter when available.
 	 *
 	 * Safe to call once, early in plugin init (before the dependency check).
 	 *
 	 * @since 1.7.4
 	 */
 	public static function ensure(): void {
-		// Make our bundled copy authoritative for the whole WP\MCP namespace
-		// before anything can autoload an adapter class (see the class docblock).
-		self::preload_bundled_namespace();
-
-		// Load the Jetpack Autoloader for the adapter's own Composer
-		// dependencies (php-mcp-schema, …). Requiring it prepends the Jetpack
-		// autoloader, so re-assert our resolver afterwards to keep it
-		// front-most and the WP\MCP namespace single-version.
-		$autoloader = EMCP_TOOLS_DIR . 'vendor/autoload_packages.php';
-		if ( is_readable( $autoloader ) ) {
-			require_once $autoloader;
-			self::preload_bundled_namespace();
-		}
+		self::load_vendor();
 
 		if ( ! class_exists( '\WP\MCP\Core\McpAdapter' ) ) {
 			self::$source = 'none';
 			return;
 		}
 
-		// External vs bundled is informational only now (the Jetpack Autoloader
-		// picks the winning copy regardless of who required it first).
-		self::$source = 'bundled';
+		self::$source = self::is_plugin_active() ? 'plugin' : 'external';
 
-		// Boot the adapter (idempotent singleton). This is what fires
-		// mcp_adapter_init. It is a no-op if an external owner already booted it,
-		// and the safety net when the classes were merely autoloaded but never
-		// instantiated (e.g. WooCommerce with its MCP feature flag off). Booting
-		// only fires the init action; it does not register any other plugin's
-		// tools — those are added on that hook by each plugin's own gated code.
+		// Idempotent: a no-op when the adapter plugin already booted itself, and
+		// the safety net when another plugin only autoloaded the classes.
 		if ( class_exists( '\WP\MCP\Plugin' ) ) {
 			\WP\MCP\Plugin::instance();
 		} elseif ( method_exists( '\WP\MCP\Core\McpAdapter', 'instance' ) ) {
-			// Fallback: a copy that exposes McpAdapter but not the Plugin wrapper.
 			\WP\MCP\Core\McpAdapter::instance();
 		}
 	}
 
 	/**
-	 * Absolute path to the bundled adapter's class root (PSR-4 base).
-	 *
-	 * `WP\MCP\Transport\HttpTransport` maps to `…/includes/Transport/HttpTransport.php`.
-	 *
-	 * @since 3.5.1
-	 *
-	 * @return string Path with a trailing slash.
+	 * Load EMCP's bundled Composer dependencies (svg-sanitize) through the
+	 * Jetpack Autoloader. Idempotent.
 	 */
-	private static function bundled_dir(): string {
-		return EMCP_TOOLS_DIR . 'vendor/wordpress/mcp-adapter/includes/';
-	}
-
-	/**
-	 * Autoloads any `WP\MCP\*` class from OUR bundled adapter copy.
-	 *
-	 * PHP only ever calls an autoloader for a class that is not yet declared,
-	 * so this can never redeclare a class another plugin already loaded — it
-	 * simply makes our copy the one that answers first when registered at the
-	 * front of the stack.
-	 *
-	 * @since 3.5.1
-	 *
-	 * @param string $class Fully-qualified class name.
-	 */
-	public static function autoload_bundled( string $class ): void {
-		$prefix_len = strlen( self::ADAPTER_NAMESPACE );
-		if ( 0 !== strncmp( $class, self::ADAPTER_NAMESPACE, $prefix_len ) ) {
-			return;
-		}
-
-		$relative = str_replace( '\\', '/', substr( $class, $prefix_len ) );
-		$file     = self::bundled_dir() . $relative . '.php';
-
-		if ( is_readable( $file ) ) {
-			require_once $file;
+	public static function load_vendor(): void {
+		$autoloader = EMCP_TOOLS_DIR . 'vendor/autoload_packages.php';
+		if ( is_readable( $autoloader ) ) {
+			require_once $autoloader;
 		}
 	}
 
 	/**
-	 * Registers (or re-asserts) our WP\MCP resolver at the FRONT of the
-	 * autoload stack.
-	 *
-	 * Safe and cheap to call repeatedly: it unregisters first, so calling it
-	 * again after another autoloader has prepended itself restores our
-	 * front-most position. Nothing is eagerly loaded — resolution stays lazy.
-	 *
-	 * @since 3.5.1
-	 */
-	public static function preload_bundled_namespace(): void {
-		if ( defined( 'EMCP_TOOLS_NO_ADAPTER_PRELOAD' ) && EMCP_TOOLS_NO_ADAPTER_PRELOAD ) {
-			return;
-		}
-
-		if ( ! is_dir( self::bundled_dir() ) ) {
-			return; // No bundled copy to serve (e.g. a stripped install).
-		}
-
-		$callback = array( __CLASS__, 'autoload_bundled' );
-		spl_autoload_unregister( $callback );
-		spl_autoload_register( $callback, true, true ); // throw, prepend.
-	}
-
-	/**
-	 * Whether the MCP Adapter core class is available (from either source).
+	 * Whether the MCP Adapter core class is available (from any source).
 	 *
 	 * @since 1.7.4
 	 *
@@ -194,61 +94,36 @@ final class EMCP_Tools_Adapter_Bootstrap {
 		return class_exists( '\WP\MCP\Core\McpAdapter' );
 	}
 
-	/**
-	 * Reports which file each critical adapter class actually resolved from.
-	 *
-	 * Diagnostic for the mixed-version shear described in the class docblock:
-	 * every entry should sit under this plugin's vendor directory. Mirrors the
-	 * PHP-Reflection check used to diagnose #99.
-	 *
-	 * @since 3.5.1
-	 *
-	 * @return array{consistent:bool,classes:array<string,string>} Map of class => file
-	 *               ('' when not loaded), plus whether all loaded ones are ours.
-	 */
-	public static function loaded_class_report(): array {
-		$critical = array(
-			'\WP\MCP\Core\McpAdapter',
-			'\WP\MCP\Core\McpServer',
-			'\WP\MCP\Transport\HttpTransport',
-			'\WP\MCP\Transport\Infrastructure\SessionManager',
-			'\WP\MCP\Transport\Infrastructure\RequestRouter',
-			'\WP\MCP\Transport\Infrastructure\HttpSessionValidator',
-			'\WP\MCP\Infrastructure\ErrorHandling\McpErrorFactory',
-		);
-
-		$ours       = wp_normalize_path( self::bundled_dir() );
-		$consistent = true;
-		$classes    = array();
-
-		foreach ( $critical as $class ) {
-			if ( ! class_exists( $class, false ) && ! interface_exists( $class, false ) ) {
-				$classes[ $class ] = '';
-				continue;
-			}
-
-			try {
-				$file = ( new \ReflectionClass( $class ) )->getFileName();
-			} catch ( \Throwable $e ) {
-				$file = '';
-			}
-
-			$file              = is_string( $file ) ? wp_normalize_path( $file ) : '';
-			$classes[ $class ] = $file;
-
-			if ( '' !== $file && 0 !== strpos( $file, $ours ) ) {
-				$consistent = false;
-			}
+	/** Whether the official MCP Adapter plugin is active on this site. */
+	public static function is_plugin_active(): bool {
+		$active = (array) get_option( 'active_plugins', array() );
+		if ( in_array( self::PLUGIN_FILE, $active, true ) ) {
+			return true;
 		}
+		return is_multisite() && array_key_exists( self::PLUGIN_FILE, (array) get_site_option( 'active_sitewide_plugins', array() ) );
+	}
 
-		return array(
-			'consistent' => $consistent,
-			'classes'    => $classes,
-		);
+	/** Whether the official MCP Adapter plugin is installed (active or not). */
+	public static function is_plugin_installed(): bool {
+		return is_readable( trailingslashit( WP_PLUGIN_DIR ) . self::PLUGIN_FILE );
 	}
 
 	/**
-	 * Where the adapter was loaded from: 'external', 'bundled', or 'none'.
+	 * What the site needs to do for MCP to work.
+	 *
+	 * @return string 'ready', 'outdated' (loaded but older than MIN_VERSION),
+	 *                'inactive' (installed, not active) or 'missing'.
+	 */
+	public static function status(): string {
+		if ( self::is_loaded() ) {
+			$version = defined( 'WP\MCP\Core\McpAdapter::VERSION' ) ? (string) constant( 'WP\MCP\Core\McpAdapter::VERSION' ) : '';
+			return ( '' !== $version && version_compare( $version, self::MIN_VERSION, '<' ) ) ? 'outdated' : 'ready';
+		}
+		return self::is_plugin_installed() ? 'inactive' : 'missing';
+	}
+
+	/**
+	 * Where the adapter was loaded from: 'plugin', 'external' or 'none'.
 	 *
 	 * @since 1.7.4
 	 *
@@ -258,24 +133,20 @@ final class EMCP_Tools_Adapter_Bootstrap {
 		return self::$source;
 	}
 
-	/**
-	 * The version of the bundled adapter, read from its McpAdapter::VERSION.
-	 *
-	 * @since 3.19.0
-	 */
-	public static function bundled_version(): string {
-		$src = @file_get_contents( self::bundled_dir() . 'Core/McpAdapter.php' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors, WordPress.WP.AlternativeFunctions
-		return is_string( $src ) && preg_match( "/const\\s+VERSION\\s*=\\s*'([^']+)'/", $src, $m ) ? $m[1] : self::BUNDLED_VERSION;
+	/** The adapter plugin's class root, used to recognise its own copy. */
+	private static function plugin_class_dir(): string {
+		return trailingslashit( WP_PLUGIN_DIR ) . self::PLUGIN_SLUG . '/includes/';
 	}
 
 	/**
-	 * Which copy of McpAdapter a file is: the plugin folder it sits in and whether it is ours.
+	 * Which copy of McpAdapter a file is: the plugin folder it sits in and
+	 * whether it is the official MCP Adapter plugin's own copy.
 	 *
 	 * @since 3.19.0
 	 *
 	 * @param string $file        The class file ('' when unknown).
 	 * @param string $plugins_dir WP_PLUGIN_DIR.
-	 * @param string $ours_dir    Our bundled adapter's class root.
+	 * @param string $ours_dir    The MCP Adapter plugin's class root.
 	 * @param string $version     The loaded McpAdapter::VERSION.
 	 * @return array{file: string, version: string, ours: bool, plugin: string}
 	 */
@@ -299,8 +170,8 @@ final class EMCP_Tools_Adapter_Bootstrap {
 	}
 
 	/**
-	 * Where the loaded McpAdapter class came from (D3: Amelia loads its bundled 0.5.0 copy before
-	 * EMCP boots, so the core class can be another plugin's while the rest is ours).
+	 * Where the loaded McpAdapter class came from. Another plugin can load its
+	 * own bundled copy before the MCP Adapter plugin does.
 	 *
 	 * @since 3.19.0
 	 *
@@ -316,9 +187,9 @@ final class EMCP_Tools_Adapter_Bootstrap {
 			} catch ( \Throwable $e ) {
 				$file = '';
 			}
-			$ver = defined( $class . '::VERSION' ) ? (string) constant( $class . '::VERSION' ) : '';
+			$const = ltrim( $class, '\\' ) . '::VERSION';
+			$ver   = defined( $const ) ? (string) constant( $const ) : '';
 		}
-		$plugins = defined( 'WP_PLUGIN_DIR' ) ? WP_PLUGIN_DIR : dirname( EMCP_TOOLS_DIR );
-		return self::source_from_file( $file, $plugins, self::bundled_dir(), $ver );
+		return self::source_from_file( $file, WP_PLUGIN_DIR, self::plugin_class_dir(), $ver );
 	}
 }

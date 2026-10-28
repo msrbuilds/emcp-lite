@@ -39,7 +39,9 @@ EMCP Lite does not install, update or remove plugins or themes, manage users, ch
 
 = Connect your AI client =
 
-The Connection screen guides you through setup for Claude Desktop, Claude.ai, Claude Code, Cursor, ChatGPT, Antigravity and other MCP clients, using OAuth sign-in or a WordPress Application Password.
+EMCP Lite uses the free, official [MCP Adapter](https://wordpress.org/plugins/mcp-adapter/) plugin from WordPress.org to provide the MCP endpoint. If it is not active yet, EMCP Lite shows a notice with a one-click button that installs and activates it for you.
+
+The Connection screen then guides you through setup for Claude Desktop, Claude.ai, Claude Code, Cursor, ChatGPT, Antigravity and other MCP clients, using OAuth sign-in or a WordPress Application Password.
 
 Elementor is optional: the WordPress and Gutenberg tools work without it, and some integrations need their respective plugins. EMCP Lite is independently developed and is not affiliated with WordPress, Elementor, Anthropic or OpenAI.
 
@@ -63,7 +65,7 @@ EMCP Lite does not send data anywhere until you connect an AI client or enable a
 * Pexels: https://www.pexels.com/terms-of-service/ and https://www.pexels.com/privacy-policy/
 * Pixabay: https://pixabay.com/service/terms/ and https://pixabay.com/service/privacy/
 
-**Other requests.** Plugin and theme search uses the WordPress.org API, sending your search terms and page number. When a security check runs, it looks up your installed plugins' slugs on the WordPress.org API to compare versions. Page inspection and media import tools request only the URLs you provide or select. Tutorial videos open on YouTube only when you click them; their thumbnails are bundled with the plugin.
+**Other requests.** When you click Install and activate MCP Adapter, the plugin is downloaded from WordPress.org. Plugin and theme search uses the WordPress.org API, sending your search terms and page number. When a security check runs, it looks up your installed plugins' slugs on the WordPress.org API to compare versions. Page inspection and media import tools request only the URLs you provide or select. Tutorial videos open on YouTube only when you click them; their thumbnails are bundled with the plugin.
 
 = Source code =
 
@@ -78,16 +80,16 @@ Bundled libraries:
 * jsdiff (BSD-3-Clause): https://github.com/kpdecker/jsdiff
 * Lucide (ISC): https://github.com/lucide-icons/lucide
 * svg-sanitize (GPL-2.0-or-later): https://github.com/darylldoyle/svg-sanitizer
-* MCP Adapter (GPL-2.0-or-later): https://github.com/WordPress/mcp-adapter
 
 License notices are included in the assets/licenses, assets/fonts and assets/lib/swiper folders.
 
 == Installation ==
 
 1. In your WordPress dashboard, go to Plugins > Add New, search for "EMCP Lite", then install and activate it.
-2. Open EMCP in the admin menu and choose Connection.
-3. Pick your AI client and follow the steps to connect it.
-4. On the Tools screen, review which tools your AI client may use before allowing write operations.
+2. If prompted, click Install and activate MCP Adapter. EMCP Lite needs this official WordPress.org plugin to connect AI clients.
+3. Open EMCP in the admin menu and choose Connection.
+4. Pick your AI client and follow the steps to connect it.
+5. On the Tools screen, review which tools your AI client may use before allowing write operations.
 
 == Frequently Asked Questions ==
 
@@ -102,6 +104,10 @@ Any client that supports remote MCP servers. The Connection screen has guided se
 = Do I need Elementor? =
 
 No. The WordPress, media and Gutenberg tools work on any site. Elementor tools appear when Elementor is active.
+
+= Why do I need the MCP Adapter plugin? =
+
+MCP Adapter is the official WordPress plugin that turns WordPress abilities into an MCP server. EMCP Lite adds its tools to that server. Using the official plugin means it is updated by the WordPress team and shared with other MCP plugins on your site. EMCP Lite installs and activates it in one click.
 
 = Do I need an EMCP Cloud account? =
 

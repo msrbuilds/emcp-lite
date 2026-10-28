@@ -2,6 +2,7 @@
 
 ## 1.0.4
 
+- Use the official MCP Adapter plugin from WordPress.org instead of a bundled copy, with a one-click install and activation notice.
 - Use the EMCP Lite name throughout the dashboard, notices, messages and Claude Desktop bundle.
 - First release on WordPress.org.
 

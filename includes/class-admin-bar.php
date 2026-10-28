@@ -94,7 +94,9 @@ class EMCP_Tools_Admin_Bar {
 	 * @return bool
 	 */
 	protected function api_available(): bool {
-		return function_exists( 'wp_register_ability' );
+		// The MCP endpoint needs both core's Abilities API and the MCP Adapter plugin.
+		return function_exists( 'wp_register_ability' )
+			&& ( ! class_exists( 'EMCP_Tools_Adapter_Bootstrap' ) || EMCP_Tools_Adapter_Bootstrap::is_loaded() );
 	}
 
 	/**

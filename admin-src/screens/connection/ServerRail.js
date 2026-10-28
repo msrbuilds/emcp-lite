@@ -61,9 +61,9 @@ export function ServerRail( { data, apps, setApps, onSaved = () => {} } ) {
 		'none' !== status.adapter;
 	const copy = status.adapterCopy;
 	const adapterLabel = {
-		bundled: __( 'Bundled', 'emcp-lite' ),
+		plugin: __( 'Active', 'emcp-lite' ),
 		external: __( 'External', 'emcp-lite' ),
-		none: __( 'Missing', 'emcp-lite' ),
+		none: __( 'Not active', 'emcp-lite' ),
 	}[ status.adapter ];
 	const rows = [
 		[
@@ -75,7 +75,7 @@ export function ServerRail( { data, apps, setApps, onSaved = () => {} } ) {
 			__( 'MCP Adapter', 'emcp-lite' ),
 			copy && ! copy.ours && copy.plugin
 				? sprintf(
-						/* translators: 1: Bundled or External, 2: plugin folder, 3: its adapter version. */
+						/* translators: 1: Active or External, 2: plugin folder, 3: its adapter version. */
 						__( '%1$s, with %2$s %3$s loaded first', 'emcp-lite' ),
 						adapterLabel,
 						copy.plugin,

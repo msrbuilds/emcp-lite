@@ -251,7 +251,8 @@ final class EMCP_Tools_Admin_Frame {
 		$labels = array(
 			'green' => __( 'Server online', 'emcp-lite' ),
 			'grey'  => __( 'Server off', 'emcp-lite' ),
-			'red'   => __( 'Abilities API missing', 'emcp-lite' ),
+			// Core always has the Abilities API on 6.9+, so red usually means no MCP Adapter.
+			'red'   => function_exists( 'wp_register_ability' ) ? __( 'MCP Adapter not active', 'emcp-lite' ) : __( 'Abilities API missing', 'emcp-lite' ),
 		);
 		if ( ! isset( $labels[ $color ] ) ) {
 			$color = 'grey';

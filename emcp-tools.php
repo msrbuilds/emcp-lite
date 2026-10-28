@@ -37,8 +37,6 @@ function emcp_lite_start() {
 	define( 'EMCP_TOOLS_DIR', plugin_dir_path( __FILE__ ) );
 	define( 'EMCP_TOOLS_URL', plugin_dir_url( __FILE__ ) );
 	define( 'EMCP_TOOLS_BASENAME', plugin_basename( __FILE__ ) );
-	require_once EMCP_TOOLS_DIR . 'includes/class-mcp-adapter-bootstrap.php';
-	EMCP_Tools_Adapter_Bootstrap::preload_bundled_namespace();
 	require_once EMCP_TOOLS_DIR . 'includes/class-bootstrap.php';
 	add_action( 'plugins_loaded', array( 'EMCP_Tools_Bootstrap', 'boot' ), 20 );
 }

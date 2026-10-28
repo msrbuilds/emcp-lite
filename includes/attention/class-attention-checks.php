@@ -190,8 +190,8 @@ final class EMCP_Tools_Adapter_Attention extends EMCP_Tools_Attention_Base {
 	public function item(): array {
 		$s   = $this->source();
 		$url = class_exists( 'EMCP_Tools_Admin' ) ? self::url( '-connection' ) : admin_url( 'admin.php?page=emcp-tools-connection' );
-		/* translators: 1: plugin folder, 2: its adapter version, 3: EMCP's bundled version. */
-		$body = sprintf( __( 'The plugin %1$s loads its own MCP Adapter %2$s before EMCP, so part of EMCP\'s server runs on that copy instead of the bundled %3$s. Connections work today; if they start failing after an update of either plugin, this is the first thing to check.', 'emcp-lite' ), (string) $s['plugin'], '' !== (string) $s['version'] ? (string) $s['version'] : '?', EMCP_Tools_Adapter_Bootstrap::bundled_version() );
+		/* translators: 1: plugin folder, 2: its adapter version. */
+		$body = sprintf( __( 'The plugin %1$s loads its own MCP Adapter %2$s first, so EMCP\'s server runs on that copy instead of the MCP Adapter plugin. Connections work today; if they start failing after an update of either plugin, this is the first thing to check.', 'emcp-lite' ), (string) $s['plugin'], '' !== (string) $s['version'] ? (string) $s['version'] : '?' );
 		return $this->make( 'warning', 'plug', __( 'Another plugin\'s MCP Adapter is loaded', 'emcp-lite' ), $body, __( 'Open Connection', 'emcp-lite' ), $url );
 	}
 }

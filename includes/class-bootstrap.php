@@ -28,11 +28,15 @@ class EMCP_Tools_Bootstrap {
 	 * @since 2.1.0 (since 1.0.0 as emcp_tools_init)
 	 */
 	public static function boot(): void {
-		// Make the MCP Adapter available (active standalone plugin, else our
-		// bundled copy) BEFORE the dependency check, so the adapter is never a
-		// "go install this" blocker. The Abilities API is core in WP 6.9+/7.0.
+		// Boot the MCP Adapter plugin when it is active. Without it EMCP still
+		// loads its dashboard and offers a one-click install; the MCP endpoint
+		// appears once the adapter is active. The Abilities API is core in 6.9+.
 		require_once EMCP_TOOLS_DIR . 'includes/class-mcp-adapter-bootstrap.php';
 		EMCP_Tools_Adapter_Bootstrap::ensure();
+		if ( is_admin() ) {
+			require_once EMCP_TOOLS_DIR . 'includes/admin/class-adapter-notice.php';
+			EMCP_Tools_Adapter_Notice::init();
+		}
 
 		if ( ! self::check_dependencies() ) {
 			return;
@@ -540,12 +544,9 @@ class EMCP_Tools_Bootstrap {
 			$missing[] = 'WordPress Abilities API (requires WordPress 6.9+)';
 		}
 
-		// MCP Adapter: bundled with the plugin (EMCP_Tools_Adapter_Bootstrap::ensure()
-		// ran above). Only fails if the bundled source is missing/corrupt, a
-		// broken build, not a user action.
-		if ( ! class_exists( '\WP\MCP\Core\McpAdapter' ) ) {
-			$missing[] = 'WordPress MCP Adapter (bundled, reinstall the plugin if this persists)';
-		}
+		// The MCP Adapter plugin is not a boot requirement: EMCP_Tools_Adapter_Notice
+		// guides the install, and the server registers once the adapter fires
+		// mcp_adapter_init.
 
 		if ( ! empty( $missing ) ) {
 			add_action(

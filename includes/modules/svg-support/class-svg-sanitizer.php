@@ -27,7 +27,7 @@ class EMCP_Tools_SVG_Sanitizer {
 	 * Ensure the enshrined/svg-sanitize library is autoloadable.
 	 *
 	 * The library ships in vendor/ and is autoloaded through the Jetpack
-	 * autoloader (same mechanism as the bundled MCP adapter). We boot that
+	 * autoloader. We boot that
 	 * autoloader on demand so the class is available even if nothing else
 	 * has required it yet this request.
 	 *
@@ -37,9 +37,9 @@ class EMCP_Tools_SVG_Sanitizer {
 		if ( class_exists( '\\enshrined\\svgSanitize\\Sanitizer' ) ) {
 			return true;
 		}
-		// Preferred: the Jetpack autoloader (same mechanism as the bundled MCP adapter).
-		if ( class_exists( 'EMCP_Tools_Adapter_Bootstrap' ) && method_exists( 'EMCP_Tools_Adapter_Bootstrap', 'ensure' ) ) {
-			EMCP_Tools_Adapter_Bootstrap::ensure();
+		// Preferred: the Jetpack autoloader that loads EMCP's Composer dependencies.
+		if ( class_exists( 'EMCP_Tools_Adapter_Bootstrap' ) && method_exists( 'EMCP_Tools_Adapter_Bootstrap', 'load_vendor' ) ) {
+			EMCP_Tools_Adapter_Bootstrap::load_vendor();
 		} elseif ( defined( 'EMCP_TOOLS_DIR' ) && is_readable( EMCP_TOOLS_DIR . 'vendor/autoload_packages.php' ) ) {
 			require_once EMCP_TOOLS_DIR . 'vendor/autoload_packages.php';
 		}

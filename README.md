@@ -19,7 +19,7 @@ Lite excludes Freemius, third-party updates, arbitrary code insertion, executabl
 
 ## Requirements
 
-WordPress 6.9 or newer and PHP 8.1 or newer. For development, use Node.js matching [.nvmrc](.nvmrc), npm and Composer.
+WordPress 6.9 or newer and PHP 8.1 or newer. AI clients connect through the official [MCP Adapter](https://wordpress.org/plugins/mcp-adapter/) plugin; EMCP Lite offers a one-click install and activation when it is missing. For development, use Node.js matching [.nvmrc](.nvmrc), npm and Composer.
 
 ## Build and install
 

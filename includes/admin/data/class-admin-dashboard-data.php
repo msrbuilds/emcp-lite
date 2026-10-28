@@ -182,7 +182,8 @@ final class EMCP_Tools_Admin_Dashboard_Data {
 	public function health( ?int $now = null ): array {
 		$now      = $now ?? time();
 		$abilities = function_exists( 'wp_register_ability' );
-		$online   = (bool) get_option( 'emcp_tools_server_enabled', true ) && $abilities;
+		$adapter   = class_exists( 'EMCP_Tools_Adapter_Bootstrap' ) && EMCP_Tools_Adapter_Bootstrap::is_loaded();
+		$online   = (bool) get_option( 'emcp_tools_server_enabled', true ) && $abilities && $adapter;
 		$clients  = self::clients_from_log( class_exists( 'EMCP_Tools_MCP_Request_Log' ) ? EMCP_Tools_MCP_Request_Log::all() : array(), $now );
 		$enabled  = $this->admin ? $this->admin->get_enabled_tool_count() : 0;
 		$total    = $this->admin ? $this->admin->get_total_tool_count() : 0;
@@ -201,7 +202,7 @@ final class EMCP_Tools_Admin_Dashboard_Data {
 			'server'  => array(
 				'online' => $online,
 				'label'  => $online ? __( 'MCP server online', 'emcp-lite' ) : __( 'MCP server off', 'emcp-lite' ),
-				'sub'    => $abilities ? __( 'Abilities API enabled', 'emcp-lite' ) : __( 'Abilities API missing', 'emcp-lite' ),
+				'sub'    => ! $adapter ? __( 'MCP Adapter plugin not active', 'emcp-lite' ) : ( $abilities ? __( 'Abilities API enabled', 'emcp-lite' ) : __( 'Abilities API missing', 'emcp-lite' ) ),
 			),
 			'clients' => array(
 				'count' => $clients['count'],
