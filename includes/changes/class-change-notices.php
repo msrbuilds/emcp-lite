@@ -114,10 +114,10 @@ final class EMCP_Tools_Change_Notices {
 			return;
 		}
 		if ( self::stray_option() ) {
-			self::notice( __( 'An AI client needs to reconnect.', 'emcp-lite' ), __( "An AI connection is still running the previous version of EMCP Tools. Its changes aren't being recorded in History and can't be undone. Reconnect your AI client (restart it, or reload its MCP server) to fix this.", 'emcp-lite' ), self::DISMISS_STRAY );
+			self::notice( __( 'An AI client needs to reconnect.', 'emcp-lite' ), __( "An AI connection is still running the previous version of EMCP Lite. Its changes aren't being recorded in History and can't be undone. Reconnect your AI client (restart it, or reload its MCP server) to fix this.", 'emcp-lite' ), self::DISMISS_STRAY );
 		}
 		if ( self::upgrade_notice_pending() ) {
-			self::notice( __( 'Reconnect your AI clients.', 'emcp-lite' ), __( 'EMCP Tools 3.18.0 moved History to its own table. Reconnect every AI client (restart it, or reload its MCP server) so its changes keep being recorded.', 'emcp-lite' ), self::DISMISS_UPGRADE );
+			self::notice( __( 'Reconnect your AI clients.', 'emcp-lite' ), __( 'An earlier EMCP version moved History to its own table. Reconnect every AI client (restart it, or reload its MCP server) so its changes keep being recorded.', 'emcp-lite' ), self::DISMISS_UPGRADE );
 		}
 	}
 

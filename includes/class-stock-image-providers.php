@@ -119,7 +119,7 @@ class EMCP_Tools_Stock_Image_Providers {
 					'no_api_key',
 					sprintf(
 						/* translators: %s: provider label */
-						__( 'No %s API key is configured. Add one on EMCP Tools → Connection, or use a provider you have connected.', 'emcp-lite' ),
+						__( 'No %s API key is configured. Add one on EMCP Lite → Connection, or use a provider you have connected.', 'emcp-lite' ),
 						self::label( $requested )
 					)
 				);
@@ -131,7 +131,7 @@ class EMCP_Tools_Stock_Image_Providers {
 		if ( empty( $available ) ) {
 			return new \WP_Error(
 				'no_api_key',
-				__( 'No stock-image provider is configured. Add a free Unsplash, Pexels, or Pixabay API key on EMCP Tools → Connection.', 'emcp-lite' )
+				__( 'No stock-image provider is configured. Add a free Unsplash, Pexels, or Pixabay API key on EMCP Lite → Connection.', 'emcp-lite' )
 			);
 		}
 		$id = $available[0];

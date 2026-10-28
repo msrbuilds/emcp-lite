@@ -160,7 +160,7 @@ export function ChangelogScreen( { data } ) {
 			<PageHeader
 				title={ __( 'Changelog', 'emcp-lite' ) }
 				description={ __(
-					'What changed in each release of EMCP Tools.',
+					'What changed in each release of EMCP Lite.',
 					'emcp-lite'
 				) }
 				actions={

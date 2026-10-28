@@ -69,7 +69,7 @@ final class EMCP_Tools_Management_Access {
 			$page   = isset( $source['page'] ) && is_string( $source['page'] ) ? sanitize_key( wp_unslash( $source['page'] ) ) : '';
 			$action = isset( $source['action'] ) && is_string( $source['action'] ) ? sanitize_key( wp_unslash( $source['action'] ) ) : '';
 			if ( self::is_management_request( $page, $action ) && ! self::can_manage() ) {
-				wp_die( esc_html__( 'Your account cannot manage EMCP Tools on this site.', 'emcp-lite' ), '', array( 'response' => 403 ) );
+				wp_die( esc_html__( 'Your account cannot manage EMCP Lite on this site.', 'emcp-lite' ), '', array( 'response' => 403 ) );
 			}
 		}
 	}
@@ -79,7 +79,7 @@ final class EMCP_Tools_Management_Access {
 		// WordPress matches registered REST routes case-insensitively.
 		$route = strtolower( $request->get_route() );
 		if ( ( '/emcp-tools/v1/admin' === $route || str_starts_with( $route, '/emcp-tools/v1/admin/' ) ) && ! self::can_manage() ) {
-			return new WP_Error( 'emcp_management_forbidden', __( 'Your account cannot manage EMCP Tools on this site.', 'emcp-lite' ), array( 'status' => 403 ) );
+			return new WP_Error( 'emcp_management_forbidden', __( 'Your account cannot manage EMCP Lite on this site.', 'emcp-lite' ), array( 'status' => 403 ) );
 		}
 		return $result;
 	}

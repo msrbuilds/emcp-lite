@@ -429,7 +429,7 @@ class EMCP_Tools_OAuth_Authorize {
 				'<b>' . esc_html( $user->display_name ) . '</b>',
 				esc_html( $user->user_login )
 			) . '</div>'
-			. '<p class="warn">' . esc_html__( 'Only approve connections you started yourself. You can revoke access anytime from EMCP Tools → Connection.', 'emcp-lite' ) . '</p>'
+			. '<p class="warn">' . esc_html__( 'Only approve connections you started yourself. You can revoke access anytime from EMCP Lite → Connection.', 'emcp-lite' ) . '</p>'
 			. '<form method="post" action="' . $action . '">' . $hidden
 			. '<div class="row">'
 			. '<button class="deny" type="submit" name="action" value="deny">' . esc_html( $deny_label ) . '</button>'

@@ -132,7 +132,7 @@ class EMCP_Tools_ACF_Abilities {
 			'emcp-tools/acf-write',
 			array(
 				'label'               => __( 'ACF Write', 'emcp-lite' ),
-				'description'         => __( 'Write Advanced Custom Fields data: field values, field groups, and (ACF 6.1+) ACF-managed post types and taxonomies. Individual write operations are disabled by default, enable them under EMCP Tools → Tools → Plugins → ACF. Call with no "operation" to list the available write operations and their arguments, then call again with { operation, arguments }.', 'emcp-lite' ),
+				'description'         => __( 'Write Advanced Custom Fields data: field values, field groups, and (ACF 6.1+) ACF-managed post types and taxonomies. Individual write operations are disabled by default, enable them under EMCP Lite → Tools → Plugins → ACF. Call with no "operation" to list the available write operations and their arguments, then call again with { operation, arguments }.', 'emcp-lite' ),
 				'category'            => 'emcp-tools',
 				'execute_callback'    => array( $this, 'run_acf_write' ),
 				'permission_callback' => array( $this, 'check_read_permission' ),

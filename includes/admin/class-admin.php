@@ -401,7 +401,7 @@ class EMCP_Tools_Admin {
 		if ( ! current_user_can( EMCP_Tools_Management_Access::CAPABILITY ) ) { return; }
 		$this->hook_suffixes[] = add_menu_page(
 			__( 'EMCP Lite', 'emcp-lite' ),
-			__( 'EMCP Tools', 'emcp-lite' ),
+			__( 'EMCP Lite', 'emcp-lite' ),
 			EMCP_Tools_Management_Access::CAPABILITY,
 			self::PAGE_SLUG,
 			array( $this, 'render_page' ),

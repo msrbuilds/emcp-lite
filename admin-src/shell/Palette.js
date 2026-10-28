@@ -85,7 +85,7 @@ export function Palette( { open, onClose, data, navigate } ) {
 	return (
 		<Dialog
 			open={ open }
-			title={ __( 'Search EMCP Tools', 'emcp-lite' ) }
+			title={ __( 'Search EMCP Lite', 'emcp-lite' ) }
 			onClose={ onClose }
 			size="md"
 		>

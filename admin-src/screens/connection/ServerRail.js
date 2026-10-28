@@ -67,7 +67,7 @@ export function ServerRail( { data, apps, setApps, onSaved = () => {} } ) {
 	}[ status.adapter ];
 	const rows = [
 		[
-			__( 'MCP Tools for Elementor', 'emcp-lite' ),
+			__( 'EMCP Lite', 'emcp-lite' ),
 			__( 'Active', 'emcp-lite' ),
 			true,
 		],

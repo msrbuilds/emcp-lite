@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.4
+
+- Use the EMCP Lite name throughout the dashboard, notices, messages and Claude Desktop bundle.
+- First release on WordPress.org.
+
 ## 1.0.3
 
 - Remove site-settings writes: Lite reads site settings but never changes them, including through History undo.

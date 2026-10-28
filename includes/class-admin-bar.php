@@ -149,7 +149,7 @@ class EMCP_Tools_Admin_Bar {
 			'id'    => 'emcp-tools-mcp',
 			'title' => $dot . esc_html__( 'EMCP', 'emcp-lite' ),
 			'href'  => esc_url( $settings ),
-			'meta'  => array( 'title' => esc_attr__( 'EMCP Tools, MCP status', 'emcp-lite' ) ),
+			'meta'  => array( 'title' => esc_attr__( 'EMCP Lite, MCP status', 'emcp-lite' ) ),
 		) );
 
 		$wp_admin_bar->add_node( array(

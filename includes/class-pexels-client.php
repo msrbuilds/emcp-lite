@@ -59,7 +59,7 @@ class EMCP_Tools_Pexels_Client {
 			return new \WP_Error( 'missing_query', __( 'The search query parameter is required.', 'emcp-lite' ) );
 		}
 		if ( ! self::has_key() ) {
-			return new \WP_Error( 'no_api_key', __( 'No Pexels API key is configured. Add one on EMCP Tools → Connection.', 'emcp-lite' ) );
+			return new \WP_Error( 'no_api_key', __( 'No Pexels API key is configured. Add one on EMCP Lite → Connection.', 'emcp-lite' ) );
 		}
 
 		$per_page   = min( max( absint( $params['page_size'] ?? 5 ), 1 ), 80 );
@@ -180,7 +180,7 @@ class EMCP_Tools_Pexels_Client {
 
 		$code = (int) wp_remote_retrieve_response_code( $response );
 		if ( 401 === $code || 403 === $code ) {
-			return new \WP_Error( 'invalid_key', __( 'Pexels rejected the API key. Check it on EMCP Tools → Connection.', 'emcp-lite' ) );
+			return new \WP_Error( 'invalid_key', __( 'Pexels rejected the API key. Check it on EMCP Lite → Connection.', 'emcp-lite' ) );
 		}
 		if ( 429 === $code ) {
 			return new \WP_Error( 'rate_limited', __( 'Pexels rate limit reached (200 requests/hour on the free tier). Try again later.', 'emcp-lite' ) );

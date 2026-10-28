@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 ?>
 <section class="emcp-management-access">
 	<h1><?php esc_html_e( 'Management access', 'emcp-lite' ); ?></h1>
-	<p><?php esc_html_e( 'Choose which WordPress administrators can manage EMCP Tools, its settings and Cloud connection on this site.', 'emcp-lite' ); ?></p>
+	<p><?php esc_html_e( 'Choose which WordPress administrators can manage EMCP Lite, its settings and Cloud connection on this site.', 'emcp-lite' ); ?></p>
 	<p><?php echo esc_html( sprintf( /* translators: 1: WordPress login, 2: user ID. */ __( 'You are managing this site as %1$s (WordPress user ID %2$d).', 'emcp-lite' ), $actor->user_login, $actor->ID ) ); ?></p>
 	<p><?php esc_html_e( 'MCP and Gateway calls use the WordPress account that authorized their credentials. This local management policy does not change that account or its execution permissions.', 'emcp-lite' ); ?></p>
 	<?php $emcp_locked = 'config' === ( $policy['source'] ?? '' ); ?>
@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 		<input type="hidden" name="version" value="<?php echo (int) $policy['version']; ?>">
 		<?php wp_nonce_field( EMCP_Tools_Management_Access_Admin::ACTION ); ?>
 		<fieldset <?php disabled( $emcp_locked ); ?>>
-		<fieldset><legend><strong><?php esc_html_e( 'Who can manage EMCP Tools?', 'emcp-lite' ); ?></strong></legend>
+		<fieldset><legend><strong><?php esc_html_e( 'Who can manage EMCP Lite?', 'emcp-lite' ); ?></strong></legend>
 			<p><label><input type="radio" name="mode" value="all_admins" <?php checked( $policy['mode'], 'all_admins' ); ?>> <?php esc_html_e( 'All current administrators (default)', 'emcp-lite' ); ?></label></p>
 			<p><label><input type="radio" name="mode" value="allowlist" <?php checked( $policy['mode'], 'allowlist' ); ?>> <?php esc_html_e( 'Only the listed administrators', 'emcp-lite' ); ?></label></p>
 		</fieldset>

@@ -159,8 +159,8 @@ final class EMCP_Tools_Admin_Frame {
 		// where a nested complementary landmark is an accessibility error.
 		$html  = '<div class="eui-frame__sidebar" id="emcp-frame-sidebar">';
 		$html .= '<div class="eui-frame-brand"><img class="eui-frame-brand__logo" src="' . esc_url( EMCP_TOOLS_URL . 'assets/img/icon-sm.png' ) . '" alt="" width="32" height="32">'
-			. '<span class="eui-frame-brand__text"><span class="eui-frame-brand__name">' . esc_html__( 'EMCP Tools', 'emcp-lite' ) . '</span>'
-			. '<span class="eui-frame-brand__version eui-mono">v' . esc_html( $version ) . ' · ' . esc_html__( 'Free', 'emcp-lite' ) . '</span></span></div>';
+			. '<span class="eui-frame-brand__text"><span class="eui-frame-brand__name">' . esc_html__( 'EMCP Lite', 'emcp-lite' ) . '</span>'
+			. '<span class="eui-frame-brand__version eui-mono">v' . esc_html( $version ) . '</span></span></div>'; // Lite has no tiers; the name already says Lite.
 		$html .= '<button type="button" class="eui-frame-search" data-emcp-palette-open>' . EMCP_Tools_Admin_Icons::svg( 'search', 16 )
 			. '<span class="eui-frame-search__label">' . esc_html__( 'Search...', 'emcp-lite' ) . '</span>'
 			. '<kbd class="eui-frame-search__kbd">' . esc_html__( 'Ctrl K', 'emcp-lite' ) . '</kbd></button>';

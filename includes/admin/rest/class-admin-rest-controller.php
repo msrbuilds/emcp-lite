@@ -78,7 +78,7 @@ abstract class EMCP_Tools_Admin_REST_Controller {
 			return new WP_Error( 'rest_forbidden', __( 'You are not allowed to do that.', 'emcp-lite' ), array( 'status' => 403 ) );
 		}
 		if ( ! current_user_can( EMCP_Tools_Management_Access::CAPABILITY ) ) {
-			return new WP_Error( 'emcp_management_forbidden', __( 'Your account cannot manage EMCP Tools on this site.', 'emcp-lite' ), array( 'status' => 403 ) );
+			return new WP_Error( 'emcp_management_forbidden', __( 'Your account cannot manage EMCP Lite on this site.', 'emcp-lite' ), array( 'status' => 403 ) );
 		}
 		return true;
 	}

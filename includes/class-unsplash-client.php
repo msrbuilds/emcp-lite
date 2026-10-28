@@ -72,7 +72,7 @@ class EMCP_Tools_Unsplash_Client {
 		if ( ! self::has_key() ) {
 			return new \WP_Error(
 				'no_api_key',
-				__( 'No Unsplash Access Key is configured. Add one on EMCP Tools → Connection (get a free key at https://unsplash.com/developers).', 'emcp-lite' )
+				__( 'No Unsplash Access Key is configured. Add one on EMCP Lite → Connection (get a free key at https://unsplash.com/developers).', 'emcp-lite' )
 			);
 		}
 
@@ -156,7 +156,7 @@ class EMCP_Tools_Unsplash_Client {
 			return new \WP_Error( 'not_unsplash_api', __( 'Not an Unsplash API URL.', 'emcp-lite' ) );
 		}
 		if ( ! self::has_key() ) {
-			return new \WP_Error( 'no_api_key', __( 'The Unsplash download API needs an access key (EMCP Tools → Connection). Use the direct image URL from search-images instead.', 'emcp-lite' ) );
+			return new \WP_Error( 'no_api_key', __( 'The Unsplash download API needs an access key (EMCP Lite → Connection). Use the direct image URL from search-images instead.', 'emcp-lite' ) );
 		}
 
 		$response = wp_remote_get(
@@ -284,7 +284,7 @@ class EMCP_Tools_Unsplash_Client {
 		$code = (int) wp_remote_retrieve_response_code( $response );
 
 		if ( 401 === $code ) {
-			return new \WP_Error( 'invalid_key', __( 'Unsplash rejected the Access Key. Check it on EMCP Tools → Connection.', 'emcp-lite' ) );
+			return new \WP_Error( 'invalid_key', __( 'Unsplash rejected the Access Key. Check it on EMCP Lite → Connection.', 'emcp-lite' ) );
 		}
 		if ( 403 === $code ) {
 			return new \WP_Error( 'rate_limited', __( 'Unsplash rate limit reached (demo apps allow 50 requests/hour). Try again later or request production access.', 'emcp-lite' ) );

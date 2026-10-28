@@ -64,7 +64,7 @@ trait EMCP_Tools_Admin_Connection_Trait {
 
 		$app_name = sprintf(
 			/* translators: %s: current date and time */
-			__( 'EMCP Tools (MCP), %s', 'emcp-lite' ),
+			__( 'EMCP Lite (MCP), %s', 'emcp-lite' ),
 			gmdate( 'Y-m-d H:i' )
 		);
 
@@ -139,7 +139,7 @@ trait EMCP_Tools_Admin_Connection_Trait {
 					'protocolVersion' => '2025-11-25',
 					'capabilities'    => (object) array(),
 					'clientInfo'      => array(
-						'name'    => 'EMCP Tools connection test',
+						'name'    => 'EMCP Lite connection test',
 						'version' => defined( 'EMCP_TOOLS_VERSION' ) ? EMCP_TOOLS_VERSION : 'unknown',
 					),
 				),

@@ -105,7 +105,7 @@ class EMCP_Tools_Meta_Box_Abilities {
 			'emcp-tools/metabox-write',
 			array(
 				'label'               => __( 'Meta Box Write', 'emcp-lite' ),
-				'description'         => __( 'Write Meta Box (metabox.io) custom-field values. Disabled by default, enable under EMCP Tools → Tools → Plugins → Meta Box. Call with no "operation" to list the available write operations and their arguments, then call again with { operation, arguments }.', 'emcp-lite' ),
+				'description'         => __( 'Write Meta Box (metabox.io) custom-field values. Disabled by default, enable under EMCP Lite → Tools → Plugins → Meta Box. Call with no "operation" to list the available write operations and their arguments, then call again with { operation, arguments }.', 'emcp-lite' ),
 				'category'            => 'emcp-tools',
 				'execute_callback'    => array( $this, 'run_metabox_write' ),
 				'permission_callback' => array( $this, 'check_read_permission' ),

@@ -61,7 +61,7 @@ class EMCP_Tools_Pixabay_Client {
 			return new \WP_Error( 'missing_query', __( 'The search query parameter is required.', 'emcp-lite' ) );
 		}
 		if ( ! self::has_key() ) {
-			return new \WP_Error( 'no_api_key', __( 'No Pixabay API key is configured. Add one on EMCP Tools → Connection.', 'emcp-lite' ) );
+			return new \WP_Error( 'no_api_key', __( 'No Pixabay API key is configured. Add one on EMCP Lite → Connection.', 'emcp-lite' ) );
 		}
 
 		// Pixabay requires per_page between 3 and 200.
@@ -182,7 +182,7 @@ class EMCP_Tools_Pixabay_Client {
 		$code = (int) wp_remote_retrieve_response_code( $response );
 		if ( 400 === $code || 401 === $code ) {
 			// Pixabay returns 400 for a bad/missing key or invalid params.
-			return new \WP_Error( 'invalid_key', __( 'Pixabay rejected the request, check the API key on EMCP Tools → Connection.', 'emcp-lite' ) );
+			return new \WP_Error( 'invalid_key', __( 'Pixabay rejected the request, check the API key on EMCP Lite → Connection.', 'emcp-lite' ) );
 		}
 		if ( 429 === $code ) {
 			return new \WP_Error( 'rate_limited', __( 'Pixabay rate limit reached (100 requests/minute). Try again shortly.', 'emcp-lite' ) );

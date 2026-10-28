@@ -3,7 +3,7 @@
  * Plugin Name: EMCP Lite
  * Plugin URI: https://emcptools.com/
  * Description: Connect AI clients to WordPress through MCP, with content, media, Elementor and Gutenberg tools, access controls and change history.
- * Version: 1.0.3
+ * Version: 1.0.4
  * Requires at least: 6.9
  * Requires PHP: 8.1
  * Author: Mian Shahzad Raza
@@ -33,7 +33,7 @@ function emcp_lite_start() {
 		add_action( 'admin_notices', 'emcp_lite_requirements_notice' );
 		return;
 	}
-	define( 'EMCP_TOOLS_VERSION', '1.0.3' );
+	define( 'EMCP_TOOLS_VERSION', '1.0.4' );
 	define( 'EMCP_TOOLS_DIR', plugin_dir_path( __FILE__ ) );
 	define( 'EMCP_TOOLS_URL', plugin_dir_url( __FILE__ ) );
 	define( 'EMCP_TOOLS_BASENAME', plugin_basename( __FILE__ ) );

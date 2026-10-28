@@ -46,7 +46,7 @@ class EMCP_Tools_Plugin_Abilities {
 			'emcp-tools/list-plugins',
 			array(
 				'label'               => __( 'List Plugins', 'emcp-lite' ),
-				'description'         => __( 'Lists installed WordPress plugins with status (active/inactive/network), version, whether an update is available, and whether the plugin is protected (EMCP Tools / Elementor can never be disabled via MCP). Optional "status" filter.', 'emcp-lite' ),
+				'description'         => __( 'Lists installed WordPress plugins with status (active/inactive/network), version, whether an update is available, and whether the plugin is protected (EMCP Lite / Elementor can never be disabled via MCP). Optional "status" filter.', 'emcp-lite' ),
 				'category'            => 'emcp-tools',
 				'execute_callback'    => array( $this, 'execute_list_plugins' ),
 				'permission_callback' => array( $this, 'can_list' ),

@@ -1,6 +1,6 @@
 {
   "name": "emcp-lite-admin",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Build tooling for the EMCP Lite admin screens.",
   "scripts": {
     "build": "wp-scripts build && node admin-build/generate-php-icons.mjs && node admin-build/copy-swiper.mjs",

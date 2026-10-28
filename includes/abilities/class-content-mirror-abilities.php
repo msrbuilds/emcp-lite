@@ -58,7 +58,7 @@ class EMCP_Tools_Content_Mirror_Abilities {
 			'emcp-tools/export-content',
 			array(
 				'label'               => __( 'Export Content', 'emcp-lite' ),
-				'description'         => __( 'Exports Elementor page/template content to git-trackable JSON files under uploads/emcp-content-mirror/, so an external version-control system can diff and version your designs. Pass post_id to export one page/template, or omit it to export all. (Enable auto-export-on-save in EMCP Tools → Tools to keep the mirror current automatically.)', 'emcp-lite' ),
+				'description'         => __( 'Exports Elementor page/template content to git-trackable JSON files under uploads/emcp-content-mirror/, so an external version-control system can diff and version your designs. Pass post_id to export one page/template, or omit it to export all. (Enable auto-export-on-save in EMCP Lite → Tools to keep the mirror current automatically.)', 'emcp-lite' ),
 				'category'            => 'emcp-tools',
 				'execute_callback'    => array( $this, 'execute_export' ),
 				'permission_callback' => array( $this, 'check_permission' ),

@@ -96,8 +96,8 @@ final class EMCP_Tools_Admin_Locked {
 				'title'       => __( 'Export as plugin', 'emcp-lite' ),
 				'description' => __( 'Package your active widgets, blocks and snippets as a standalone plugin.', 'emcp-lite' ),
 				'bullets'     => array(
-					__( 'Keeps working after EMCP Tools is removed', 'emcp-lite' ),
-					__( 'Stays dormant while EMCP Tools is active', 'emcp-lite' ),
+					__( 'Keeps working after EMCP Lite is removed', 'emcp-lite' ),
+					__( 'Stays dormant while EMCP Lite is active', 'emcp-lite' ),
 					__( 'API keys stay out of the ZIP unless you choose otherwise', 'emcp-lite' ),
 				),
 			),

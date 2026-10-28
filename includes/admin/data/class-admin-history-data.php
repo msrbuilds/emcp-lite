@@ -225,7 +225,7 @@ final class EMCP_Tools_Admin_History_Data {
 				'id'          => 'stray',
 				'tone'        => 'warning',
 				'title'       => __( 'Reconnect your AI client', 'emcp-lite' ),
-				'body'        => __( "An AI connection is still running the previous version of EMCP Tools. Its changes aren't being recorded in History and can't be undone. Reconnect your AI client (restart it, or reload its MCP server) to fix this.", 'emcp-lite' ),
+				'body'        => __( "An AI connection is still running the previous version of EMCP Lite. Its changes aren't being recorded in History and can't be undone. Reconnect your AI client (restart it, or reload its MCP server) to fix this.", 'emcp-lite' ),
 				'dismissible' => true,
 				'action'      => array(
 					'label' => __( 'Open MCP Log', 'emcp-lite' ),

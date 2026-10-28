@@ -391,7 +391,7 @@ trait EMCP_Tools_Admin_Catalog_Trait {
 					),
 					'emcp-tools/deactivate-plugin' => array(
 						'label'       => __( 'Deactivate Plugin', 'emcp-lite' ),
-						'description' => __( 'Deactivates a plugin (never EMCP Tools or Elementor).', 'emcp-lite' ),
+						'description' => __( 'Deactivates a plugin (never EMCP Lite or Elementor).', 'emcp-lite' ),
 						'badges'      => array(),
 					),
 					'emcp-tools/update-plugin'     => array(

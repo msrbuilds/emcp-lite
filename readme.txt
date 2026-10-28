@@ -1,120 +1,144 @@
 === EMCP Lite ===
 Contributors: mianshahzadraza
-Tags: mcp, ai, automation, elementor, gutenberg
+Tags: mcp, ai, claude, elementor, gutenberg
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Connect AI clients to WordPress through MCP, with content, media, Elementor and Gutenberg tools, access controls and change history.
+Connect Claude, ChatGPT, Cursor and other AI assistants to WordPress through MCP to manage content, media and page layouts.
 
 == Description ==
 
-EMCP Lite connects MCP-compatible AI clients to your WordPress site. It includes the EMCP dashboard, connection setup, per-tool controls, activity logs and change history.
+EMCP Lite connects your WordPress site to AI assistants that support the Model Context Protocol (MCP), such as Claude, ChatGPT, Cursor and Claude Code. Ask your assistant to draft posts, organize media, update menus or build Elementor and Gutenberg layouts, and it works directly on your site through tools you control.
 
-Use it to manage WordPress content and media, work with Elementor and Gutenberg layouts, inspect the site, and control which tools your connected clients can use. Available tools depend on the plugins and modules enabled on your site.
+Every request acts as the connected WordPress user, within that user's permissions and only through the tools you enable. Changes are logged, and supported changes can be undone from History.
 
-Features include:
+= What your AI assistant can do =
 
-* WordPress posts, pages, taxonomies, menus and media tools, with read-only site settings.
-* Elementor page structures, widgets, templates, styles and supported global design controls, when Elementor is active.
-* Gutenberg blocks and patterns, with integrations for supported installed plugins.
-* Bundled prompts and brand kits.
-* Optional Themer layouts, dynamic content and loop templates, without a template quota.
-* Read-only plugin, theme and user information.
-* Read-only database inspection, performance checks and security inspection.
-* Per-tool controls, WordPress capability checks, local management access controls and supported change-history undo operations.
-* Direct MCP connections, plus optional EMCP Cloud settings sync and hosted Gateway access.
+* Create and edit posts, pages, categories, tags and menus.
+* Upload, organize and resize media, and add stock photos from Unsplash, Pexels or Pixabay using your own API key.
+* Build and edit Elementor pages: containers, widgets, templates, global colors and fonts (when Elementor is active).
+* Build and edit Gutenberg blocks and patterns, including supported block plugins such as Spectra and Kadence Blocks.
+* Design headers, footers and content templates with the optional Themer module.
+* Inspect your site: plugins, themes, users, database structure, performance and security checks.
+* Read your site settings.
+* Use bundled prompts and brand kits to keep results on brand.
 
-This edition does not include Freemius, remote plugin/theme installation or lifecycle changes, user administration, site-settings changes, managed Cloud configuration deployment, arbitrary CSS/JavaScript/PHP insertion, generated executable widgets/blocks, PHP templates, shell commands, arbitrary filesystem tools, raw database writes, or executable Cloud/Marketplace artifact installation. Ordinary Elementor widgets, Gutenberg blocks and Themer layouts remain available. Use structured design controls for styling.
+= Stay in control =
 
-Some optional integrations require their respective plugins. Elementor is not required for the ordinary WordPress tools. EMCP Lite is independently developed and is not affiliated with WordPress or Elementor.
+* Choose exactly which tools AI clients may use on the Tools screen.
+* Every request runs with the connected user's WordPress capabilities.
+* History records the changes made through EMCP, with one-click undo where supported.
+* The MCP Log shows each request from your connected clients.
+* Management access lets you decide which administrators can change EMCP settings.
+
+EMCP Lite does not install, update or remove plugins or themes, manage users, change site settings or run custom code.
+
+= Connect your AI client =
+
+The Connection screen guides you through setup for Claude Desktop, Claude.ai, Claude Code, Cursor, ChatGPT, Antigravity and other MCP clients, using OAuth sign-in or a WordPress Application Password.
+
+Elementor is optional: the WordPress and Gutenberg tools work without it, and some integrations need their respective plugins. EMCP Lite is independently developed and is not affiliated with WordPress, Elementor, Anthropic or OpenAI.
 
 = Privacy and external services =
 
-Direct MCP connections communicate with the AI client you choose. The client receives the tool results it requests, which may contain site content or personal data according to the connected WordPress user's permissions. Check your AI client's privacy policy before connecting it. Local activity and change-history records are stored on your WordPress site.
+EMCP Lite does not send data anywhere until you connect an AI client or enable an optional service.
 
-EMCP Cloud is optional. Local tools work without a Cloud account. Choosing Connect sends your site URL, site name, installation identifier and OAuth registration/authorization information to emcptools.com. Once connected, the plugin exchanges and refreshes tokens and can request account/service status. Settings sync sends supported preferences, including tool toggles, modules and free-text site context. Credential options are excluded, but site-context text is not automatically redacted: do not put passwords or API keys in it. Extensions can narrow, but cannot expand, Lite's settings-sync allowlist. Hosted services may require a paid service plan. The default Cloud endpoint is emcptools.com; a developer or site administrator can configure a different endpoint. Review that service before connecting.
+**AI clients.** A direct MCP connection communicates only with the AI client you choose. The client receives the results of the tools it calls, which can include site content or personal data the connected WordPress user can access. Check your AI client's privacy policy before connecting it. Activity and History records are stored on your own site.
 
-Gateway access is a separate opt-in, initially unchecked. Enabling it provisions a revocable, resource-bound EMCP OAuth refresh token for the authorizing WordPress user and sends it to the EMCP service. It does not send a WordPress application password. This token authenticates only the EMCP MCP endpoint, not wp-admin, core REST administration, or EMCP dashboard configuration endpoints. Gateway requests act as that user, subject to enabled tools and that user's WordPress permissions; the credential is not limited to read-only operations. Gateway connections relay MCP requests and responses, including any content or personal data returned by the selected tools. You can disable Gateway access and disconnect Cloud from the Connection screen.
+**EMCP Cloud (optional).** Local tools work without a Cloud account. Choosing Connect sends your site URL, site name, an installation identifier and OAuth registration and authorization details to emcptools.com. Once connected, the plugin exchanges and refreshes tokens and can request account and service status. Settings sync sends supported EMCP preferences, including tool toggles, modules and your free-text site context. Credentials are excluded, but site-context text is not redacted, so do not put passwords or API keys in it. Hosted services may require a paid plan. A developer or administrator can configure a different Cloud endpoint.
 
-Service: https://emcptools.com/
-Terms: https://emcptools.com/terms-of-service/
-Privacy: https://emcptools.com/privacy/
+**Gateway access (optional).** Gateway is a separate opt-in that is off by default. Enabling it creates a revocable EMCP OAuth token for the authorizing WordPress user and sends it to the EMCP service. It does not send a WordPress password or Application Password. The token works only on the EMCP MCP endpoint, not wp-admin, the WordPress REST API or EMCP settings. Gateway requests act as that user, within the enabled tools and that user's permissions, and can include write operations. Gateway relays MCP requests and responses, including any content or personal data the selected tools return. You can turn off Gateway and disconnect Cloud on the Connection screen at any time.
 
-Optional stock-image tools contact a provider only after you configure its API key and request a search or download. Requests send your API credential, search terms and selected image identifiers; downloads use the provider's image hosts. Unsplash download attribution requests are made when required by its API. Provider terms and image licenses apply:
+* Service: https://emcptools.com/
+* Terms of service: https://emcptools.com/terms-of-service/
+* Privacy policy: https://emcptools.com/privacy/
+
+**Stock photos (optional).** Unsplash, Pexels and Pixabay are contacted only after you add that provider's API key and request a search or download. Requests send your API key, search terms and selected image identifiers, and images are downloaded from the provider's servers. Unsplash download notifications are sent when its API requires them. Provider terms and image licenses apply:
 
 * Unsplash: https://unsplash.com/terms and https://unsplash.com/privacy
 * Pexels: https://www.pexels.com/terms-of-service/ and https://www.pexels.com/privacy-policy/
 * Pixabay: https://pixabay.com/service/terms/ and https://pixabay.com/service/privacy/
 
-WordPress.org plugin and theme discovery uses the WordPress.org APIs when you request a search, sending search terms and pagination parameters. EMCP Lite cannot install or update that software. Front-end inspection and media-import tools request the specific URLs you provide or select. Tutorial links open YouTube only when clicked; dashboard tutorial thumbnails are bundled locally.
+**Other requests.** Plugin and theme search uses the WordPress.org API, sending your search terms and page number. When a security check runs, it looks up your installed plugins' slugs on the WordPress.org API to compare versions. Page inspection and media import tools request only the URLs you provide or select. Tutorial videos open on YouTube only when you click them; their thumbnails are bundled with the plugin.
 
-= Source and build instructions =
+= Source code =
 
-Human-readable frontend source is included in admin-src/. Build configuration, package.json, package-lock.json and admin-build/ are included. With a supported Node.js LTS version, run `npm ci` followed by `npm run build`. WordPress supplies React and WordPress JavaScript libraries at runtime. Composer dependency source and licenses are included in vendor/, with composer.json and composer.lock for reproducibility. Do not ship node_modules or development tests in a distribution ZIP.
+The full source code, including the uncompressed admin interface source in the admin-src folder, ships with the plugin and is available on GitHub: https://github.com/msrbuilds/emcp-lite
 
-Bundled library sources:
+To rebuild the admin scripts, run `npm ci` and then `npm run build` with a current Node.js LTS release. Composer dependencies are included in the vendor folder, with composer.json and composer.lock.
 
-* Swiper 14.3.0 (MIT): https://github.com/nolimits4web/swiper/tree/v14.3.0
+Bundled libraries:
+
+* Swiper 14.3.0 (MIT): https://github.com/nolimits4web/swiper
 * Fuse.js (Apache-2.0): https://github.com/krisk/Fuse
 * jsdiff (BSD-3-Clause): https://github.com/kpdecker/jsdiff
 * Lucide (ISC): https://github.com/lucide-icons/lucide
+* svg-sanitize (GPL-2.0-or-later): https://github.com/darylldoyle/svg-sanitizer
+* MCP Adapter (GPL-2.0-or-later): https://github.com/WordPress/mcp-adapter
 
-Exact JavaScript versions are pinned in package-lock.json. Readable Swiper source ships beside its minified distribution. Font and library license notices are included in assets/licenses/, assets/fonts/ and assets/lib/swiper/.
+License notices are included in the assets/licenses, assets/fonts and assets/lib/swiper folders.
+
 == Installation ==
 
-1. Upload the emcp-lite folder to wp-content/plugins, or install its ZIP through Plugins > Add New.
-2. Activate EMCP Lite.
-3. Open the EMCP dashboard, choose Connection, and follow the setup for your MCP client.
-4. Review the Tools and Modules screens before enabling write operations.
+1. In your WordPress dashboard, go to Plugins > Add New, search for "EMCP Lite", then install and activate it.
+2. Open EMCP in the admin menu and choose Connection.
+3. Pick your AI client and follow the steps to connect it.
+4. On the Tools screen, review which tools your AI client may use before allowing write operations.
 
 == Frequently Asked Questions ==
 
-= Is a subscription required? =
+= What is MCP? =
 
-No. Included local features do not require a subscription or a license key. Optional hosted EMCP services have separate service plans.
+The Model Context Protocol is an open standard that lets AI assistants use external tools. EMCP Lite adds an MCP server to your WordPress site, so a compatible assistant can read and update your content through the tools you allow.
 
-= Does this replace my existing GitHub EMCP installation? =
+= Which AI clients work with EMCP Lite? =
 
-No automatic replacement is performed. Do not activate two EMCP editions on the same site. Lite pauses when another EMCP edition is active. They retain compatible internal settings and data names, so use the dedicated Lite test site when evaluating a change of edition and back up before deliberately switching.
+Any client that supports remote MCP servers. The Connection screen has guided setup for Claude Desktop, Claude.ai, Claude Code, Cursor, ChatGPT, Antigravity, OpenClaw and Hermes, plus a generic option for other clients.
 
-= Does uninstall delete my pages or designs? =
+= Do I need Elementor? =
 
-No. Content, Themer layouts, brand-kit backups and change-history records are preserved. Uninstall removes local connection credentials and scheduled EMCP maintenance when no other EMCP edition is installed. If another edition is installed, shared data is preserved for it. Disconnect hosted services before removing the plugin if you also want to remove the service-side connection.
+No. The WordPress, media and Gutenberg tools work on any site. Elementor tools appear when Elementor is active.
 
-= Does every operation support undo? =
+= Do I need an EMCP Cloud account? =
 
-No. History shows which operations support undo. Undo may be refused if the resource changed afterward or an operation is not reversible.
+No. Connecting directly works without an account or license key. EMCP Cloud and Gateway are optional hosted services with their own plans.
+
+= What can an AI assistant change on my site? =
+
+Only what you allow. It uses the tools enabled on the Tools screen and the permissions of the WordPress user it connects as. EMCP Lite cannot install or remove plugins or themes, manage users, change site settings or run custom code. Review changes in History and undo them where supported.
+
+= Can I use EMCP Lite alongside the full EMCP Tools plugin? =
+
+Please activate only one EMCP edition at a time. EMCP Lite pauses automatically when another edition is active.
+
+= Does uninstalling delete my pages or designs? =
+
+No. Your content, Themer layouts, brand kits and History are kept. Uninstalling removes local connection credentials and scheduled maintenance tasks. If you use EMCP Cloud, disconnect it before uninstalling to remove the connection on the service side too.
+
+= Can every change be undone? =
+
+Not every change. History shows which entries support undo. An undo can be refused if the item changed again afterwards.
+
+== Screenshots ==
+
+1. Dashboard: recent AI activity, connected clients and tool status at a glance.
+2. Connection: guided setup for Claude, ChatGPT, Cursor and other MCP clients.
+3. Tools: choose exactly which tools your AI clients may use.
+4. History: review changes made through EMCP and undo them.
+5. MCP Log: every request from your connected clients.
 
 == Changelog ==
 
-= 1.0.3 =
+= 1.0.4 =
 
-* Remove site-settings writes: Lite reads site settings but never changes them, including through History undo.
-* Verify the OAuth consent nonce before reading any submitted field.
-* Update enshrined/svg-sanitize to 1.0.0 and the WordPress MCP adapter to 0.7.1.
-
-= 1.0.2 =
-
-* Security: remove arbitrary SQL reads from Lite to prevent credential-bearing database values being exposed. Structured content queries and database schema inspection remain available.
-* Validate OAuth consent, request types and credential headers at their input boundaries.
-* Escape dashboard and Themer output, use JSON transport for CSV downloads, and protect inline asset data.
-* Respect configured directories and REST URLs; resolve Spectra's installed attribute files safely.
-* Exclude dependency development folders and preserve the site error-reporting configuration.
-
-= 1.0.1 =
-* Removes remote administration and arbitrary code insertion from Lite while retaining content tools and the dashboard.
-* Updates bundled dependencies, request validation, output escaping, asset loading and service disclosures.
-
-= 1.0.0 =
-* Initial WordPress.org edition based on EMCP Free 3.19.0.
-* Retains the dashboard and ordinary free tools, with targeted executable-feature removals.
-* Removes Freemius and third-party updates, adds explicit service disclosures, and removes Themer template quotas.
+* First release on WordPress.org.
 
 == Upgrade Notice ==
 
-= 1.0.0 =
-Initial WordPress.org edition. Review enabled tools and connection permissions before use.
+= 1.0.4 =
+
+First release on WordPress.org. Review the enabled tools before connecting an AI client.

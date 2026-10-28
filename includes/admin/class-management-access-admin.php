@@ -23,7 +23,7 @@ final class EMCP_Tools_Management_Access_Admin {
 	/** Require both current local authorization and a fresh form nonce. */
 	public static function save(): void {
 		if ( ! EMCP_Tools_Management_Access::can_manage() ) {
-			wp_die( esc_html__( 'Your account cannot manage EMCP Tools on this site.', 'emcp-lite' ), '', array( 'response' => 403 ) );
+			wp_die( esc_html__( 'Your account cannot manage EMCP Lite on this site.', 'emcp-lite' ), '', array( 'response' => 403 ) );
 		}
 		check_admin_referer( self::ACTION );
 		$mode = isset( $_POST['mode'] ) && is_string( $_POST['mode'] ) ? sanitize_key( wp_unslash( $_POST['mode'] ) ) : '';

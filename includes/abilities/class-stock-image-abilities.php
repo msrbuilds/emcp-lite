@@ -158,7 +158,7 @@ class EMCP_Tools_Stock_Image_Abilities {
 			'emcp-tools/search-images',
 			array(
 				'label'               => __( 'Search Images', 'emcp-lite' ),
-				'description'         => __( 'Searches a stock-photo provider (Unsplash, Pexels, or Pixabay) for high-quality images. Returns image URLs, thumbnails, dimensions, and attribution. Use the returned URLs with sideload-image or add-stock-image. Requires a free API key for at least one provider (set on EMCP Tools → Connection).', 'emcp-lite' ),
+				'description'         => __( 'Searches a stock-photo provider (Unsplash, Pexels, or Pixabay) for high-quality images. Returns image URLs, thumbnails, dimensions, and attribution. Use the returned URLs with sideload-image or add-stock-image. Requires a free API key for at least one provider (set on EMCP Lite → Connection).', 'emcp-lite' ),
 				'category'            => 'emcp-tools',
 				'execute_callback'    => array( $this, 'execute_search_images' ),
 				'permission_callback' => array( $this, 'check_read_permission' ),
@@ -535,7 +535,7 @@ class EMCP_Tools_Stock_Image_Abilities {
 			'emcp-tools/add-stock-image',
 			array(
 				'label'               => __( 'Add Stock Image', 'emcp-lite' ),
-				'description'         => __( 'Searches a stock provider (Unsplash, Pexels, or Pixabay) for a photo, downloads it to the Media Library, and adds it as an image widget to the page, all in one step. Defaults to landscape (wide) images for consistent layouts. Combines search-images + sideload-image + add-free-widget. Requires a free API key for at least one provider (EMCP Tools → Connection).', 'emcp-lite' ),
+				'description'         => __( 'Searches a stock provider (Unsplash, Pexels, or Pixabay) for a photo, downloads it to the Media Library, and adds it as an image widget to the page, all in one step. Defaults to landscape (wide) images for consistent layouts. Combines search-images + sideload-image + add-free-widget. Requires a free API key for at least one provider (EMCP Lite → Connection).', 'emcp-lite' ),
 				'category'            => 'emcp-tools',
 				'execute_callback'    => array( $this, 'execute_add_stock_image' ),
 				'permission_callback' => array( $this, 'check_combined_permission' ),
