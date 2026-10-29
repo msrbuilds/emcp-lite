@@ -18,6 +18,8 @@ It works by turning your site into a WordPress MCP server through the [Model Con
 
 Every request acts as the connected WordPress user, within that user's permissions and only through the tools you enable. Changes are logged, and supported changes can be undone from History.
 
+https://www.youtube.com/watch?v=8eHKzdzj2s0
+
 = What your AI assistant can do =
 
 * Create and edit posts, pages, categories, tags and menus.
@@ -29,13 +31,76 @@ Every request acts as the connected WordPress user, within that user's permissio
 * Read your site settings.
 * Use bundled prompts and brand kits to keep results on brand.
 
+= Free modules =
+
+Turn modules on or off on the Modules screen. All of these are included in EMCP Lite:
+
+* [Themer](https://emcptools.com/features/themer/): build headers, footers, single, archive, search and 404 layouts and Loop Items with any page builder, and choose where each one applies.
+* [Brand Kits](https://emcptools.com/features/brand-kits/): one-click color and typography kits, with bundled free kits, so AI-built pages stay on brand.
+* [Prompts](https://emcptools.com/features/prompts/): ready-to-use prompt blueprints for building pages.
+* [Image Optimization](https://emcptools.com/features/image-optimization/): compress uploaded images and generate WebP versions automatically.
+* [SVG Uploads](https://emcptools.com/features/svg-uploads/): allow SVG uploads to the Media Library, with every file sanitized before it is saved.
+* [Redirect Manager](https://emcptools.com/features/redirects/): manage 301 and 302 redirects, get a suggested redirect when a page is removed or renamed, and scan for broken internal links.
+* [EMCP Cloud](https://emcptools.com/cloud/): optional configuration management and Gateway access. Off until you connect it.
+
+= Tools and abilities =
+
+EMCP Lite registers 154 tools as WordPress abilities through the Abilities API, and also exposes three read-only WordPress core abilities (site, user and environment info). Tools for Elementor, block plugins, themes and integrations appear only when that product is active, and a few Elementor widget and template tools also need Elementor Pro. Browse every tool in the [EMCP tool catalog](https://emcptools.com/tools/), which also lists tools from other EMCP editions.
+
+**WordPress (37 tools)**
+
+* Posts, pages and taxonomies: 9
+* Media and stock images: 8
+* Navigation menus: 2
+* Content search: 2
+* Redirects: 5
+* Site inspection, read-only (plugins, themes, users, settings, database, performance and security): 11
+
+**Elementor (64 tools)**
+
+* Query and discovery: 8
+* Page management: 6
+* Layout and structure: 11
+* Widgets: 3
+* Templates: 8
+* Global colors and typography: 2
+* One-call page builder: 1
+* SVG icons: 1
+* Atomic layout, classes and variables (Elementor 4.0+): 14
+* Atomic widgets (Elementor 4.0+): 10
+
+**Block editor (32 tools)**
+
+* Blocks and patterns: 10
+* Spectra: 10
+* Kadence Blocks: 12
+
+**Themes (5 tools)**
+
+* Active theme: 1
+* Astra: 2
+* Kadence: 2
+
+**Plugin integrations (10 tools)**
+
+* ACF (Advanced Custom Fields): 2
+* Meta Box: 2
+* Contact Form 7: 2
+* Slim SEO: 2
+* Visibility: 2
+
+**History and safety (6 tools)**
+
+* Changes and rollback: 3
+* Content Mirror (Git export and restore): 3
+
 = Stay in control =
 
 * Choose exactly which tools AI clients may use on the Tools screen.
 * Every request runs with the connected user's WordPress capabilities.
-* History records the changes made through EMCP, with one-click undo where supported.
-* The MCP Log shows each request from your connected clients.
-* Management access lets you decide which administrators can change EMCP settings.
+* [History](https://emcptools.com/features/history/) records the changes made through EMCP, with one-click undo where supported.
+* The [MCP Log](https://emcptools.com/features/mcp-log/) shows each request from your connected clients.
+* [Management access](https://emcptools.com/features/management-access/) lets you decide which administrators can change EMCP settings.
 
 EMCP Lite does not install, update or remove plugins or themes, manage users, change site settings or run custom code.
 
@@ -44,6 +109,30 @@ EMCP Lite does not install, update or remove plugins or themes, manage users, ch
 EMCP Lite uses the free, official [MCP Adapter](https://wordpress.org/plugins/mcp-adapter/) plugin from WordPress.org to provide the MCP endpoint. If it is not active yet, EMCP Lite shows a notice with a one-click button that installs and activates it for you.
 
 The Connection screen then guides you through setup for Claude Desktop, Claude.ai, Claude Code, Cursor, ChatGPT, Antigravity and other MCP clients, using OAuth sign-in or a WordPress Application Password.
+
+= Video tutorials =
+
+Walkthroughs from the EMCP community:
+
+**Build a full site without opening the Elementor editor**
+
+https://www.youtube.com/watch?v=KkOioXKT_Eo
+
+**Use EMCP with open models such as DeepSeek, Kimi and MiniMax**
+
+https://www.youtube.com/watch?v=wAEJORy5eek
+
+**Build Elementor websites with Claude Code**
+
+https://www.youtube.com/watch?v=1cMBIzc78XU
+
+**Build a website with Claude and Elementor**
+
+https://www.youtube.com/watch?v=p5Yu-LCCS7U
+
+**Design Elementor pages with Claude Code**
+
+https://www.youtube.com/watch?v=nS8ecyBqzds
 
 = Documentation =
 
