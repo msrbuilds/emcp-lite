@@ -1,4 +1,4 @@
-=== EMCP Tools – MCP Plugin for WordPress: Connect Claude, ChatGPT & AI Agents, with Elementor Tools ===
+=== EMCP Tools – AI Page Builder for Elementor & Block Editor via MCP: Claude, ChatGPT, Cursor ===
 Contributors: mianshahzadraza
 Tags: mcp, mcp-server, wordpress-mcp, claude, elementor
 Requires at least: 6.9
@@ -8,11 +8,13 @@ Stable tag: 1.0.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-WordPress MCP server for Claude, ChatGPT, Cursor and AI agents. Manage posts, media, Elementor and block editor pages with tools you control.
+WordPress MCP server that lets Claude, ChatGPT or Cursor design Elementor and block editor pages, with brand kits, change history and undo.
 
 == Description ==
 
-EMCP Lite, the free edition of EMCP Tools, turns your site into a WordPress MCP server, so AI assistants that support the [Model Context Protocol](https://modelcontextprotocol.io/) (MCP), such as Claude, ChatGPT, Cursor and Claude Code, can work on it directly. Ask your assistant to draft posts, organize media, update menus or build Elementor and block editor layouts, and it uses the WordPress MCP tools you enable.
+EMCP Lite, the free edition of EMCP Tools, lets your AI assistant design pages on your site, not just write posts. Ask Claude, ChatGPT, Cursor or Claude Code to "build a pricing page in our brand colors", and it lays out the page with Elementor containers and widgets or block editor blocks and patterns, using your brand kit.
+
+It works by turning your site into a WordPress MCP server through the [Model Context Protocol](https://modelcontextprotocol.io/) (MCP), the open standard AI assistants use to work with external tools. The same tools handle everyday work too: drafting posts, organizing media and updating menus.
 
 Every request acts as the connected WordPress user, within that user's permissions and only through the tools you enable. Changes are logged, and supported changes can be undone from History.
 
