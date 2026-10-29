@@ -127,6 +127,10 @@ trait EMCP_Tools_Admin_Integrations_Trait {
 				'label' => __( 'Elementor Addons', 'emcp-lite' ),
 				'desc'  => __( 'Discover addon widget packs, and manage Ultimate Addons for Elementor templates.', 'emcp-lite' ),
 			),
+			'performance' => array(
+				'label' => __( 'Performance and caching', 'emcp-lite' ),
+				'desc' => __( 'Cache status and supported cache operations.', 'emcp-lite' ),
+			),
 			'other'     => array(
 				'label' => __( 'Other Integrations', 'emcp-lite' ),
 				'desc'  => __( 'Additional plugin integrations.', 'emcp-lite' ),

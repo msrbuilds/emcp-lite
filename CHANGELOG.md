@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.5
+
+- Add native integrations for LiteSpeed Cache, Redirection, WP Mail SMTP, Custom Post Type UI, Wordfence and Pods. Wordfence is read-only; LiteSpeed invalidation requires a supported server.
+- Keep new write tools disabled until explicitly enabled, with capability checks, confirmation, native storage verification and conflict-aware History recovery.
+- Preserve quoted CPT UI labels and descriptions, verify Pods writes after native hooks, and prevent conflicting SMTP plugins or uncertain receipts from causing accidental mail-test replay.
+
 ## 1.0.4
 
 - Use the official MCP Adapter plugin from WordPress.org instead of a bundled copy, with a one-click install and activation notice.

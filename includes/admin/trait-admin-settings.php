@@ -378,6 +378,21 @@ trait EMCP_Tools_Admin_Settings_Trait {
 		if ( $applied < 63 ) {
 			$add[] = 'emcp-tools/mailpoet-write';
 		}
+		if ( $applied < 68 ) {
+			$add[] = 'emcp-tools/litespeed-write';
+		}
+		if ( $applied < 67 ) {
+			$add[] = 'emcp-tools/wp-mail-smtp-write';
+		}
+		if ( $applied < 66 ) {
+			$add[] = 'emcp-tools/pods-write';
+		}
+		if ( $applied < 65 ) {
+			$add[] = 'emcp-tools/cptui-write';
+		}
+		if ( $applied < 64 ) {
+			$add[] = 'emcp-tools/redirection-write';
+		}
 		return array(
 			'add'   => array_values( array_unique( $add ) ),
 			'strip' => array_values( array_unique( $strip ) ),

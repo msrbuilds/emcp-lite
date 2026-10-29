@@ -248,6 +248,35 @@ class EMCP_Tools_Ability_Registrar {
 		$nav_menus->register();
 		$this->ability_names = array_merge( $this->ability_names, $nav_menus->get_ability_names() );
 
+		if ( class_exists( 'EMCP_Tools_Wordfence_Integration' ) && EMCP_Tools_Wordfence_Api::active() ) {
+			$wordfence = new EMCP_Tools_Wordfence_Integration(); $wordfence->register();
+			$this->ability_names = array_merge( $this->ability_names, $wordfence->get_ability_names() );
+		}
+		if ( class_exists( 'EMCP_Tools_Litespeed_Integration' ) && EMCP_Tools_Litespeed_Api::active() ) {
+			$litespeed = new EMCP_Tools_Litespeed_Integration(); $litespeed->register();
+			$this->ability_names = array_merge( $this->ability_names, $litespeed->get_ability_names() );
+		}
+		if ( class_exists( 'EMCP_Tools_Wp_Mail_Smtp_Integration' ) && EMCP_Tools_Wp_Mail_Smtp_Api::active() ) {
+			$wpms = new EMCP_Tools_Wp_Mail_Smtp_Integration();
+			$wpms->register();
+			$this->ability_names = array_merge( $this->ability_names, $wpms->get_ability_names() );
+		}
+		if ( class_exists( 'EMCP_Tools_Pods_Integration' ) && EMCP_Tools_Pods_Api::active() ) {
+			$pods = new EMCP_Tools_Pods_Integration();
+			$pods->register();
+			$this->ability_names = array_merge( $this->ability_names, $pods->get_ability_names() );
+		}
+		if ( class_exists( 'EMCP_Tools_Cptui_Integration' ) && EMCP_Tools_Cptui_Api::active() ) {
+			$cptui = new EMCP_Tools_Cptui_Integration();
+			$cptui->register();
+			$this->ability_names = array_merge( $this->ability_names, $cptui->get_ability_names() );
+		}
+		if ( class_exists( 'EMCP_Tools_Redirection_Integration' ) && EMCP_Tools_Redirection_Api::active() ) {
+			$redirection = new EMCP_Tools_Redirection_Integration();
+			$redirection->register();
+			$this->ability_names = array_merge( $this->ability_names, $redirection->get_ability_names() );
+		}
+
 		// ACF abilities — only when Advanced Custom Fields (free or Pro) is active.
 		if ( class_exists( 'EMCP_Tools_ACF_Abilities' ) && EMCP_Tools_ACF_Abilities::acf_active() ) {
 			$acf = new EMCP_Tools_ACF_Abilities();

@@ -462,6 +462,123 @@ trait EMCP_Tools_Admin_Catalog_Trait {
 					),
 				),
 			),
+			'wp_wordfence' => array(
+				'platform' => 'plugins', 'group' => 'other',
+				'label' => __( 'Wordfence', 'emcp-lite' ), 'note' => __( 'Read-only firewall, scan and finding inspection. No firewall or scan changes.', 'emcp-lite' ),
+				'tools' => array(
+					'emcp-tools/wordfence-read' => array(
+						'label' => __( 'Wordfence Read', 'emcp-lite' ), 'description' => __( 'Read native status and bounded finding/block metadata with private fields redacted.', 'emcp-lite' ),
+						'badges' => array( 'read-only' ), 'operations' => array( 'status', 'firewall', 'scan-status', 'list-findings', 'get-finding', 'list-blocks' ),
+						'available' => class_exists( 'EMCP_Tools_Wordfence_Api' ) && EMCP_Tools_Wordfence_Api::active(), 'requires' => array( 'name' => 'Wordfence', 'kind' => 'plugin' ),
+					),
+				),
+			),
+			'wp_litespeed' => array(
+				'platform' => 'plugins', 'group' => 'performance',
+				'label' => __( 'LiteSpeed Cache', 'emcp-lite' ),
+				'note' => __( 'Effective cache status and confirmed page-cache purges on supported servers.', 'emcp-lite' ),
+				'tools' => array(
+					'emcp-tools/litespeed-read' => array(
+						'label' => __( 'LiteSpeed Cache Read', 'emcp-lite' ), 'description' => __( 'Read cache flags, TTL and actual server support.', 'emcp-lite' ),
+						'badges' => array( 'read-only' ), 'operations' => array( 'status' ),
+						'available' => class_exists( 'EMCP_Tools_Litespeed_Api' ) && EMCP_Tools_Litespeed_Api::active(), 'requires' => array( 'name' => 'LiteSpeed Cache', 'kind' => 'plugin' ),
+					),
+					'emcp-tools/litespeed-write' => array(
+						'label' => __( 'LiteSpeed Cache Write', 'emcp-lite' ), 'description' => __( 'Request a path or page-cache purge over HTTP on a supported server.', 'emcp-lite' ),
+						'badges' => array( 'destructive' ), 'operations' => array( 'purge-path', 'purge-page-cache' ),
+						'available' => class_exists( 'EMCP_Tools_Litespeed_Api' ) && EMCP_Tools_Litespeed_Api::active(), 'requires' => array( 'name' => 'LiteSpeed Cache', 'kind' => 'plugin' ),
+					),
+				),
+			),
+			'wp_mail_smtp' => array(
+				'platform' => 'plugins', 'group' => 'marketing',
+				'label' => __( 'WP Mail SMTP', 'emcp-lite' ),
+				'note' => __( 'Credential-free mailer status and explicitly confirmed native test emails with durable retry protection.', 'emcp-lite' ),
+				'tools' => array(
+					'emcp-tools/wp-mail-smtp-read' => array(
+						'label' => __( 'WP Mail SMTP Read', 'emcp-lite' ), 'description' => __( 'Read redacted mailer status and test receipts.', 'emcp-lite' ),
+						'badges' => array( 'read-only' ), 'operations' => array( 'status', 'test-status' ),
+						'available' => class_exists( 'EMCP_Tools_Wp_Mail_Smtp_Api' ) && EMCP_Tools_Wp_Mail_Smtp_Api::active(), 'requires' => array( 'name' => 'WP Mail SMTP', 'kind' => 'plugin' ),
+					),
+					'emcp-tools/wp-mail-smtp-write' => array(
+						'label' => __( 'WP Mail SMTP Write', 'emcp-lite' ), 'description' => __( 'Send one confirmed native test email. Reusing a request ID never sends again.', 'emcp-lite' ),
+						'badges' => array( 'destructive' ), 'operations' => array( 'send-test' ),
+						'available' => class_exists( 'EMCP_Tools_Wp_Mail_Smtp_Api' ) && EMCP_Tools_Wp_Mail_Smtp_Api::active(), 'requires' => array( 'name' => 'WP Mail SMTP', 'kind' => 'plugin' ),
+					),
+				),
+			),
+			'wp_pods' => array(
+				'platform' => 'plugins',
+				'group' => 'dynamic',
+				'label' => __( 'Pods', 'emcp-lite' ),
+				'note' => __( 'Public post-type Pods using metadata storage and scalar fields. No SQL, code, user/setting Pods or relationship writes. Creation is audited as irreversible; supported edits have History undo.', 'emcp-lite' ),
+				'tools' => array(
+					'emcp-tools/pods-read' => array(
+						'label' => __( 'Pods Read', 'emcp-lite' ),
+						'description' => __( 'Read supported Pod schemas, fields, records and versions with native field permissions.', 'emcp-lite' ),
+						'badges' => array( 'read-only' ),
+						'operations' => array( 'status', 'list-pods', 'get-pod', 'list-fields', 'list-records', 'get-record' ),
+						'available' => class_exists( 'EMCP_Tools_Pods_Api' ) && EMCP_Tools_Pods_Api::active(),
+						'requires' => array( 'name' => 'Pods', 'kind' => 'plugin' ),
+					),
+					'emcp-tools/pods-write' => array(
+						'label' => __( 'Pods Write', 'emcp-lite' ),
+						'description' => __( 'Create scalar-field Pods, rename their labels, create drafts and edit scalar values. Writes default off and require confirmation.', 'emcp-lite' ),
+						'badges' => array(),
+						'operations' => array( 'create-pod', 'update-pod-label', 'create-record', 'update-record' ),
+						'available' => class_exists( 'EMCP_Tools_Pods_Api' ) && EMCP_Tools_Pods_Api::active(),
+						'requires' => array( 'name' => 'Pods', 'kind' => 'plugin' ),
+					),
+				),
+			),
+			'wp_cptui' => array(
+				'platform' => 'plugins',
+				'group' => 'dynamic',
+				'label' => __( 'Custom Post Type UI', 'emcp-lite' ),
+				'note' => __( 'Structured CPT UI definitions. Slugs are immutable; no code or custom capabilities. Undo of creation refuses definitions with content or dependent schemas.', 'emcp-lite' ),
+				'tools' => array(
+					'emcp-tools/cptui-read' => array(
+						'label' => __( 'CPT UI Read', 'emcp-lite' ),
+						'description' => __( 'Read CPT UI-owned post types, taxonomies, registered public types and schema versions.', 'emcp-lite' ),
+						'badges' => array( 'read-only' ),
+						'operations' => array( 'status', 'list-post-types', 'get-post-type', 'list-taxonomies', 'get-taxonomy', 'list-registered-post-types' ),
+						'available' => class_exists( 'EMCP_Tools_Cptui_Api' ) && EMCP_Tools_Cptui_Api::active(),
+						'requires' => array( 'name' => 'Custom Post Type UI', 'kind' => 'plugin' ),
+					),
+					'emcp-tools/cptui-write' => array(
+						'label' => __( 'CPT UI Write', 'emcp-lite' ),
+						'description' => __( 'Create post types and taxonomies; update labels and descriptions. Writes default off and require confirmation.', 'emcp-lite' ),
+						'badges' => array(),
+						'operations' => array( 'create-post-type', 'update-post-type', 'create-taxonomy', 'update-taxonomy' ),
+						'available' => class_exists( 'EMCP_Tools_Cptui_Api' ) && EMCP_Tools_Cptui_Api::active(),
+						'requires' => array( 'name' => 'Custom Post Type UI', 'kind' => 'plugin' ),
+					),
+				),
+			),
+			'wp_redirection' => array(
+				'platform' => 'plugins',
+				'group' => 'seo',
+				'label' => __( 'Redirection', 'emcp-lite' ),
+				'note' => __( 'Manage the Redirection plugin separately from EMCP Redirect Manager. Exact URL redirects and WordPress-module groups only. Writes default off; redirect deletion and group creation are irreversible.', 'emcp-lite' ),
+				'tools' => array(
+					'emcp-tools/redirection-read' => array(
+						'label' => __( 'Redirection Read', 'emcp-lite' ),
+						'description' => __( 'Read redirects, groups, versions, status and redacted redirect/404 logs.', 'emcp-lite' ),
+						'badges' => array( 'read-only' ),
+						'operations' => array( 'status', 'list-redirects', 'get-redirect', 'list-groups', 'get-group', 'list-logs', 'list-404s' ),
+						'available' => class_exists( 'EMCP_Tools_Redirection_Api' ) && EMCP_Tools_Redirection_Api::active(),
+						'requires' => array( 'name' => 'Redirection', 'kind' => 'plugin' ),
+					),
+					'emcp-tools/redirection-write' => array(
+						'label' => __( 'Redirection Write', 'emcp-lite' ),
+						'badges' => array(),
+						'description' => __( 'Create, edit, enable, disable or delete exact redirects; create or rename WordPress groups. Confirm required; existing records require a version.', 'emcp-lite' ),
+						'operations' => array( 'create-redirect', 'update-redirect', 'enable-redirect', 'disable-redirect', 'delete-redirect', 'create-group', 'rename-group' ),
+						'available' => class_exists( 'EMCP_Tools_Redirection_Api' ) && EMCP_Tools_Redirection_Api::active(),
+						'requires' => array( 'name' => 'Redirection', 'kind' => 'plugin' ),
+					),
+				),
+			),
 			'wp_acf'           => array(
 				'platform' => 'plugins',
 				'group'    => 'dynamic',

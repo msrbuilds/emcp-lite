@@ -4,7 +4,7 @@ Tags: mcp, mcp-server, wordpress-mcp, claude, elementor
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.0.4
+Stable tag: 1.0.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -259,11 +259,23 @@ Not every change. History shows which entries support undo. An undo can be refus
 
 == Changelog ==
 
+= 1.0.5 =
+
+Six native plugin integrations with guarded writes and History recovery.
+
+* New: LiteSpeed Cache, Redirection, WP Mail SMTP, Custom Post Type UI, Wordfence and Pods integrations. Wordfence is read-only; LiteSpeed invalidation requires a supported server.
+* New write tools start disabled. Enable them explicitly on the Tools screen.
+* Improved: Native write verification, quoted text preservation, conflict-aware undo and replay protection for mail tests.
+
 = 1.0.4 =
 
 * First release on WordPress.org.
 
 == Upgrade Notice ==
+
+= 1.0.5 =
+
+Adds six plugin integrations. New write tools start disabled; review them on the Tools screen.
 
 = 1.0.4 =
 

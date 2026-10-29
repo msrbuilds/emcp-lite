@@ -25,3 +25,4 @@
 /jest.config.js
 /eslint.config.cjs
 /build.ps1
+/tests-e2e/
