@@ -1,4 +1,4 @@
-=== EMCP Tools – MCP Server for Claude, ChatGPT & AI Agents, with Elementor Tools ===
+=== EMCP Tools – MCP Plugin for WordPress: Connect Claude, ChatGPT & AI Agents, with Elementor Tools ===
 Contributors: mianshahzadraza
 Tags: mcp, mcp-server, wordpress-mcp, claude, elementor
 Requires at least: 6.9
