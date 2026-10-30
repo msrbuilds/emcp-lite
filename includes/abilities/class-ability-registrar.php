@@ -1,6 +1,6 @@
 <?php
 /**
- * Registers all MCP Tools for Elementor abilities with the WordPress Abilities API.
+ * Registers all MCP Tools for WordPress & Page Builders abilities with the WordPress Abilities API.
  *
  * @package EMCP_Tools
  * @since   1.0.0

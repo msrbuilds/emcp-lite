@@ -265,6 +265,7 @@ Six native plugin integrations with guarded writes and History recovery.
 
 * New: LiteSpeed Cache, Redirection, WP Mail SMTP, Custom Post Type UI, Wordfence and Pods integrations. Wordfence is read-only; LiteSpeed invalidation requires a supported server.
 * New write tools start disabled. Enable them explicitly on the Tools screen.
+* Fixed: MCP clients and EMCP Cloud that leave out the MCP-Protocol-Version header failed after initialize with MCP Adapter 0.7. A missing header now uses the version the session negotiated.
 * Improved: Native write verification, quoted text preservation, conflict-aware undo and replay protection for mail tests.
 
 = 1.0.4 =

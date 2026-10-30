@@ -12876,7 +12876,7 @@ msgid "Missing"
 msgstr ""
 
 #: admin-src/screens/connection/ServerRail.js:70
-msgid "MCP Tools for Elementor"
+msgid "MCP Tools for WordPress & Page Builders"
 msgstr ""
 
 #: admin-src/screens/connection/ServerRail.js:75
