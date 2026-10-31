@@ -45,7 +45,7 @@ Turn modules on or off on the Modules screen. All of these are included in EMCP 
 
 = Tools and abilities =
 
-EMCP Lite registers 154 tools as WordPress abilities through the Abilities API, and also exposes three read-only WordPress core abilities (site, user and environment info). Tools for Elementor, block plugins, themes and integrations appear only when that product is active, and a few Elementor widget and template tools also need Elementor Pro. Browse every tool in the [EMCP tool catalog](https://emcptools.com/tools/), which also lists tools from other EMCP editions.
+EMCP Lite registers 165 tools as WordPress abilities through the Abilities API, and also exposes three read-only WordPress core abilities (site, user and environment info). Tools for Elementor, block plugins, themes and integrations appear only when that product is active, and a few Elementor widget and template tools also need Elementor Pro. Browse every tool in the [EMCP tool catalog](https://emcptools.com/tools/), which also lists tools from other EMCP editions.
 
 **WordPress (37 tools)**
 
@@ -81,13 +81,19 @@ EMCP Lite registers 154 tools as WordPress abilities through the Abilities API, 
 * Astra: 2
 * Kadence: 2
 
-**Plugin integrations (10 tools)**
+**Plugin integrations (21 tools)**
 
 * ACF (Advanced Custom Fields): 2
 * Meta Box: 2
 * Contact Form 7: 2
 * Slim SEO: 2
 * Visibility: 2
+* Redirection: 2
+* Custom Post Type UI: 2
+* Pods: 2
+* WP Mail SMTP: 2
+* LiteSpeed Cache: 2
+* Wordfence: 1 (read-only)
 
 **History and safety (6 tools)**
 
