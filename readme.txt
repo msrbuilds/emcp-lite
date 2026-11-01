@@ -4,7 +4,7 @@ Tags: mcp, mcp-server, wordpress-mcp, claude, elementor
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.0.5
+Stable tag: 1.0.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -265,6 +265,13 @@ Not every change. History shows which entries support undo. An undo can be refus
 
 == Changelog ==
 
+= 1.0.6 =
+
+Fixes wp-admin errors for non-administrators on some sites and corrects the ChatGPT App connection steps.
+
+* Fixed: Every wp-admin page showed a critical error for users who are not administrators when another plugin added a menu item with no capability.
+* Fixed: The ChatGPT App steps on the Connection screen now match the app's Plugins flow.
+
 = 1.0.5 =
 
 Six native plugin integrations with guarded writes and History recovery.
@@ -279,6 +286,10 @@ Six native plugin integrations with guarded writes and History recovery.
 * First release on WordPress.org.
 
 == Upgrade Notice ==
+
+= 1.0.6 =
+
+Fixes a critical error on wp-admin pages for non-administrators on some sites.
 
 = 1.0.5 =
 

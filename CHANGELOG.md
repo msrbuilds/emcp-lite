@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.6
+
+- Fix every wp-admin page failing for users who are not administrators when another plugin adds a menu item with no capability (EMCP Tools issue #174).
+- Correct the ChatGPT App connection steps to match the app's Plugins flow.
+
 ## 1.0.5
 
 - Add native integrations for LiteSpeed Cache, Redirection, WP Mail SMTP, Custom Post Type UI, Wordfence and Pods. Wordfence is read-only; LiteSpeed invalidation requires a supported server.
