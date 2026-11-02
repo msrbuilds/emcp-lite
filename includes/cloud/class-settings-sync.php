@@ -125,26 +125,12 @@ class EMCP_Tools_Settings_Sync {
 		if ( isset( $data['emcp_tools_disabled_tools'] ) && is_array( $data['emcp_tools_disabled_tools'] ) ) {
 			$data['emcp_tools_disabled_tools'] = self::with_newer_defaults( $data['emcp_tools_disabled_tools'], $meta );
 		}
-		$n      = 0;
-		$before = array();
+		$n = 0;
 		foreach ( $data as $key => $val ) {
 			if ( isset( $allow[ $key ] ) ) {
-				$before[ $key ] = get_option( $key, '__ABSENT__' );
 				update_option( $key, $val );
 				$n++;
 			}
-		}
-		// A pull replaces this site's settings: record it so History can undo it.
-		if ( $n > 0 && class_exists( 'EMCP_Tools_Change_Recorder' ) ) {
-			$source = isset( $meta['site'] ) ? esc_url_raw( (string) $meta['site'] ) : '';
-			EMCP_Tools_Change_Recorder::record_options(
-				$before,
-				/* translators: %d: number of settings. */
-				sprintf( _n( 'Pulled %d EMCP setting from EMCP Cloud', 'Pulled %d EMCP settings from EMCP Cloud', $n, 'emcp-lite' ), $n ),
-				'' !== $source ? $source : 'EMCP Cloud',
-				'settings',
-				'settings-pull'
-			);
 		}
 		return $n;
 	}
