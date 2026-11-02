@@ -3,6 +3,8 @@
 ## 1.0.6
 
 - Fix every wp-admin page failing for users who are not administrators when another plugin adds a menu item with no capability (EMCP Tools issue #174).
+- Fix pulling settings from EMCP Cloud: explain why a pull failed (for example, nothing pushed yet), report how many settings it applied, keep tools that newer versions switch off switched off, and record the pull in History so it can be undone.
+- Make the cloud-config-sync MCP tool apply pulled settings and push this site's own settings.
 - Correct the ChatGPT App connection steps to match the app's Plugins flow.
 
 ## 1.0.5
