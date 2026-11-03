@@ -1,4 +1,4 @@
-=== EMCP Tools – AI Page Builder for Elementor & Block Editor via MCP: Claude, ChatGPT, Cursor ===
+=== EMCP Tools – MCP Plugin for WordPress: Powerful Page Builder Abilities & Modules ===
 Contributors: mianshahzadraza
 Tags: mcp, mcp-server, wordpress-mcp, claude, elementor
 Requires at least: 6.9
