@@ -33,12 +33,12 @@ final class EMCP_Lite_Uninstall {
 	/** Clear credentials for the current site without deleting content or History. */
 	private static function site(): void {
 		global $wpdb;
-		foreach ( array( 'emcp_tools_cloud_connection', 'emcp_tools_site_uuid', 'emcp_tools_cloud_identity_base', 'emcp_tools_gateway_provisioned', 'emcp_tools_oauth_db_version', 'emcp_tools_oauth_gc_throttle', 'emcp_tools_unsplash_access_key', 'emcp_tools_pexels_api_key', 'emcp_tools_pixabay_api_key' ) as $option ) {
+		foreach ( array( 'emcp_tools_cloud_connection', 'emcp_tools_site_uuid', 'emcp_tools_cloud_identity_base', 'emcp_tools_gateway_provisioned', 'emcp_tools_gateway_tokens_extended', 'emcp_tools_oauth_db_version', 'emcp_tools_oauth_gc_throttle', 'emcp_tools_unsplash_access_key', 'emcp_tools_pexels_api_key', 'emcp_tools_pixabay_api_key' ) as $option ) {
 			delete_option( $option );
 		}
 		delete_transient( 'emcp_tools_cloud_pending' );
 		delete_transient( 'emcp_tools_oauth_gc_throttle' );
-		foreach ( array( 'emcp_tools_oauth_gc', 'emcp_tools_changes_prune', 'emcp_tools_changes_migrate', 'emcp_tools_refresh_pro_prompts', 'emcp_tools_refresh_pro_brand_kits' ) as $hook ) {
+		foreach ( array( 'emcp_tools_oauth_gc', 'emcp_tools_cloud_keepalive', 'emcp_tools_changes_prune', 'emcp_tools_changes_migrate', 'emcp_tools_refresh_pro_prompts', 'emcp_tools_refresh_pro_brand_kits' ) as $hook ) {
 			wp_clear_scheduled_hook( $hook );
 		}
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Uninstall removes plugin credential tables; no WordPress table API exists.

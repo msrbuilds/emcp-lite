@@ -41,6 +41,13 @@ function emcp_lite_start() {
 	add_action( 'plugins_loaded', array( 'EMCP_Tools_Bootstrap', 'boot' ), 20 );
 }
 
+register_deactivation_hook( __FILE__, 'emcp_lite_deactivate' );
+
+/** Stop the Cloud renewal check; it is scheduled again on the next load. */
+function emcp_lite_deactivate() {
+	wp_clear_scheduled_hook( 'emcp_tools_cloud_keepalive' );
+}
+
 /** Explain why two editions cannot serve the same MCP namespace. */
 function emcp_lite_conflict_notice() {
 	if ( current_user_can( 'activate_plugins' ) ) {
