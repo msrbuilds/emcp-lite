@@ -267,9 +267,11 @@ Not every change. History shows which entries support undo. An undo can be refus
 
 = 1.0.7 =
 
-Quiet sites stay connected to EMCP Cloud.
+Quiet sites stay connected to EMCP Cloud, and Compact tool mode works for read-only team members.
 
 * Fixed: Quiet sites needed a reconnect in wp-admin. Gateway credentials keep their full life when they rotate, and a daily background check renews a Cloud connection that has not renewed for a week. A site that already lapsed needs one last reconnect.
+* Improved: Compact tool mode now tells the hosted Gateway which tools only read, so read-only team members can use compact sites.
+* Improved: The Page Builders screen lists each EMCP Pro builder's tested version as a minimum, because later versions are supported too.
 
 = 1.0.6 =
 

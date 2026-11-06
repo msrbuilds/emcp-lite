@@ -3,6 +3,8 @@
 ## 1.0.7
 
 - Fix quiet sites needing a reconnect in wp-admin: Gateway credentials keep their full life when they rotate, live credentials already cut short get it back once, and a daily background check renews a Cloud connection that has not renewed for a week. A site that already lapsed needs one last reconnect. The check runs on WP-Cron, so a site with no visits at all can still lapse.
+- Make Compact tool mode tell the hosted Gateway which tools only read, so read-only team members can use compact sites.
+- List each EMCP Pro builder's tested version on the Page Builders screen as a minimum, because later versions are supported too.
 
 ## 1.0.6
 

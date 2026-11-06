@@ -17,7 +17,7 @@ class EMCP_Tools_Page_Builders {
 	/** Gutenberg block packs. Packs without a 'class' need EMCP Pro, which Lite does not ship. */
 	public static function block_packs(): array {
 		return array(
-			'otter' => array('label'=>'Otter Blocks', 'native_tools'=>true, 'requirement'=>__('Requires Otter Blocks 3.2.5–3.2.x and EMCP Pro. Otter Pro is optional.','emcp-lite')),
+			'otter' => array('label'=>'Otter Blocks', 'native_tools'=>true, 'requirement'=>__('Requires Otter Blocks 3.2.5 or later and EMCP Pro. Otter Pro is optional.','emcp-lite')),
 			'blocksy-blocks' => array('label'=>'Blocksy Blocks', 'requirement'=>__('Requires the Blocksy theme, Blocksy Companion and EMCP Pro.','emcp-lite')),
 			'spectra' => array('label'=>'Spectra', 'class'=>'EMCP_Tools_Spectra_Integration'),
 			'kadence-blocks' => array('label'=>'Kadence Blocks', 'class'=>'EMCP_Tools_Kadence_Blocks_Integration'),
@@ -36,23 +36,23 @@ class EMCP_Tools_Page_Builders {
 	/** Implemented standalone integrations. Block packs belong to Gutenberg. */
 	public static function catalog(): array {
 		return array(
-			'visual-composer' => array('label'=>__('Visual Composer','emcp-lite'),'description'=>__('Native documents, element schemas, staged HTML/CSS, local library and recovery.','emcp-lite'),'requirement'=>__('Requires active Visual Composer 45.16.2–45.16.x and EMCP Pro.','emcp-lite')),
-			'beaver' => array('label'=>__('Beaver Builder','emcp-lite'),'description'=>__('Native staged layouts, module schemas, responsive styles, saved library and recovery.','emcp-lite'),'requirement'=>__('Requires active Beaver Builder 2.11.1–2.11.x and EMCP Pro.','emcp-lite')),
-			'wpbakery' => array('label'=>__('WPBakery','emcp-lite'),'description'=>__('Native shortcode layouts, element schemas, page CSS, templates and recovery.','emcp-lite'),'requirement'=>__('Requires active WPBakery 9.0.1–9.0.x and EMCP Pro.','emcp-lite')),
-			'kirki' => array('label'=>__('Kirki','emcp-lite'),'description'=>__('Native canvas pages, responsive styles, staged versions, local library and CMS discovery.','emcp-lite'),'requirement'=>__('Requires active Kirki 6.3.1–6.3.x and EMCP Pro.','emcp-lite')),
-			'oxygen' => array('label'=>__('Oxygen','emcp-lite'),'description'=>__('Native Oxygen 6 pages, elements, responsive classes, components and design-system discovery.','emcp-lite'),'requirement'=>__('Requires active Oxygen 6.1.3–6.1.x and EMCP Pro.','emcp-lite')),
-			'thrive' => array('label' => __( 'Thrive Architect', 'emcp-lite' ), 'description' => __( 'Native Architect pages, element controls, HTML and CSS editing, and local library discovery.', 'emcp-lite' ), 'requirement' => __( 'Requires Thrive Architect 11.0.x and EMCP Pro.', 'emcp-lite' )),
-			'divi' => array('label' => __( 'Divi', 'emcp-lite' ), 'description' => __( 'Divi 5 pages, modules, library layouts, Theme Builder assignments and theme options.', 'emcp-lite' ), 'requirement' => __( 'Requires active Divi 5.13.x and EMCP Pro.', 'emcp-lite' )),
-			'avada' => array('label' => __( 'Avada', 'emcp-lite' ), 'description' => __( 'Native layouts, page editing, and Avada Core Portfolio, FAQ and Slider elements.', 'emcp-lite' ), 'requirement' => __( 'Requires the active Avada theme, Avada Builder 3.16.1–3.16.x and EMCP Pro. Core features require Avada Core.', 'emcp-lite' )),
+			'visual-composer' => array('label'=>__('Visual Composer','emcp-lite'),'description'=>__('Native documents, element schemas, staged HTML/CSS, local library and recovery.','emcp-lite'),'requirement'=>__('Requires active Visual Composer 45.16.2 or later and EMCP Pro.','emcp-lite')),
+			'beaver' => array('label'=>__('Beaver Builder','emcp-lite'),'description'=>__('Native staged layouts, module schemas, responsive styles, saved library and recovery.','emcp-lite'),'requirement'=>__('Requires active Beaver Builder 2.11.1 or later and EMCP Pro.','emcp-lite')),
+			'wpbakery' => array('label'=>__('WPBakery','emcp-lite'),'description'=>__('Native shortcode layouts, element schemas, page CSS, templates and recovery.','emcp-lite'),'requirement'=>__('Requires active WPBakery 9.0.1 or later and EMCP Pro.','emcp-lite')),
+			'kirki' => array('label'=>__('Kirki','emcp-lite'),'description'=>__('Native canvas pages, responsive styles, staged versions, local library and CMS discovery.','emcp-lite'),'requirement'=>__('Requires active Kirki 6.3.1 or later and EMCP Pro.','emcp-lite')),
+			'oxygen' => array('label'=>__('Oxygen','emcp-lite'),'description'=>__('Native Oxygen 6 pages, elements, responsive classes, components and design-system discovery.','emcp-lite'),'requirement'=>__('Requires active Oxygen 6.1.3 or later and EMCP Pro.','emcp-lite')),
+			'thrive' => array('label' => __( 'Thrive Architect', 'emcp-lite' ), 'description' => __( 'Native Architect pages, element controls, HTML and CSS editing, and local library discovery.', 'emcp-lite' ), 'requirement' => __( 'Requires Thrive Architect 11.0 or later and EMCP Pro.', 'emcp-lite' )),
+			'divi' => array('label' => __( 'Divi', 'emcp-lite' ), 'description' => __( 'Divi 5 pages, modules, library layouts, Theme Builder assignments and theme options.', 'emcp-lite' ), 'requirement' => __( 'Requires active Divi 5.13 or later and EMCP Pro.', 'emcp-lite' )),
+			'avada' => array('label' => __( 'Avada', 'emcp-lite' ), 'description' => __( 'Native layouts, page editing, and Avada Core Portfolio, FAQ and Slider elements.', 'emcp-lite' ), 'requirement' => __( 'Requires the active Avada theme, Avada Builder 3.16.1 or later and EMCP Pro. Core features require Avada Core.', 'emcp-lite' )),
 			'breakdance' => array(
 				'label' => __( 'Breakdance', 'emcp-lite' ),
 				'description' => __( 'Native element schemas, nested page editing, templates and design-system discovery.', 'emcp-lite' ),
-				'requirement' => __( 'Requires active Breakdance 2.8.3–2.8.x and an EMCP Pro license.', 'emcp-lite' ),
+				'requirement' => __( 'Requires active Breakdance 2.8.3 or later and an EMCP Pro license.', 'emcp-lite' ),
 			),
 			'bricks' => array(
 				'label' => __( 'Bricks', 'emcp-lite' ),
 				'description' => __( 'Native elements, page editing, local templates and design-system discovery.', 'emcp-lite' ),
-				'requirement' => __( 'Requires active Bricks 2.3.13 to 2.4.x and an EMCP Pro license.', 'emcp-lite' ),
+				'requirement' => __( 'Requires active Bricks 2.3.13 or later and an EMCP Pro license.', 'emcp-lite' ),
 			),
 			'elementor' => array(
 				'label' => __( 'Elementor', 'emcp-lite' ),
