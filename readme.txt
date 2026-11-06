@@ -4,7 +4,7 @@ Tags: mcp, mcp-server, wordpress-mcp, claude, elementor
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.0.6
+Stable tag: 1.0.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -265,6 +265,12 @@ Not every change. History shows which entries support undo. An undo can be refus
 
 == Changelog ==
 
+= 1.0.7 =
+
+Quiet sites stay connected to EMCP Cloud.
+
+* Fixed: Quiet sites needed a reconnect in wp-admin. Gateway credentials keep their full life when they rotate, and a daily background check renews a Cloud connection that has not renewed for a week. A site that already lapsed needs one last reconnect.
+
 = 1.0.6 =
 
 Fixes pulling settings from EMCP Cloud and wp-admin errors for non-administrators on some sites, and corrects the ChatGPT App connection steps.
@@ -288,6 +294,10 @@ Six native plugin integrations with guarded writes and History recovery.
 * First release on WordPress.org.
 
 == Upgrade Notice ==
+
+= 1.0.7 =
+
+Keeps quiet sites connected to EMCP Cloud. A site that already lapsed needs one last reconnect.
 
 = 1.0.6 =
 

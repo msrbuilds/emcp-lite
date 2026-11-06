@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.7
+
+- Fix quiet sites needing a reconnect in wp-admin: Gateway credentials keep their full life when they rotate, live credentials already cut short get it back once, and a daily background check renews a Cloud connection that has not renewed for a week. A site that already lapsed needs one last reconnect. The check runs on WP-Cron, so a site with no visits at all can still lapse.
+
 ## 1.0.6
 
 - Fix every wp-admin page failing for users who are not administrators when another plugin adds a menu item with no capability (EMCP Tools issue #174).
