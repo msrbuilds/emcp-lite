@@ -56,6 +56,12 @@ class EMCP_Tools_OAuth_Server {
 		}
 
 		if ( ! self::is_enabled() ) {
+			// Subdirectory multisite: the main site still answers path-inserted
+			// discovery for subsites that have OAuth on (maybe_serve() serves
+			// only that case while this site's own OAuth is off).
+			if ( is_multisite() && ! is_subdomain_install() ) {
+				add_action( 'parse_request', array( 'EMCP_Tools_OAuth_Metadata', 'maybe_serve' ), 0 );
+			}
 			return;
 		}
 		// Discovery documents at the site root.

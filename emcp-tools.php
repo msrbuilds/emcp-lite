@@ -44,8 +44,16 @@ function emcp_lite_start() {
 register_deactivation_hook( __FILE__, 'emcp_lite_deactivate' );
 
 /** Stop the Cloud renewal check; it is scheduled again on the next load. */
-function emcp_lite_deactivate() {
-	wp_clear_scheduled_hook( 'emcp_tools_cloud_keepalive' );
+function emcp_lite_deactivate( $network_wide = false ) {
+	if ( ! is_multisite() || ! $network_wide ) {
+		wp_clear_scheduled_hook( 'emcp_tools_cloud_keepalive' );
+		return;
+	}
+	foreach ( get_sites( array( 'fields' => 'ids', 'number' => 0 ) ) as $site_id ) {
+		switch_to_blog( (int) $site_id );
+		wp_clear_scheduled_hook( 'emcp_tools_cloud_keepalive' );
+		restore_current_blog();
+	}
 }
 
 /** Explain why two editions cannot serve the same MCP namespace. */

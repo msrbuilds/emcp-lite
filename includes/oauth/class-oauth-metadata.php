@@ -205,10 +205,24 @@ class EMCP_Tools_OAuth_Metadata {
 	 * @param WP $wp Current WordPress environment (unused).
 	 */
 	public static function maybe_serve( $wp = null ): void {
+		$path = self::request_path();
+
+		// Subdirectory multisite: a subsite's issuer is https://host/<path>, so
+		// RFC 8414 clients ask the network root for
+		// /.well-known/oauth-authorization-server/<path>, and WordPress hands
+		// that request to the main site. Answer for the subsite here. Checked
+		// before this site's own OAuth switch: the main site may have OAuth off
+		// while its subsites have it on.
+		if ( 0 === strpos( $path, self::PATH_AUTH_SERVER . '/' ) ) {
+			$doc = self::subsite_authorization_server_document( substr( $path, strlen( self::PATH_AUTH_SERVER ) ) );
+			if ( null !== $doc ) {
+				self::emit( $doc );
+			}
+		}
+
 		if ( ! EMCP_Tools_OAuth_Server::is_enabled() ) {
 			return;
 		}
-		$path = self::request_path();
 
 		// Match both the root well-known path and the resource-scoped variant
 		// clients build by appending OUR resource path, e.g.
@@ -225,6 +239,63 @@ class EMCP_Tools_OAuth_Metadata {
 		if ( self::path_matches( $path, self::PATH_AUTH_SERVER ) ) {
 			self::emit( self::authorization_server_document() );
 		}
+	}
+
+	/**
+	 * The authorization-server document of the subdirectory subsite named by a
+	 * path-inserted well-known suffix, or null when this request is not for an
+	 * EMCP subsite on this network.
+	 *
+	 * Returns null unless the suffix names an exact, live subsite of this
+	 * subdirectory network, EMCP is active there with OAuth on, and that
+	 * subsite's issuer is the one the client derived the path from (a subsite
+	 * with a Server URL override on another host is discovered there instead).
+	 *
+	 * @since 3.20.1
+	 *
+	 * @param string $suffix Path after the well-known prefix, e.g. "/grand-jury".
+	 * @return array|null
+	 */
+	public static function subsite_authorization_server_document( string $suffix ): ?array {
+		if ( ! is_multisite() || is_subdomain_install() ) {
+			return null;
+		}
+		$suffix = trim( $suffix, '/' );
+		if ( '' === $suffix ) {
+			return null;
+		}
+
+		$current   = get_site();
+		$site_path = '/' . $suffix . '/';
+		$site      = $current ? get_site_by_path( $current->domain, $site_path ) : null;
+		if ( ! $site || $site_path !== $site->path || (int) $site->blog_id === get_current_blog_id()
+			|| ! empty( $site->deleted ) || ! empty( $site->archived ) || ! empty( $site->spam ) ) {
+			return null;
+		}
+
+		$home     = wp_parse_url( home_url() );
+		$expected = ( $home['scheme'] ?? 'https' ) . '://' . ( $home['host'] ?? '' ) . ( isset( $home['port'] ) ? ':' . (int) $home['port'] : '' ) . '/' . $suffix;
+
+		switch_to_blog( (int) $site->blog_id );
+		try {
+			if ( ! self::active_on_current_site() || ! EMCP_Tools_OAuth_Server::is_enabled() ) {
+				return null;
+			}
+			$doc = self::authorization_server_document();
+			return self::identifier_matches( (string) $doc['issuer'], $expected ) ? $doc : null;
+		} finally {
+			restore_current_blog();
+		}
+	}
+
+	/** Whether this plugin is active on the current (possibly switched-to) site. */
+	private static function active_on_current_site(): bool {
+		if ( ! defined( 'EMCP_TOOLS_BASENAME' ) ) {
+			return false;
+		}
+		$network = (array) get_site_option( 'active_sitewide_plugins', array() );
+		return isset( $network[ EMCP_TOOLS_BASENAME ] )
+			|| in_array( EMCP_TOOLS_BASENAME, (array) get_option( 'active_plugins', array() ), true );
 	}
 
 	/**
