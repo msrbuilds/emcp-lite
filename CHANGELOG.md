@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.8 (unreleased)
+
+- Fixed: **Claude could not connect on sites where another plugin answers the shared OAuth discovery address** (reported in a support ticket; the same cause as earlier Tropk and SiteGround reports). Claude signed in with the other plugin, so EMCP rejected its tokens and the MCP Log showed every request failing with "Sorry, you are not allowed to do that." EMCP's OAuth issuer is now its own REST address (`/wp-json/emcp-tools/oauth/v1`), so clients look for its settings at addresses only EMCP answers. Sites with plain permalinks keep the old address. Existing connections keep working; a client that failed this way needs to be removed and added again.
+
 ## 1.0.7
 
 - Fix quiet sites needing a reconnect in wp-admin: Gateway credentials keep their full life when they rotate, live credentials already cut short get it back once, and a daily background check renews a Cloud connection that has not renewed for a week. A site that already lapsed needs one last reconnect. The check runs on WP-Cron, so a site with no visits at all can still lapse.
