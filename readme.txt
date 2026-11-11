@@ -4,7 +4,7 @@ Tags: mcp, mcp-server, wordpress-mcp, claude, elementor
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.0.7
+Stable tag: 1.0.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -265,6 +265,14 @@ Not every change. History shows which entries support undo. An undo can be refus
 
 == Changelog ==
 
+= 1.0.8 =
+
+Claude connects on sites where another OAuth plugin owns the shared discovery address, plus two fixes from user reports.
+
+* Fixed: Claude could not connect on sites where another plugin answers the shared OAuth discovery address. EMCP's OAuth issuer is now its own REST address. A client that failed this way needs to be removed and added again.
+* Fixed: Atomic paragraphs, headings and buttons kept no inline HTML. They now keep the inline tags Elementor accepts and remove the rest.
+* Fixed: The query tool refused a SELECT that used the REPLACE() or INSERT() string functions.
+
 = 1.0.7 =
 
 Quiet sites stay connected to EMCP Cloud, and the Connection screen's Disconnect, Gateway off and Re-issue buttons work again.
@@ -298,6 +306,10 @@ Six native plugin integrations with guarded writes and History recovery.
 * First release on WordPress.org.
 
 == Upgrade Notice ==
+
+= 1.0.8 =
+
+Fixes Claude connections on sites where another OAuth plugin owns the shared discovery address.
 
 = 1.0.7 =
 
