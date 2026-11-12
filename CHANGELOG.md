@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.8 (unreleased)
+## 1.0.8
 
 - Fixed: **Claude could not connect on sites where another plugin answers the shared OAuth discovery address** (reported in a support ticket; the same cause as earlier Tropk and SiteGround reports). Claude signed in with the other plugin, so EMCP rejected its tokens and the MCP Log showed every request failing with "Sorry, you are not allowed to do that." EMCP's OAuth issuer is now its own REST address (`/wp-json/emcp-tools/oauth/v1`), so clients look for its settings at addresses only EMCP answers. Sites with plain permalinks keep the old address. Existing connections keep working; a client that failed this way needs to be removed and added again.
 - Fixed: **Atomic paragraphs, headings and buttons removed inline HTML** (#180). They now keep the inline tags Elementor accepts for each element and remove everything else, including scripts and event attributes.
