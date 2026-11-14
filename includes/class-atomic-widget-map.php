@@ -156,7 +156,7 @@ class EMCP_Tools_Atomic_Widget_Map {
 	 */
 	private static function heading( array $params ): array {
 		$settings = array(
-			'title' => EMCP_Tools_Atomic_Props::html( self::inline_markup( 'e-heading', 'title', $params['title'] ?? 'Heading' ) ),
+			'title' => EMCP_Tools_Atomic_Props::rich_text( 'e-heading', 'title', self::inline_markup( 'e-heading', 'title', $params['title'] ?? 'Heading' ) ),
 			'tag'   => EMCP_Tools_Atomic_Props::string( sanitize_text_field( $params['tag'] ?? 'h2' ) ),
 		);
 		return self::finish( $settings, $params );
@@ -167,10 +167,11 @@ class EMCP_Tools_Atomic_Widget_Map {
 	 * @return array
 	 */
 	private static function paragraph( array $params ): array {
-		// The e-paragraph content prop is named `paragraph` (Html_V3), not
+		// The e-paragraph content prop is named `paragraph` (escaped-html on Elementor 4.3+,
+		// html-v3 before; rich_text() asks the schema), not
 		// `text`. Writing `text` silently dropped the content (issue #56).
 		$settings = array(
-			'paragraph' => EMCP_Tools_Atomic_Props::html( self::inline_markup( 'e-paragraph', 'paragraph', $params['content'] ?? 'Paragraph text' ) ),
+			'paragraph' => EMCP_Tools_Atomic_Props::rich_text( 'e-paragraph', 'paragraph', self::inline_markup( 'e-paragraph', 'paragraph', $params['content'] ?? 'Paragraph text' ) ),
 		);
 		return self::finish( $settings, $params );
 	}
@@ -181,7 +182,7 @@ class EMCP_Tools_Atomic_Widget_Map {
 	 */
 	private static function button( array $params ): array {
 		$settings = array(
-			'text' => EMCP_Tools_Atomic_Props::html( self::inline_markup( 'e-button', 'text', $params['text'] ?? 'Click Here' ) ),
+			'text' => EMCP_Tools_Atomic_Props::rich_text( 'e-button', 'text', self::inline_markup( 'e-button', 'text', $params['text'] ?? 'Click Here' ) ),
 		);
 		return self::finish( $settings, $params, true );
 	}

@@ -332,6 +332,44 @@ class EMCP_Tools_Atomic_Props {
 	}
 
 	/**
+	 * Wraps text for a widget's rich-text prop in the envelope the installed
+	 * Elementor declares: `escaped-html` on 4.3+ (e-heading title, e-paragraph
+	 * paragraph, e-button text), `html-v3` before that (#166).
+	 *
+	 * @since 3.21.0
+	 *
+	 * @param string $widget_type Atomic widget type, e.g. 'e-paragraph'.
+	 * @param string $prop        Prop name.
+	 * @param string $text        Text, may hold inline markup.
+	 * @return array
+	 */
+	public static function rich_text( string $widget_type, string $prop, string $text ): array {
+		return self::rich_text_with_schema( self::props_schema( $widget_type ), $prop, $text );
+	}
+
+	/**
+	 * rich_text() against a supplied prop schema.
+	 *
+	 * @since 3.21.0
+	 *
+	 * @param array  $schema Map of prop name => Elementor prop type.
+	 * @param string $prop   Prop name.
+	 * @param string $text   Text.
+	 * @return array
+	 */
+	public static function rich_text_with_schema( array $schema, string $prop, string $text ): array {
+		$type    = $schema[ $prop ] ?? null;
+		$escaped = array(
+			'$$type' => 'escaped-html',
+			'value'  => $text,
+		);
+		if ( is_object( $type ) && method_exists( $type, 'validate' ) && self::prop_accepts( $type, $escaped ) ) {
+			return $escaped;
+		}
+		return self::html( $text );
+	}
+
+	/**
 	 * Wraps a URL into a typed prop.
 	 *
 	 * @param string $url The URL string.
@@ -754,9 +792,51 @@ class EMCP_Tools_Atomic_Props {
 			}
 		}
 
+		// Rich text in an envelope the installed prop rejects: Elementor 4.3 moved
+		// heading, paragraph and button text from `html-v3` to `escaped-html`, and
+		// a value in the old envelope renders empty (#166). Offer its text in the
+		// envelope the schema asks for, either way round.
+		$text = self::rich_text_of( $value );
+		if ( null !== $text ) {
+			foreach ( self::candidates_for( $prop, $text ) as $candidate ) {
+				if ( self::prop_accepts( $prop, $candidate ) ) {
+					return $candidate;
+				}
+			}
+		}
+
 		// Nothing fits. Leave it alone so Elementor reports a precise error
 		// rather than us silently storing something reshaped.
 		return $value;
+	}
+
+	/**
+	 * The markup inside a rich-text envelope (`html-v3`, `html-v2`, `html`,
+	 * `escaped-html`), or null for anything else.
+	 *
+	 * @since 3.21.0
+	 *
+	 * @param mixed $value A prop value.
+	 * @return string|null
+	 */
+	protected static function rich_text_of( $value ): ?string {
+		if ( ! is_array( $value ) || ! isset( $value['$$type'] ) ) {
+			return null;
+		}
+		$inner = $value['value'] ?? null;
+		switch ( $value['$$type'] ) {
+			case 'html':
+			case 'escaped-html':
+				return is_string( $inner ) ? $inner : null;
+			case 'html-v2':
+			case 'html-v3':
+				$content = is_array( $inner ) ? ( $inner['content'] ?? null ) : $inner;
+				if ( is_array( $content ) && is_string( $content['value'] ?? null ) ) {
+					return $content['value'];
+				}
+				return is_string( $content ) ? $content : null;
+		}
+		return null;
 	}
 
 	/**

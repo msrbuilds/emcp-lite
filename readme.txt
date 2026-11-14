@@ -4,7 +4,7 @@ Tags: mcp, mcp-server, wordpress-mcp, claude, elementor
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.0.8
+Stable tag: 1.0.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -265,6 +265,16 @@ Not every change. History shows which entries support undo. An undo can be refus
 
 == Changelog ==
 
+= 1.0.9 =
+
+Fixes from user reports: MCP clients that check output schemas, global typography, Elementor Pro theme widgets, atomic text on Elementor 4.3 or later and the collapsing admin menu.
+
+* Fixed: get-element-settings, get-post and other tools sent an empty list where their output schema declares an object, so MCP clients that check the schema rejected the answer.
+* Fixed: update-global-typography added a duplicate global for a system typography id. System ids are now refused with a pointer to the right tool, and custom ids update in place.
+* Fixed: Post Title, Post Excerpt and other Elementor Pro theme widgets added with add-pro-widget or build-page showed placeholder text. They now get the same default dynamic tag the editor gives them.
+* Fixed: Atomic paragraphs, headings and buttons written to Elementor 4.3 or later stored their text in the old format. They now use the format each Elementor version expects.
+* Fixed: The WordPress admin menu collapsed every time an EMCP screen opened. It now follows WordPress's own setting.
+
 = 1.0.8 =
 
 Claude connects on sites where another OAuth plugin owns the shared discovery address, plus two fixes from user reports.
@@ -306,6 +316,10 @@ Six native plugin integrations with guarded writes and History recovery.
 * First release on WordPress.org.
 
 == Upgrade Notice ==
+
+= 1.0.9 =
+
+Fixes MCP clients rejecting answers with empty fields, and four other fixes from user reports.
 
 = 1.0.8 =
 

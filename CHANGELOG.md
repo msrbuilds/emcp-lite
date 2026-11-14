@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.9
+
+- Fixed: get-element-settings, get-post and other tools sent an empty list where their output schema declares an object, so MCP clients that check the schema rejected the answer.
+- Fixed: update-global-typography added a duplicate global for a system typography id. System ids are now refused with a pointer to the right tool, and custom ids update in place.
+- Fixed: Post Title, Post Excerpt and other Elementor Pro theme widgets added with add-pro-widget or build-page showed placeholder text. They now get the same default dynamic tag the editor gives them.
+- Fixed: Atomic paragraphs, headings and buttons written to Elementor 4.3 or later stored their text in the old format. They now use the format each Elementor version expects.
+- Fixed: The WordPress admin menu collapsed every time an EMCP screen opened. It now follows WordPress's own setting.
+
 ## 1.0.8
 
 - Fixed: **Claude could not connect on sites where another plugin answers the shared OAuth discovery address** (reported in a support ticket; the same cause as earlier Tropk and SiteGround reports). Claude signed in with the other plugin, so EMCP rejected its tokens and the MCP Log showed every request failing with "Sorry, you are not allowed to do that." EMCP's OAuth issuer is now its own REST address (`/wp-json/emcp-tools/oauth/v1`), so clients look for its settings at addresses only EMCP answers. Sites with plain permalinks keep the old address. Existing connections keep working; a client that failed this way needs to be removed and added again.
