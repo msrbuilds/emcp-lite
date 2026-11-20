@@ -4,7 +4,7 @@ Tags: mcp, mcp-server, wordpress-mcp, claude, elementor
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.0.9
+Stable tag: 1.0.10
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -265,6 +265,10 @@ Not every change. History shows which entries support undo. An undo can be refus
 
 == Changelog ==
 
+= 1.0.10 =
+
+* Fixed: Sites connected to the EMCP Cloud Gateway could lose the connection when a token renewal took longer than the Gateway waited. The previous refresh token now keeps working until the new one is used.
+
 = 1.0.9 =
 
 Fixes from user reports: MCP clients that check output schemas, global typography, Elementor Pro theme widgets, atomic text on Elementor 4.3 or later and the collapsing admin menu.
@@ -316,6 +320,10 @@ Six native plugin integrations with guarded writes and History recovery.
 * First release on WordPress.org.
 
 == Upgrade Notice ==
+
+= 1.0.10 =
+
+Keeps EMCP Cloud Gateway connections working when a token renewal is slow.
 
 = 1.0.9 =
 

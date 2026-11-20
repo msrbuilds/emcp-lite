@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.10
+
+- Fixed: Sites connected to the EMCP Cloud Gateway could lose the connection when a token renewal took longer than the Gateway waited. The previous refresh token now keeps working until the new one is used.
+
 ## 1.0.9
 
 - Fixed: get-element-settings, get-post and other tools sent an empty list where their output schema declares an object, so MCP clients that check the schema rejected the answer.
