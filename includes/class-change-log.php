@@ -1072,6 +1072,9 @@ class EMCP_Tools_Change_Log {
 			return new WP_Error( 'rollback_failed', __( 'The original attachment ID could not be restored. Inspect the partially restored attachment before retrying.', 'emcp-lite' ) );
 		}
 		foreach ( (array) ( $snap['meta'] ?? array() ) as $key => $values ) {
+			// save_post handlers that ran during the insert may have written this
+			// key already; the snapshot wins.
+			delete_post_meta( $new_id, (string) $key );
 			foreach ( (array) $values as $value ) {
 				if ( false === add_post_meta( $new_id, (string) $key, wp_slash( maybe_unserialize( $value ) ) ) ) {
 					return new WP_Error( 'rollback_failed', __( 'The attachment was only partially restored: metadata could not be written.', 'emcp-lite' ) );
@@ -1117,7 +1120,7 @@ class EMCP_Tools_Change_Log {
 			return new WP_Error( 'rollback_failed', __( 'No ACF values to restore.', 'emcp-lite' ) );
 		}
 		foreach ( $before as $key => $value ) {
-			update_field( (string) $key, $value, $target );
+			update_field( (string) $key, wp_slash( $value ), $target );
 			if ( ! function_exists( 'get_field' ) || maybe_serialize( get_field( (string) $key, $target, false ) ) !== maybe_serialize( $value ) ) {
 				return new WP_Error( 'rollback_failed', __( 'Could not restore an ACF field value.', 'emcp-lite' ) );
 			}
@@ -1322,7 +1325,16 @@ class EMCP_Tools_Change_Log {
 			if ( $post_id <= 0 ) {
 				return new WP_Error( 'rollback_failed', __( 'Missing post id.', 'emcp-lite' ) );
 			}
-			$result = wp_untrash_post( $post_id );
+			// Core untrashes to draft; undo puts back the status the post had (1.0.11).
+			$keep   = static function ( $status, $id, $previous ) use ( $post_id ) {
+				return (int) $id === $post_id && is_string( $previous ) && '' !== $previous ? $previous : $status;
+			};
+			add_filter( 'wp_untrash_post_status', $keep, 10, 3 );
+			try {
+				$result = wp_untrash_post( $post_id );
+			} finally {
+				remove_filter( 'wp_untrash_post_status', $keep, 10 );
+			}
 			$post = get_post( $post_id );
 			return $result && $post && 'trash' !== $post->post_status ? true : new WP_Error( 'rollback_failed', __( 'Could not restore the trashed post.', 'emcp-lite' ) );
 		}
@@ -1353,6 +1365,9 @@ class EMCP_Tools_Change_Log {
 			return new WP_Error( 'rollback_failed', __( 'The original post ID could not be restored. Inspect the partially restored post before retrying.', 'emcp-lite' ) );
 		}
 		foreach ( (array) ( $snap['meta'] ?? array() ) as $key => $values ) {
+			// save_post handlers that ran during the insert may have written this
+			// key already; the snapshot wins.
+			delete_post_meta( $new_id, (string) $key );
 			foreach ( (array) $values as $value ) {
 				if ( false === add_post_meta( $new_id, (string) $key, wp_slash( maybe_unserialize( $value ) ) ) ) {
 					return new WP_Error( 'rollback_failed', __( 'The post was only partially restored: metadata could not be written.', 'emcp-lite' ) );

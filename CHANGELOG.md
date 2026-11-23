@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.11
+
+- Fixed: Backslashes in custom field values, ACF values and Slim SEO and Visibility fields are kept when they are saved. Before, Windows paths, regular expressions and escaped quotes lost their backslashes.
+- Fixed: Undoing the trash of a post puts it back with the status it had. Before, it came back as a draft.
+- Fixed: Undoing the deletion of a post no longer leaves duplicate custom fields when a plugin writes them while the post is restored.
+
 ## 1.0.10
 
 - Fixed: Sites connected to the EMCP Cloud Gateway could lose the connection when a token renewal took longer than the Gateway waited. The previous refresh token now keeps working until the new one is used.
