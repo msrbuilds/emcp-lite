@@ -473,7 +473,11 @@ class EMCP_Tools_Bootstrap {
 		$emcp_modules->register( new EMCP_Tools_SVG_Support_Module() );
 		$emcp_modules->register( new EMCP_Tools_Cloud_Module() );
 		do_action( 'emcp_tools_register_modules', $emcp_modules );
-		$emcp_modules->apply_defaults();
+		// Seed module defaults on init 0, never on plugins_loaded: option writes
+		// fire other plugins' update hooks before $wp_rewrite exists, and a hook
+		// that calls rest_url() there fatals every request (Lumios Agent Markdown
+		// Mirror did, on a customer site).
+		add_action( 'init', array( $emcp_modules, 'apply_defaults' ), 0 );
 		add_action( 'init', array( $emcp_modules, 'boot_active' ), 5 );
 
 		// Admin-bar MCP status + exposure toggle (front-end + wp-admin; the class
