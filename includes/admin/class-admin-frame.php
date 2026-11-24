@@ -42,39 +42,60 @@ final class EMCP_Tools_Admin_Frame {
 	/**
 	 * Announcements for the promo bar, in display order.
 	 *
+	 * During the Black Friday sale a sale slide leads and replaces the Pro and
+	 * lifetime deal slides, unless the user dismissed the sale notice.
+	 *
+	 * @param int|null $now            Unix time; defaults to now.
+	 * @param bool     $sale_dismissed The user dismissed the sale notice.
 	 * @return array[]
 	 */
-	public static function announcements(): array {
-		$list = array(
-			array(
-				'key'   => 'cloud',
-				'badge' => __( 'New', 'emcp-lite' ),
-				'icon'  => 'cloud',
-				'title' => __( 'EMCP Cloud is live.', 'emcp-lite' ),
-				'text'  => __( 'Optionally connect your site for configuration management and access to enabled tools through Gateway.', 'emcp-lite' ),
-				'cta'   => __( 'Explore Cloud', 'emcp-lite' ),
-				'url'   => 'https://emcptools.com/cloud',
-			),
+	public static function announcements( ?int $now = null, bool $sale_dismissed = false ): array {
+		require_once __DIR__ . '/class-sale.php';
+		$sale = ! $sale_dismissed && EMCP_Tools_Sale::active( $now );
+		$list = array();
+		if ( $sale ) {
+			$list[] = array(
+				'key'   => 'bfcm',
+				'badge' => __( 'Black Friday', 'emcp-lite' ),
+				'icon'  => 'tag',
+				/* translators: %d: discount percentage. */
+				'title' => sprintf( __( '%d%% off EMCP Pro.', 'emcp-lite' ), EMCP_Tools_Sale::PLUGIN_PERCENT ),
+				/* translators: %d: discount percentage. */
+				'text'  => sprintf( __( 'Our Black Friday sale is on until December 1, with %d%% off EMCP Cloud and a small batch of lifetime deals.', 'emcp-lite' ), EMCP_Tools_Sale::CLOUD_PERCENT ),
+				'cta'   => __( 'See the deals', 'emcp-lite' ),
+				'url'   => EMCP_Tools_Sale::URL,
+			);
+		}
+		$list[] = array(
+			'key'   => 'cloud',
+			'badge' => __( 'New', 'emcp-lite' ),
+			'icon'  => 'cloud',
+			'title' => __( 'EMCP Cloud is live.', 'emcp-lite' ),
+			'text'  => __( 'Optionally connect your site for configuration management and access to enabled tools through Gateway.', 'emcp-lite' ),
+			'cta'   => __( 'Explore Cloud', 'emcp-lite' ),
+			'url'   => 'https://emcptools.com/cloud',
 		);
-		$upgrade = function_exists( 'emcp_tools_upgrade_url' ) ? emcp_tools_upgrade_url() : 'https://emcptools.com/pricing';
-		$list[]  = array(
-			'key'   => 'pro',
-			'badge' => __( 'Pro', 'emcp-lite' ),
-			'icon'  => 'crown',
-			'title' => __( 'Upgrade to EMCP Pro.', 'emcp-lite' ),
-			'text'  => __( 'Unlock AI Chat, the Widget and Block Builder, Templates, Skills and scheduled backups.', 'emcp-lite' ),
-			'cta'   => __( 'Upgrade to Pro', 'emcp-lite' ),
-			'url'   => $upgrade,
-		);
-		$list[]  = array(
-			'key'   => 'ltd',
-			'badge' => __( 'Limited', 'emcp-lite' ),
-			'icon'  => 'sparkles',
-			'title' => __( 'Lifetime deal ends soon.', 'emcp-lite' ),
-			'text'  => __( 'Pay once and own EMCP Pro forever. This lifetime deal is going away for good.', 'emcp-lite' ),
-			'cta'   => __( 'Get the LTD', 'emcp-lite' ),
-			'url'   => $upgrade,
-		);
+		if ( ! $sale ) {
+			$upgrade = function_exists( 'emcp_tools_upgrade_url' ) ? emcp_tools_upgrade_url() : 'https://emcptools.com/pricing';
+			$list[]  = array(
+				'key'   => 'pro',
+				'badge' => __( 'Pro', 'emcp-lite' ),
+				'icon'  => 'crown',
+				'title' => __( 'Upgrade to EMCP Pro.', 'emcp-lite' ),
+				'text'  => __( 'Unlock AI Chat, the Widget and Block Builder, Templates, Skills and scheduled backups.', 'emcp-lite' ),
+				'cta'   => __( 'Upgrade to Pro', 'emcp-lite' ),
+				'url'   => $upgrade,
+			);
+			$list[]  = array(
+				'key'   => 'ltd',
+				'badge' => __( 'Limited', 'emcp-lite' ),
+				'icon'  => 'sparkles',
+				'title' => __( 'Lifetime deal ends soon.', 'emcp-lite' ),
+				'text'  => __( 'Pay once and own EMCP Pro forever. This lifetime deal is going away for good.', 'emcp-lite' ),
+				'cta'   => __( 'Get the LTD', 'emcp-lite' ),
+				'url'   => $upgrade,
+			);
+		}
 		$list[] = array(
 			'key'   => 'whatsnew',
 			'badge' => EMCP_TOOLS_VERSION,

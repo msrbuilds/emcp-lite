@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.12
+
+- Fixed: Activating EMCP Lite no longer breaks every request on sites where another plugin builds REST URLs while options are saved (seen with Lumios Agent Markdown Mirror and pretty permalinks). Module defaults are now saved on init instead of plugins_loaded.
+- New: A Black Friday sale notice on EMCP Lite's own screens, with 40% off EMCP Pro until December 1, 2026. It shows only on EMCP Lite pages, makes no remote requests, and once dismissed it stays gone.
+
 ## 1.0.11
 
 - Fixed: Backslashes in custom field values, ACF values and Slim SEO and Visibility fields are kept when they are saved. Before, Windows paths, regular expressions and escaped quotes lost their backslashes.

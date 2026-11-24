@@ -25,7 +25,7 @@ $emcp_collapsed = EMCP_Tools_Admin_Frame::sidebar_collapsed(
 <div class="wrap emcp-app eui-frame<?php echo $emcp_collapsed ? ' is-collapsed' : ''; ?>">
 	<?php
 	// Every Frame method returns markup assembled from escaped parts.
-	echo wp_kses( EMCP_Tools_Admin_Frame::promo( EMCP_Tools_Admin_Frame::announcements() ), EMCP_Lite_Edition::allowed_html() );
+	echo wp_kses( EMCP_Tools_Admin_Frame::promo( EMCP_Tools_Admin_Frame::announcements( null, (bool) get_user_meta( get_current_user_id(), 'emcp_tools_bfcm2026_notice_dismissed', true ) ) ), EMCP_Lite_Edition::allowed_html() );
 	?>
 	<div class="eui-frame__layout">
 		<?php echo wp_kses( EMCP_Tools_Admin_Frame::sidebar( $emcp_nav, $active_tab, EMCP_TOOLS_VERSION ), EMCP_Lite_Edition::allowed_html() ); ?>

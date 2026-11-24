@@ -4,7 +4,7 @@ Tags: mcp, mcp-server, wordpress-mcp, claude, elementor
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.0.11
+Stable tag: 1.0.12
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -265,6 +265,11 @@ Not every change. History shows which entries support undo. An undo can be refus
 
 == Changelog ==
 
+= 1.0.12 =
+
+* Fixed: Activating EMCP Lite no longer breaks every request on sites where another plugin builds REST URLs while options are saved (seen with Lumios Agent Markdown Mirror and pretty permalinks). Module defaults are now saved on init instead of plugins_loaded.
+* New: A Black Friday sale notice on EMCP Lite's own screens, with 40% off EMCP Pro until December 1, 2026. It shows only on EMCP Lite pages, makes no remote requests, and once dismissed it stays gone.
+
 = 1.0.11 =
 
 * Fixed: Backslashes in custom field values, ACF values and Slim SEO and Visibility fields are kept when they are saved. Before, Windows paths, regular expressions and escaped quotes lost their backslashes.
@@ -326,6 +331,10 @@ Six native plugin integrations with guarded writes and History recovery.
 * First release on WordPress.org.
 
 == Upgrade Notice ==
+
+= 1.0.12 =
+
+Fixes a crash on activation alongside plugins that build REST URLs early.
 
 = 1.0.11 =
 

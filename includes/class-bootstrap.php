@@ -523,6 +523,10 @@ class EMCP_Tools_Bootstrap {
 	private static function load_admin(): void {
 		self::require_admin_classes();
 		require_once EMCP_TOOLS_DIR . 'includes/admin/class-mcpb-builder.php';
+
+		// Black Friday 2026 sale notice, on EMCP Lite screens only (ends December 1).
+		require_once EMCP_TOOLS_DIR . 'includes/admin/class-sale-notice.php';
+		( new EMCP_Tools_Sale_Notice() )->init();
 	}
 
 	/**
