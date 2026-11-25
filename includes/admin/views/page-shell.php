@@ -34,6 +34,7 @@ $emcp_collapsed = EMCP_Tools_Admin_Frame::sidebar_collapsed(
 			<div class="eui-frame__content" id="emcp-main">
 				<?php // Core moves admin notices to just after this marker. ?>
 				<hr class="wp-header-end">
+				<?php do_action( 'emcp_tools_frame_content_top', $active_tab ); ?>
 				<?php if ( 'management' === $active_tab ) : ?>
 					<?php EMCP_Tools_Management_Access_Admin::render(); ?>
 				<?php elseif ( null !== $emcp_screen ) : ?>

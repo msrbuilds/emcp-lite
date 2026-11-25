@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.13
+
+- Changed: The Black Friday notice now sits inside the EMCP Lite Dashboard, below its top bar, instead of above the admin screen.
+- Fixed: The announcement bar at the top of EMCP Lite screens stacks on phones instead of squeezing its text and overlapping its button.
+
 ## 1.0.12
 
 - Fixed: Activating EMCP Lite no longer breaks every request on sites where another plugin builds REST URLs while options are saved (seen with Lumios Agent Markdown Mirror and pretty permalinks). Module defaults are now saved on init instead of plugins_loaded.

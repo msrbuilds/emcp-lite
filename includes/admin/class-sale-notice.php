@@ -2,8 +2,8 @@
 /**
  * Black Friday 2026 sale notice for EMCP Lite.
  *
- * Shown only on EMCP Lite's own admin screens (never across wp-admin), to
- * administrators, while EMCP_Tools_Sale::active(). Dismissible per user; a
+ * Shown inside the content area of the EMCP Lite Dashboard screen (never across
+ * wp-admin, never above the Lite frame), to administrators, while EMCP_Tools_Sale::active(). Dismissible per user; a
  * dismissed notice stays gone and its announcement bar slide goes with it.
  * No remote requests: the sale dates and copy are in EMCP_Tools_Sale.
  *
@@ -27,7 +27,7 @@ class EMCP_Tools_Sale_Notice {
 
 	public function init(): void {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );
-		add_action( 'admin_notices', array( $this, 'maybe_render' ) );
+		add_action( 'emcp_tools_frame_content_top', array( $this, 'maybe_render' ) );
 		add_action( 'wp_ajax_emcp_tools_dismiss_sale_notice', array( $this, 'ajax_dismiss' ) );
 	}
 
@@ -39,16 +39,16 @@ class EMCP_Tools_Sale_Notice {
 	}
 
 	/**
-	 * Pure decision: show only on an EMCP Lite screen, to an administrator,
-	 * while the sale runs and the user has not dismissed it.
+	 * Pure decision: show only on the EMCP Lite Dashboard screen, to an
+	 * administrator, while the sale runs and the user has not dismissed it.
 	 *
-	 * @param string   $screen_id Current admin screen id.
+	 * @param string   $screen_id Current admin screen id (the Dashboard is the top-level page).
 	 * @param bool     $can       Whether the user can manage options.
 	 * @param bool     $dismissed Whether the user dismissed the notice.
 	 * @param int|null $now       Unix time; defaults to now.
 	 */
 	public static function visible( string $screen_id, bool $can, bool $dismissed, ?int $now = null ): bool {
-		return $can && ! $dismissed && false !== strpos( $screen_id, 'emcp-tools' ) && EMCP_Tools_Sale::active( $now );
+		return $can && ! $dismissed && 'toplevel_page_emcp-tools' === $screen_id && EMCP_Tools_Sale::active( $now );
 	}
 
 	private function should_show(): bool {
@@ -65,8 +65,13 @@ class EMCP_Tools_Sale_Notice {
 		wp_enqueue_script( 'emcp-tools-sale-notice', EMCP_TOOLS_URL . 'assets/js/sale-notice.js', array(), EMCP_TOOLS_VERSION, true );
 	}
 
-	public function maybe_render(): void {
-		if ( $this->should_show() ) {
+	/**
+	 * Renders inside the frame's content area (emcp_tools_frame_content_top).
+	 *
+	 * @param string $active_tab The frame's current tab.
+	 */
+	public function maybe_render( $active_tab = '' ): void {
+		if ( 'dashboard' === $active_tab && $this->should_show() ) {
 			$this->render();
 		}
 	}
@@ -88,7 +93,7 @@ class EMCP_Tools_Sale_Notice {
 		);
 		?>
 
-		<div class="emcp-sale" data-emcp-nonce="<?php echo esc_attr( $nonce ); ?>" data-emcp-banner="bfcm" data-emcp-end="<?php echo esc_attr( (string) EMCP_Tools_Sale::END ); ?>" role="region" aria-label="<?php esc_attr_e( 'EMCP Black Friday sale', 'emcp-lite' ); ?>">
+		<div class="emcp-sale-wrap"><div class="emcp-sale" data-emcp-nonce="<?php echo esc_attr( $nonce ); ?>" data-emcp-banner="bfcm" data-emcp-end="<?php echo esc_attr( (string) EMCP_Tools_Sale::END ); ?>" role="region" aria-label="<?php esc_attr_e( 'EMCP Black Friday sale', 'emcp-lite' ); ?>">
 
 			<svg class="emcp-sale__grid emcp-sale__grid--l" viewBox="0 0 120 56" aria-hidden="true" preserveAspectRatio="xMinYMid slice">
 				<rect x="0" y="0" width="14" height="14" /><rect x="28" y="0" width="14" height="14" class="b1" />
@@ -164,7 +169,7 @@ class EMCP_Tools_Sale_Notice {
 				</a>
 				</div>
 			</div>
-		</div>
+		</div></div>
 
 		<?php
 	}

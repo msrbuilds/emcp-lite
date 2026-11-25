@@ -638,6 +638,8 @@ class EMCP_Tools_Admin {
 				wp_enqueue_style( $handle, EMCP_TOOLS_URL . 'assets/admin/build/' . $file . '.css', 'shell' === $file ? array( 'emcp-admin-ui' ) : array(), $version );
 			}
 		}
+		// Phone layout for the announcement bar, kept outside the prebuilt bundle.
+		wp_enqueue_style( 'emcp-lite-frame-phone', EMCP_TOOLS_URL . 'assets/css/frame-phone.css', array( 'emcp-admin-shell' ), EMCP_TOOLS_VERSION );
 		wp_add_inline_script( 'emcp-admin-shell', 'window.emcpShell = ' . wp_json_encode( $this->shell_data(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ) . ';', 'before' );
 		wp_enqueue_script( 'emcp-admin-shell' );
 	}

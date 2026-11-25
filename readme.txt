@@ -4,7 +4,7 @@ Tags: mcp, mcp-server, wordpress-mcp, claude, elementor
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.0.12
+Stable tag: 1.0.13
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -265,6 +265,11 @@ Not every change. History shows which entries support undo. An undo can be refus
 
 == Changelog ==
 
+= 1.0.13 =
+
+* Changed: The Black Friday notice now sits inside the EMCP Lite Dashboard, below its top bar, instead of above the admin screen.
+* Fixed: The announcement bar at the top of EMCP Lite screens stacks on phones instead of squeezing its text and overlapping its button.
+
 = 1.0.12 =
 
 * Fixed: Activating EMCP Lite no longer breaks every request on sites where another plugin builds REST URLs while options are saved (seen with Lumios Agent Markdown Mirror and pretty permalinks). Module defaults are now saved on init instead of plugins_loaded.
@@ -331,6 +336,10 @@ Six native plugin integrations with guarded writes and History recovery.
 * First release on WordPress.org.
 
 == Upgrade Notice ==
+
+= 1.0.13 =
+
+Moves the Black Friday notice into the EMCP Lite Dashboard.
 
 = 1.0.12 =
 

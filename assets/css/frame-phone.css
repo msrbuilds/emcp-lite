@@ -1,0 +1,31 @@
+/* EMCP Lite: phone layout for the announcement bar above the admin frame.
+   The bar is styled by the prebuilt admin bundle (admin-src/shell/shell.css); on
+   narrow screens its one-row layout squeezes the text and overlaps the button
+   and the dots, so these rules stack it instead. */
+@media (max-width: 782px) {
+	.eui-frame-promo {
+		flex-wrap: wrap;
+		row-gap: 8px;
+		padding-inline: 16px;
+		padding-block: 12px;
+	}
+	.eui-frame-promo__slides {
+		flex: 1 1 100%;
+	}
+	.eui-frame-promo__slide {
+		flex-wrap: wrap;
+		row-gap: 10px;
+	}
+	.eui-frame-promo__text {
+		flex: 1 1 100%;
+		order: 2;
+		line-height: 1.45;
+	}
+	.eui-frame-promo__cta {
+		order: 3;
+	}
+	.eui-frame-promo__nav {
+		flex: 1 1 100%;
+		justify-content: center;
+	}
+}
