@@ -189,6 +189,7 @@ class EMCP_Tools_Admin {
 				self::PAGE_SLUG . '-mcp-log'    => __( 'MCP Log', 'emcp-lite' ),
 				self::PAGE_SLUG . '-history'    => __( 'History', 'emcp-lite' ),
 				self::PAGE_SLUG . '-changelog'  => __( 'Changelog', 'emcp-lite' ),
+				self::PAGE_SLUG . '-data-sharing' => __( 'Data sharing', 'emcp-lite' ),
 			);
 			if ( ! $this->ai_chat_tab_visible() ) {
 				unset( $this->submenus[ self::PAGE_SLUG . '-ai-chat' ] );
@@ -274,6 +275,8 @@ class EMCP_Tools_Admin {
 				return 'mcp-log';
 			case self::PAGE_SLUG . '-changelog':
 				return 'changelog';
+			case self::PAGE_SLUG . '-data-sharing':
+				return 'data-sharing';
 			default:
 				return 'dashboard';
 		}

@@ -41,6 +41,8 @@ $emcp_collapsed = EMCP_Tools_Admin_Frame::sidebar_collapsed(
 				<?php do_action( 'emcp_tools_frame_content_top', $active_tab ); ?>
 				<?php if ( 'management' === $active_tab ) : ?>
 					<?php EMCP_Tools_Management_Access_Admin::render(); ?>
+				<?php elseif ( 'data-sharing' === $active_tab ) : ?>
+					<?php EMCP_Tools_Data_Sharing_Screen::render(); ?>
 				<?php elseif ( null !== $emcp_screen ) : ?>
 					<?php
 					echo wp_kses( EMCP_Tools_Admin_Frame::screen_container( $emcp_screen ), EMCP_Lite_Edition::allowed_html() );

@@ -77,25 +77,42 @@ final class EMCP_Tools_Optin_Screen {
 
 	public static function handle_allow(): void {
 		self::guard( 'emcp_lite_optin_allow' );
-		if ( EMCP_Tools_Optin_State::encryption_available() ) {
-			$state = EMCP_Tools_Optin_State::transition(
-				function ( array $s ) {
-					$effective = EMCP_Tools_Optin_State::effective( $s );
-					if ( ! in_array( $effective, array( 'unset', 'copy' ), true ) ) {
-						return null;
-					}
-					$token = EMCP_Tools_Optin_State::seal( self::new_credential( 'copy' === $effective ? null : EMCP_Tools_Optin_State::credential( $s ) ) );
-					if ( null === $token ) {
-						return null;
-					}
-					return array_merge( $s, self::fresh(), array( 'state' => 'pending', 'credential' => $token ) );
-				}
-			);
-			if ( is_array( $state ) && 'pending' === $state['state'] ) {
-				self::send();
-			}
-		}
+		self::start( false );
 		self::done();
+	}
+
+	/**
+	 * Start a new opt-in request and send it.
+	 *
+	 * @param bool $reuse Keep this installation's id and key (Reconnect). A copy never reuses.
+	 * @return bool Whether a request was started.
+	 */
+	public static function start( bool $reuse ): bool {
+		if ( ! EMCP_Tools_Optin_State::encryption_available() ) {
+			return false;
+		}
+		$state = EMCP_Tools_Optin_State::transition(
+			function ( array $s ) use ( $reuse ) {
+				$effective = EMCP_Tools_Optin_State::effective( $s );
+				if ( ! in_array( $effective, array( 'unset', 'copy', 'skipped', 'opted_out', 'revoked', 'expired' ), true ) ) {
+					return null;
+				}
+				if ( 'opted_out' === $effective && 'pending' === $s['deletion'] ) {
+					return null; // The kept credential still has a delete to deliver.
+				}
+				$current = $reuse && 'copy' !== $effective ? EMCP_Tools_Optin_State::credential( $s ) : null;
+				$token   = EMCP_Tools_Optin_State::seal( self::new_credential( $current ) );
+				if ( null === $token ) {
+					return null;
+				}
+				return array_merge( $s, self::fresh(), array( 'state' => 'pending', 'credential' => $token ) );
+			}
+		);
+		if ( ! is_array( $state ) || 'pending' !== $state['state'] ) {
+			return false;
+		}
+		self::send();
+		return true;
 	}
 
 	public static function handle_retry(): void {

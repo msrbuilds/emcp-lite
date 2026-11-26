@@ -75,6 +75,16 @@ final class EMCP_Tools_Admin_Nav {
 				'badge'    => __( 'New', 'emcp-lite' ),
 			);
 		}
+		if ( in_array( 'data-sharing', $visible_tabs, true ) ) {
+			$this->footer[] = array(
+				'id'       => 'data-sharing',
+				'label'    => __( 'Data sharing', 'emcp-lite' ),
+				'icon'     => 'send',
+				'url'      => self::url( 'data-sharing' ),
+				'external' => false,
+				'badge'    => null,
+			);
+		}
 	}
 
 	/**
