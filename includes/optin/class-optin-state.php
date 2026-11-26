@@ -200,10 +200,21 @@ final class EMCP_Tools_Optin_State {
 	/** The credential, or null if missing, plaintext, undecryptable or issued for another base. */
 	public static function credential( array $state ): ?array {
 		$cred = self::open( $state );
-		if ( ! $cred || ( $cred['base'] ?? '' ) !== self::installation_base() ) {
+		if ( ! $cred || ! self::same_base( (string) ( $cred['base'] ?? '' ), self::installation_base() ) ) {
 			return null;
 		}
 		return $cred;
+	}
+
+	/**
+	 * Whether two base URLs name the same installation. The scheme is ignored: home_url()
+	 * answers https on an https admin request even when the stored home is http.
+	 */
+	public static function same_base( string $a, string $b ): bool {
+		$norm = static function ( string $url ): string {
+			return rtrim( strtolower( (string) preg_replace( '#^[a-z][a-z0-9+.-]*://#i', '', trim( $url ) ) ), '/' );
+		};
+		return '' !== $norm( $a ) && $norm( $a ) === $norm( $b );
 	}
 
 	/** The base URL a stored credential was issued for (for the copy message), or null. */

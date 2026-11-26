@@ -115,7 +115,9 @@ final class EMCP_Tools_Deactivation_Feedback {
 			wp_send_json_error( null, 403 );
 		}
 		$input = wp_unslash( $_POST ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- checked above.
-		$body  = self::build_body( is_array( $input ) ? $input : array(), ! empty( $input['network'] ) );
+		// The network Plugins screen never links a reason: the page says so, and so does its address.
+		$network = ! empty( $input['network'] ) || false !== strpos( (string) wp_get_referer(), '/wp-admin/network/' );
+		$body    = self::build_body( is_array( $input ) ? $input : array(), $network );
 		if ( is_wp_error( $body ) ) {
 			wp_send_json_error( null, 400 );
 		}

@@ -63,18 +63,21 @@ final class EMCP_Tools_Data_Sharing_Screen {
 			return;
 		}
 		$fp      = EMCP_Tools_Optin_State::fingerprint( $cred );
-		$started = EMCP_Tools_Optin_State::apply_response(
-			$s['version'],
-			$fp,
-			function ( array $st ) use ( $now ) {
+		$stamped = false;
+		$started = EMCP_Tools_Optin_State::transition(
+			function ( array $st ) use ( $now, $s, $fp, &$stamped ) {
+				if ( $st['version'] !== $s['version'] || EMCP_Tools_Optin_State::fingerprint( EMCP_Tools_Optin_State::credential( $st ) ) !== $fp ) {
+					return null;
+				}
+				$stamped                 = true;
 				$st['status_checked_at'] = $now;
 				return $st;
 			}
 		);
-		if ( ! $started ) {
+		if ( ! $stamped || ! is_array( $started ) ) {
 			return;
 		}
-		self::apply_site_answer( EMCP_Tools_Optin_Client::site( 'status', $cred ), $fp, '' );
+		self::apply_site_answer( EMCP_Tools_Optin_Client::site( 'status', $cred ), $fp, '', $started['version'] );
 	}
 
 	public static function handle_sharing_off(): void {
@@ -86,19 +89,19 @@ final class EMCP_Tools_Data_Sharing_Screen {
 	public static function handle_sharing_on(): void {
 		EMCP_Tools_Optin_Screen::guard( 'emcp_lite_sharing_on' );
 		EMCP_Tools_Optin_Screen::start( false );
-		EMCP_Tools_Optin_Screen::done( self::PAGE );
+		EMCP_Tools_Optin_Screen::done( self::PAGE, EMCP_Tools_Optin_Screen::busy_args() );
 	}
 
 	public static function handle_reconnect(): void {
 		EMCP_Tools_Optin_Screen::guard( 'emcp_lite_reconnect' );
 		EMCP_Tools_Optin_Screen::start( true );
-		EMCP_Tools_Optin_Screen::done( self::PAGE );
+		EMCP_Tools_Optin_Screen::done( self::PAGE, EMCP_Tools_Optin_Screen::busy_args() );
 	}
 
 	public static function handle_connect_copy(): void {
 		EMCP_Tools_Optin_Screen::guard( 'emcp_lite_connect_copy' );
 		EMCP_Tools_Optin_Screen::start( false );
-		EMCP_Tools_Optin_Screen::done( self::PAGE );
+		EMCP_Tools_Optin_Screen::done( self::PAGE, EMCP_Tools_Optin_Screen::busy_args() );
 	}
 
 	public static function handle_resend(): void {
@@ -106,18 +109,17 @@ final class EMCP_Tools_Data_Sharing_Screen {
 		$s    = EMCP_Tools_Optin_State::read();
 		$cred = EMCP_Tools_Optin_State::credential( $s );
 		if ( 'allowed' === $s['state'] && true !== $s['email_confirmed'] && $cred ) {
-			self::apply_site_answer( EMCP_Tools_Optin_Client::site( 'resend', $cred ), EMCP_Tools_Optin_State::fingerprint( $cred ), 'resent' );
+			self::apply_site_answer( EMCP_Tools_Optin_Client::site( 'resend', $cred ), EMCP_Tools_Optin_State::fingerprint( $cred ), 'resent', $s['version'] );
 		}
 		EMCP_Tools_Optin_Screen::done( self::PAGE );
 	}
 
 	/** Apply a status or resend answer to the current state. */
-	private static function apply_site_answer( array $res, string $fp, string $note ): void {
+	private static function apply_site_answer( array $res, string $fp, string $note, int $version ): void {
 		$code = $res['code'];
 		$now  = EMCP_Tools_Optin_State::now();
-		$s    = EMCP_Tools_Optin_State::read();
 		EMCP_Tools_Optin_State::apply_response(
-			$s['version'],
+			$version,
 			$fp,
 			function ( array $st ) use ( $code, $res, $now, $note ) {
 				if ( 'allowed' !== $st['state'] ) {

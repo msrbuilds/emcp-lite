@@ -81,7 +81,7 @@ final class EMCP_Tools_Optin_Inventory {
 		$parent = $theme->parent();
 
 		return array(
-			'site_title'       => self::cap( wp_strip_all_tags( (string) get_bloginfo( 'name' ) ), 200 ),
+			'site_title'       => self::cap( html_entity_decode( wp_strip_all_tags( (string) get_bloginfo( 'name' ) ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ), 200 ),
 			'wp_version'       => self::cap( (string) get_bloginfo( 'version' ), 40 ),
 			'php_version'      => self::cap( PHP_VERSION, 40 ),
 			'lite_version'     => self::cap( (string) EMCP_TOOLS_VERSION, 40 ),

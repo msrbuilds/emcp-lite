@@ -36,6 +36,9 @@ $emcp_notes = array(
 	'unreachable' => __( 'emcptools.com could not be reached. EMCP Lite tries again on a later admin visit.', 'emcp-lite' ),
 );
 $emcp_note      = $emcp_notes[ (string) $emcp_state['error'] ] ?? '';
+if ( '' === $emcp_note ) {
+	$emcp_note = EMCP_Tools_Optin_Screen::message( array( 'state' => '', 'error' => '' ) );
+}
 $emcp_crypto    = EMCP_Tools_Optin_State::encryption_available();
 ?>
 <div class="emcp-sharing" role="region" aria-labelledby="emcp-sharing-title">

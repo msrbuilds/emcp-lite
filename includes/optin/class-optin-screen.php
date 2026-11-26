@@ -20,6 +20,9 @@ final class EMCP_Tools_Optin_Screen {
 	/** @var bool Test seam: whether handlers end the request after redirecting. */
 	public static $exit = true;
 
+	/** @var bool Whether the last start() found the lease held by another request. */
+	private static $busy = false;
+
 	public static function init(): void {
 		add_action( 'admin_post_emcp_lite_optin_allow', array( __CLASS__, 'handle_allow' ) );
 		add_action( 'admin_post_emcp_lite_optin_skip', array( __CLASS__, 'handle_skip' ) );
@@ -61,6 +64,10 @@ final class EMCP_Tools_Optin_Screen {
 
 	/** A message for the screen, from the last outcome. */
 	public static function message( array $state ): string {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
+		if ( isset( $_GET['emcp_optin'] ) && 'busy' === $_GET['emcp_optin'] ) {
+			return __( 'Another administrator is changing data sharing right now. Try again in a moment.', 'emcp-lite' );
+		}
 		switch ( (string) $state['error'] ) {
 			case 'site_registered':
 				return __( 'This site address is already shared by another installation of EMCP Lite, so nothing was changed. You can try again later or skip.', 'emcp-lite' );
@@ -75,7 +82,7 @@ final class EMCP_Tools_Optin_Screen {
 	public static function handle_allow(): void {
 		self::guard( 'emcp_lite_optin_allow' );
 		self::start( false );
-		self::done( self::landing() );
+		self::done( self::landing(), self::busy_args() );
 	}
 
 	/**
@@ -88,7 +95,8 @@ final class EMCP_Tools_Optin_Screen {
 		if ( ! EMCP_Tools_Optin_State::encryption_available() ) {
 			return false;
 		}
-		$state = EMCP_Tools_Optin_State::transition(
+		self::$busy = false;
+		$state      = EMCP_Tools_Optin_State::transition(
 			function ( array $s ) use ( $reuse ) {
 				$effective = EMCP_Tools_Optin_State::effective( $s );
 				if ( ! in_array( $effective, array( 'unset', 'copy', 'skipped', 'opted_out', 'revoked', 'expired' ), true ) ) {
@@ -105,6 +113,10 @@ final class EMCP_Tools_Optin_Screen {
 				return array_merge( $s, self::fresh(), array( 'state' => 'pending', 'credential' => $token ) );
 			}
 		);
+		if ( false === $state ) {
+			self::$busy = true;
+			return false;
+		}
 		if ( ! is_array( $state ) || 'pending' !== $state['state'] ) {
 			return false;
 		}
@@ -281,6 +293,11 @@ final class EMCP_Tools_Optin_Screen {
 		return in_array( $state, array( 'pending', 'cancelling' ), true ) ? 'emcp-tools-data-sharing' : 'emcp-tools';
 	}
 
+	/** Query arguments that tell the next screen the lease was busy. */
+	public static function busy_args(): array {
+		return self::$busy ? array( 'emcp_optin' => 'busy' ) : array();
+	}
+
 	/** Nonce and capability for an action; stops the request otherwise. */
 	public static function guard( string $action ): void {
 		check_admin_referer( $action );
@@ -290,8 +307,8 @@ final class EMCP_Tools_Optin_Screen {
 	}
 
 	/** Back to where the admin came from. */
-	public static function done( string $page = 'emcp-tools' ): void {
-		wp_safe_redirect( admin_url( 'admin.php?page=' . $page ) );
+	public static function done( string $page = 'emcp-tools', array $args = array() ): void {
+		wp_safe_redirect( add_query_arg( $args, admin_url( 'admin.php?page=' . $page ) ) );
 		if ( self::$exit ) {
 			exit;
 		}
