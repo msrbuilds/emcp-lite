@@ -212,6 +212,19 @@ final class EMCP_Tools_Optin_Screen {
 			return;
 		}
 
+		if ( 410 === $code && 'expired_request' === ( $res['body']['error'] ?? '' ) ) {
+			// Older than the website's replay window: a row from an earlier lost answer may exist, so cancel it.
+			$moved = EMCP_Tools_Optin_State::apply_response(
+				$s['version'],
+				$fp,
+				fn( array $st ) => array_merge( $st, array( 'state' => 'cancelling', 'after' => 'prompt', 'retry_at' => 0, 'retry_step' => 0, 'attempt_at' => 0, 'error' => 'expired' ) )
+			);
+			if ( $moved ) {
+				EMCP_Tools_Optin_Maintenance::cancel_now();
+			}
+			return;
+		}
+
 		$refused = array(
 			409 => 'site_registered',
 			410 => 'expired',

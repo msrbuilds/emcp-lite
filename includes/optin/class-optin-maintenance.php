@@ -116,8 +116,14 @@ final class EMCP_Tools_Optin_Maintenance {
 	/** Stop sharing at once, then ask the website to delete the record. */
 	public static function opt_out(): void {
 		$pending = false;
+		$cancel  = false;
 		EMCP_Tools_Optin_State::transition(
-			function ( array $s ) use ( &$pending ) {
+			function ( array $s ) use ( &$pending, &$cancel ) {
+				// An unresolved request may already have a saved row: cancel it rather than drop it.
+				if ( in_array( $s['state'], array( 'pending', 'cancelling' ), true ) && EMCP_Tools_Optin_State::credential( $s ) ) {
+					$cancel = true;
+					return array_merge( $s, array( 'state' => 'cancelling', 'after' => 'skipped', 'retry_at' => 0, 'retry_step' => 0, 'attempt_at' => 0 ) );
+				}
 				$cred                = EMCP_Tools_Optin_State::credential( $s );
 				$pending             = 'allowed' === $s['state'] && $cred && '' !== (string) ( $cred['site_key'] ?? '' );
 				$s['state']          = 'opted_out';
@@ -131,7 +137,9 @@ final class EMCP_Tools_Optin_Maintenance {
 				return $s;
 			}
 		);
-		if ( $pending ) {
+		if ( $cancel ) {
+			self::cancel_now();
+		} elseif ( $pending ) {
 			self::delete_now();
 		}
 	}
@@ -146,7 +154,8 @@ final class EMCP_Tools_Optin_Maintenance {
 		$res  = EMCP_Tools_Optin_Client::site( 'delete', $cred );
 		$fp   = EMCP_Tools_Optin_State::fingerprint( $cred );
 		$code = $res['code'];
-		if ( ( $code >= 200 && $code < 300 ) || 404 === $code || 401 === $code || 403 === $code ) {
+		// Only 401 is final (a later claim retired the key); 403 can be a firewall challenge.
+		if ( ( $code >= 200 && $code < 300 ) || 404 === $code || 401 === $code ) {
 			$outcome = 404 === $code || ( $code >= 200 && $code < 300 ) ? 'confirmed' : 'retired';
 			EMCP_Tools_Optin_State::apply_response(
 				$s['version'],
