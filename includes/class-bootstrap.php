@@ -165,6 +165,12 @@ class EMCP_Tools_Bootstrap {
 		require_once EMCP_TOOLS_DIR . 'includes/oauth/class-oauth-server.php';
 		require_once EMCP_TOOLS_DIR . 'includes/class-change-log.php';
 		require_once EMCP_TOOLS_DIR . 'includes/class-lease.php';
+		// Opt-in, data sharing and deactivation feedback (Lite 1.0.14).
+		foreach ( array( 'optin-state', 'optin-inventory', 'optin-client', 'optin-maintenance', 'optin-proof', 'optin-screen', 'data-sharing-screen', 'deactivation-feedback' ) as $emcp_optin ) {
+			if ( file_exists( EMCP_TOOLS_DIR . 'includes/optin/class-' . $emcp_optin . '.php' ) ) {
+				require_once EMCP_TOOLS_DIR . 'includes/optin/class-' . $emcp_optin . '.php';
+			}
+		}
 		require_once EMCP_TOOLS_DIR . 'includes/class-query-capture.php';
 		require_once EMCP_TOOLS_DIR . 'includes/abilities/redirection/class-redirection-api.php';
 		require_once EMCP_TOOLS_DIR . 'includes/abilities/redirection/class-redirection-writer.php';
@@ -424,6 +430,17 @@ class EMCP_Tools_Bootstrap {
 	private static function wire_hooks(): void {
 		EMCP_Tools_Management_Access::init();
 		EMCP_Tools_Attention::init();
+		// Opt-in and deactivation feedback (Lite 1.0.14).
+		EMCP_Tools_Optin_Inventory::init();
+		EMCP_Tools_Optin_Maintenance::init();
+		EMCP_Tools_Optin_Proof::init();
+		EMCP_Tools_Optin_Screen::init();
+		if ( class_exists( 'EMCP_Tools_Data_Sharing_Screen' ) ) {
+			EMCP_Tools_Data_Sharing_Screen::init();
+		}
+		if ( class_exists( 'EMCP_Tools_Deactivation_Feedback' ) ) {
+			EMCP_Tools_Deactivation_Feedback::init();
+		}
 		// structuredContent must be a JSON object; the adapter assigns a tool's
 		// return value to it verbatim, so a list result makes strict clients
 		// reject the response. Our own abilities are normalized at registration,

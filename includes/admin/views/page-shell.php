@@ -34,6 +34,10 @@ $emcp_collapsed = EMCP_Tools_Admin_Frame::sidebar_collapsed(
 			<div class="eui-frame__content" id="emcp-main">
 				<?php // Core moves admin notices to just after this marker. ?>
 				<hr class="wp-header-end">
+				<?php $emcp_optin_state = EMCP_Tools_Optin_State::read(); ?>
+				<?php if ( EMCP_Tools_Optin_Screen::applies( $emcp_optin_state ) ) : ?>
+					<?php EMCP_Tools_Optin_Screen::render( $emcp_optin_state ); ?>
+				<?php else : ?>
 				<?php do_action( 'emcp_tools_frame_content_top', $active_tab ); ?>
 				<?php if ( 'management' === $active_tab ) : ?>
 					<?php EMCP_Tools_Management_Access_Admin::render(); ?>
@@ -47,6 +51,7 @@ $emcp_collapsed = EMCP_Tools_Admin_Frame::sidebar_collapsed(
 					?>
 				<?php else : ?>
 					<?php echo wp_kses( EMCP_Tools_Admin_Frame::unavailable(), EMCP_Lite_Edition::allowed_html() ); ?>
+				<?php endif; ?>
 				<?php endif; ?>
 			</div>
 		</div>
