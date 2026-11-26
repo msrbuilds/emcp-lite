@@ -10,7 +10,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$emcp_pending = 'pending' === $emcp_state['state'];
 $emcp_message = EMCP_Tools_Optin_Screen::message( $emcp_state );
 $emcp_post    = admin_url( 'admin-post.php' );
 ?>
@@ -44,11 +43,9 @@ $emcp_post    = admin_url( 'admin-post.php' );
 		<div class="emcp-optin__actions">
 			<?php if ( $emcp_crypto ) : ?>
 				<form method="post" action="<?php echo esc_url( $emcp_post ); ?>">
-					<input type="hidden" name="action" value="<?php echo esc_attr( $emcp_pending ? 'emcp_lite_optin_retry' : 'emcp_lite_optin_allow' ); ?>">
-					<?php wp_nonce_field( $emcp_pending ? 'emcp_lite_optin_retry' : 'emcp_lite_optin_allow' ); ?>
-					<button type="submit" class="emcp-optin__btn emcp-optin__btn--primary">
-						<?php $emcp_pending ? esc_html_e( 'Retry', 'emcp-lite' ) : esc_html_e( 'Allow & continue', 'emcp-lite' ); ?>
-					</button>
+					<input type="hidden" name="action" value="emcp_lite_optin_allow">
+					<?php wp_nonce_field( 'emcp_lite_optin_allow' ); ?>
+					<button type="submit" class="emcp-optin__btn emcp-optin__btn--primary"><?php esc_html_e( 'Allow & continue', 'emcp-lite' ); ?></button>
 				</form>
 			<?php endif; ?>
 			<form method="post" action="<?php echo esc_url( $emcp_post ); ?>">

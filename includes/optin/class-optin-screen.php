@@ -30,7 +30,7 @@ final class EMCP_Tools_Optin_Screen {
 	/** Whether the opt-in replaces this screen's content. */
 	public static function applies( array $state ): bool {
 		return current_user_can( 'manage_options' ) && ! is_network_admin()
-			&& in_array( EMCP_Tools_Optin_State::effective( $state ), array( 'unset', 'pending' ), true );
+			&& 'unset' === EMCP_Tools_Optin_State::effective( $state );
 	}
 
 	public static function enqueue( $hook = '' ): void {
@@ -61,9 +61,6 @@ final class EMCP_Tools_Optin_Screen {
 
 	/** A message for the screen, from the last outcome. */
 	public static function message( array $state ): string {
-		if ( 'pending' === $state['state'] ) {
-			return __( 'We could not reach emcptools.com. Your choice is saved: Retry sends it again, or Skip cancels it.', 'emcp-lite' );
-		}
 		switch ( (string) $state['error'] ) {
 			case 'site_registered':
 				return __( 'This site address is already shared by another installation of EMCP Lite, so nothing was changed. You can try again later or skip.', 'emcp-lite' );
@@ -78,7 +75,7 @@ final class EMCP_Tools_Optin_Screen {
 	public static function handle_allow(): void {
 		self::guard( 'emcp_lite_optin_allow' );
 		self::start( false );
-		self::done();
+		self::done( self::landing() );
 	}
 
 	/**
@@ -118,7 +115,7 @@ final class EMCP_Tools_Optin_Screen {
 	public static function handle_retry(): void {
 		self::guard( 'emcp_lite_optin_retry' );
 		self::send();
-		self::done();
+		self::done( self::landing() );
 	}
 
 	public static function handle_skip(): void {
@@ -139,7 +136,7 @@ final class EMCP_Tools_Optin_Screen {
 		if ( $cancel ) {
 			EMCP_Tools_Optin_Maintenance::cancel_now();
 		}
-		self::done();
+		self::done( self::landing() );
 	}
 
 	/**
@@ -260,6 +257,15 @@ final class EMCP_Tools_Optin_Screen {
 			'verified'          => null,
 			'error'             => '',
 		);
+	}
+
+	/**
+	 * Where an action lands: Data sharing while a request is still unresolved
+	 * (it shows the state and Retry or Cancel), else the Dashboard.
+	 */
+	public static function landing(): string {
+		$state = EMCP_Tools_Optin_State::read()['state'];
+		return in_array( $state, array( 'pending', 'cancelling' ), true ) ? 'emcp-tools-data-sharing' : 'emcp-tools';
 	}
 
 	/** Nonce and capability for an action; stops the request otherwise. */

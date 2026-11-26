@@ -67,8 +67,8 @@ final class EMCP_Tools_Optin_State {
 
 	/** The stored state, read past the object cache. */
 	public static function read(): array {
+		// The option is not autoloaded, so its own cache key and notoptions are enough.
 		wp_cache_delete( self::OPTION, 'options' );
-		wp_cache_delete( 'alloptions', 'options' );
 		wp_cache_delete( 'notoptions', 'options' );
 		$raw = get_option( self::OPTION, array() );
 		$raw = is_array( $raw ) ? $raw : array();
