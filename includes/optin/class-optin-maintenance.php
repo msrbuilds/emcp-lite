@@ -162,6 +162,7 @@ final class EMCP_Tools_Optin_Maintenance {
 				$fp,
 				function ( array $st ) use ( $outcome ) {
 					$st['deletion']   = $outcome;
+					$st['error']      = '';
 					$st['credential'] = '';
 					$st['retry_at']   = 0;
 					$st['retry_step'] = 0;
