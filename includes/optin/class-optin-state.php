@@ -33,6 +33,9 @@ final class EMCP_Tools_Optin_State {
 	/** @var int Microseconds between lease attempts. */
 	public static $lease_wait_us = 100000;
 
+	/** @var callable|null Test seam for the clock. */
+	public static $clock = null;
+
 	/** @var callable|null Test seam for the cipher. */
 	private static $encrypt = null;
 
@@ -58,6 +61,7 @@ final class EMCP_Tools_Optin_State {
 			'status_checked_at' => 0,
 			'verified'          => null,
 			'error'             => '',
+			'seen_version'      => '',
 		);
 	}
 
@@ -134,6 +138,11 @@ final class EMCP_Tools_Optin_State {
 			}
 		);
 		return $applied;
+	}
+
+	/** The current time (seam for tests). */
+	public static function now(): int {
+		return self::$clock ? (int) call_user_func( self::$clock ) : time();
 	}
 
 	/** This installation's base URL, in the form Lite Cloud binds to. */
