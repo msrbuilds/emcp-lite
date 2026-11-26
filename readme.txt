@@ -4,7 +4,7 @@ Tags: mcp, mcp-server, wordpress-mcp, claude, elementor
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.0.13
+Stable tag: 1.0.14
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -167,13 +167,19 @@ Elementor is optional: the WordPress and Gutenberg tools work without it, and so
 
 = Privacy and external services =
 
-EMCP Lite does not send data anywhere until you connect an AI client or enable an optional service.
+EMCP Lite does not send data anywhere until you connect an AI client, enable an optional service, or choose to share details with EMCP.
 
 **AI clients.** A direct MCP connection communicates only with the AI client you choose. The client receives the results of the tools it calls, which can include site content or personal data the connected WordPress user can access. Check your AI client's privacy policy before connecting it. Activity and History records are stored on your own site.
 
 **EMCP Cloud (optional).** Local tools work without a Cloud account. Choosing Connect sends your site URL, site name, an installation identifier and OAuth registration and authorization details to emcptools.com. Once connected, the plugin exchanges and refreshes tokens, including a background renewal about once a week so an idle site stays connected, and can request account and service status. Settings sync sends supported EMCP preferences, including tool toggles, modules and your free-text site context. Credentials are excluded, but site-context text is not redacted, so do not put passwords or API keys in it. Hosted services may require a paid plan. A developer or administrator can configure a different Cloud endpoint.
 
 **Gateway access (optional).** Gateway is a separate opt-in that is off by default. Enabling it creates a revocable EMCP OAuth token for the authorizing WordPress user and sends it to the EMCP service. It does not send a WordPress password or Application Password. The token works only on the EMCP MCP endpoint, not wp-admin, the WordPress REST API or EMCP settings. Gateway requests act as that user, within the enabled tools and that user's permissions, and can include write operations. Gateway relays MCP requests and responses, including any content or personal data the selected tools return. You can turn off Gateway and disconnect Cloud on the Connection screen at any time.
+
+* Service: [emcptools.com](https://emcptools.com/)
+* [Terms of service](https://emcptools.com/terms-of-service/)
+* [Privacy policy](https://emcptools.com/privacy/)
+
+**EMCP opt-in and feedback (emcptools.com, optional).** The first time an administrator opens EMCP Lite, it asks whether to share details with EMCP. Nothing is sent unless you choose Allow. Allow sends your name and email address, the site address and title, the WordPress, PHP and EMCP Lite versions, the site language, whether the site is a multisite network, the active theme, the active plugins (folder name, name and version) and the selected page builder. EMCP emails you a confirmation link, and you join EMCP product emails only after you confirm. For an HTTPS site, emcptools.com then fetches a one-time random code from your site's REST API to check that the request came from it. While sharing is on, the site details (never your name or email) are sent again when they change and once a month, both only during an admin's visit to wp-admin. Turning sharing off under Data sharing, or uninstalling the plugin, asks emcptools.com to delete the site's record; a record that emcptools.com does not hear from for 180 days is deleted. Separately, when you deactivate EMCP Lite you can send a reason and comment, with the EMCP Lite, WordPress and PHP versions. This goes through your own site, never from your browser, and includes the site's EMCP id only when the site shares its details.
 
 * Service: [emcptools.com](https://emcptools.com/)
 * [Terms of service](https://emcptools.com/terms-of-service/)
@@ -265,6 +271,11 @@ Not every change. History shows which entries support undo. An undo can be refus
 
 == Changelog ==
 
+= 1.0.14 =
+
+* New: An optional opt-in the first time an administrator opens EMCP Lite: share a few site details with EMCP and get product news by email after confirming. Skip is always one click, and Data sharing shows the state and turns sharing off at any time.
+* New: When you deactivate EMCP Lite you can tell us why in a short popup, or skip it. The reason goes through your own site, never from your browser.
+
 = 1.0.13 =
 
 * Changed: The Black Friday notice now sits inside the EMCP Lite Dashboard, below its top bar, instead of above the admin screen.
@@ -336,6 +347,10 @@ Six native plugin integrations with guarded writes and History recovery.
 * First release on WordPress.org.
 
 == Upgrade Notice ==
+
+= 1.0.14 =
+
+Adds an optional opt-in for product news and an optional deactivation feedback popup. Nothing is sent unless you choose to.
 
 = 1.0.13 =
 

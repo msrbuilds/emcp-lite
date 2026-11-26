@@ -14,8 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class EMCP_Tools_Optin_Screen {
 
-	const PRIVACY_URL = 'https://emcptools.com/privacy';
-	const TERMS_URL   = 'https://emcptools.com/terms';
+	const PRIVACY_URL = 'https://emcptools.com/privacy/';
+	const TERMS_URL   = 'https://emcptools.com/terms-of-service/';
 
 	/** @var bool Test seam: whether handlers end the request after redirecting. */
 	public static $exit = true;

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.14
+
+- New: An optional opt-in the first time an administrator opens EMCP Lite: share a few site details with EMCP and get product news by email after confirming. Skip is always one click, and Data sharing shows the state and turns sharing off at any time.
+- New: When you deactivate EMCP Lite you can tell us why in a short popup, or skip it. The reason goes through your own site, never from your browser.
+
 ## 1.0.13
 
 - Changed: The Black Friday notice now sits inside the EMCP Lite Dashboard, below its top bar, instead of above the admin screen.
